@@ -11,6 +11,11 @@ fn merge_sort(v:&mut Vec<i32>) -> Vec<i32> {
 
     fn merge(left:&Vec<i32>, right:&Vec<i32>) -> Vec<i32> {
 
+        enum Condition {
+            LeftExit,
+            RightExit,
+        }
+
         let llen = left.len()-1;
         let rlen = right.len()-1;
         let mut output: Vec<i32> = Vec::new();
@@ -24,22 +29,21 @@ fn merge_sort(v:&mut Vec<i32>) -> Vec<i32> {
                 output.push(left[l]);
                 l += 1;
                 if l > llen {
-                    break 0 ;
+                    break Condition::LeftExit ;
                 }
             } else {
                 //println!("({},{}) push: {}",rv,lv,rv);
                 output.push(right[r]);
                 r += 1;
                 if r > rlen {
-                    break 1;
+                    break Condition::RightExit;
                 }
             }
         };
 
         match cond {
-            0 => output.extend_from_slice(&right[r..]),
-            1 => output.extend_from_slice(&left[l..]),
-            _ => {}
+            Condition::LeftExit => output.extend_from_slice(&right[r..]),
+            Condition::RightExit => output.extend_from_slice(&left[l..]),
         }
 
 

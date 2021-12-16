@@ -17,26 +17,20 @@ fn merge_sort(v:&mut Vec<i32>) -> Vec<i32> {
 
         let mut r = 0;
         let mut l = 0;
-        let mut rv = right[r];
-        let mut lv = left[l];
 
         let cond = loop {
-            if rv > lv {
+            if right[r] > left[l] {
                 //println!("({},{}) push: {}",rv,lv,lv);
-                output.push(lv);
+                output.push(left[l]);
                 l += 1;
-                if l <= llen {
-                    lv = left[l];
-                } else {
+                if l > llen {
                     break 0 ;
                 }
             } else {
                 //println!("({},{}) push: {}",rv,lv,rv);
-                output.push(rv);
+                output.push(right[r]);
                 r += 1;
-                if r <= rlen {
-                    rv = right[r];
-                } else {
+                if r > rlen {
                     break 1;
                 }
             }

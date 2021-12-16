@@ -24,7 +24,7 @@ pub mod  divnconq {
             // go into a loop until one of the slices goes off bounds
             // indicate which slice caused the exit for use by the
             // following append instruction
-            let exit_cond = loop {
+            match loop {
                 if right[r] > left[l] {
                     output.push(left[l]);
                     l += 1;
@@ -38,10 +38,9 @@ pub mod  divnconq {
                         break Condition::RightExit;
                     }
                 }
-            };
-
-            // append the remaining slice on the output vector
-            match exit_cond {
+            } {
+                // append the remaining slice on the output vector
+                // based on the loop exit condition
                 Condition::LeftExit => output.extend_from_slice(&right[r..]),
                 Condition::RightExit => output.extend_from_slice(&left[l..]),
             }

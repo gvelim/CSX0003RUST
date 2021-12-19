@@ -33,6 +33,54 @@ pub mod divnconq {
         }
     }
 
+    use std::iter::Peekable;
+    use std::cmp::Ordering;
+
+    struct MergeIterator<L,R>
+        where L: Iterator<Item=i32>,
+              R: Iterator<Item=i32>
+    {
+        left: Peekable<L>,
+        right: Peekable<R>,
+    }
+
+
+    impl<L, R> MergeIterator<L, R>
+        where L: Iterator<Item=i32>,
+              R: Iterator<Item=i32>
+    {
+        fn new(left: L, right: R) -> MergeIterator<L,R> {
+            MergeIterator {
+                left: left.peekable(),
+                right: right.peekable(),
+            }
+        }
+    }
+
+    impl<L, R> Iterator for MergeIterator<L, R>
+        where L: Iterator<Item=i32>, L::Item: Ord,
+              R: Iterator<Item=i32>, R::Item: Ord,
+    {
+        type Item = i32;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let which: Option<Ordering> = match (self.left.peek(), self.right.peek()) {
+                (Some(l), Some(r)) => Some(l.cmp(r)),
+                (Some(l), None) => Some(Ordering::Less),
+                (None, Some(r)) => Some(Ordering::Greater),
+                (None, None) => None,
+            };
+
+            match which {
+                Some(Ordering::Equal) => self.left.next(),
+                Some(Ordering::Less) => self.left.next(),
+                Some(Ordering::Greater) => self.right.next(),
+                None => None,
+            }
+        }
+    }
+
+
     /// Merge subroutine
     /// Join to slices while in the right Order
     fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {

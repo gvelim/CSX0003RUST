@@ -36,20 +36,16 @@ pub mod divnconq {
     use std::iter::Peekable;
     use std::cmp::Ordering;
 
-    struct MergeIterator<L,R>
-        where L: Iterator<Item=i32>,
-              R: Iterator<Item=i32>
+    struct MergeIterator<I: Iterator>
     {
-        left: Peekable<L>,
-        right: Peekable<R>,
+        left: Peekable<I>,
+        right: Peekable<I>,
     }
 
 
-    impl<L, R> MergeIterator<L, R>
-        where L: Iterator<Item=i32>,
-              R: Iterator<Item=i32>
+    impl<I: Iterator> MergeIterator<I>
     {
-        fn new(left: L, right: R) -> MergeIterator<L,R> {
+        fn new(left: I, right: I) -> Self {
             MergeIterator {
                 left: left.peekable(),
                 right: right.peekable(),
@@ -57,17 +53,16 @@ pub mod divnconq {
         }
     }
 
-    impl<L, R> Iterator for MergeIterator<L, R>
-        where L: Iterator<Item=i32>, L::Item: Ord,
-              R: Iterator<Item=i32>, R::Item: Ord,
+    impl<I> Iterator for MergeIterator<I>
+        where I: Iterator, I::Item: Ord,
     {
-        type Item = i32;
+        type Item = I::Item;
 
         fn next(&mut self) -> Option<Self::Item> {
-            let which: Option<Ordering> = match (self.left.peek(), self.right.peek()) {
-                (Some(l), Some(r)) => Some(l.cmp(r)),
-                (Some(l), None) => Some(Ordering::Less),
-                (None, Some(r)) => Some(Ordering::Greater),
+            let which = match (self.left.peek(), self.right.peek()) {
+                (Some(l), Some(r)) => { Some(l.cmp(r)) },
+                (Some(_), None) => Some(Ordering::Less),
+                (None, Some(_)) => Some(Ordering::Greater),
                 (None, None) => None,
             };
 
@@ -84,37 +79,10 @@ pub mod divnconq {
     /// Merge subroutine
     /// Join to slices while in the right Order
     fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
-        enum Condition {
-            LeftExit,
-            RightExit,
-        }
 
-        let (l_len,r_len,mut r,mut l) = (left.len() - 1, right.len() - 1, 0, 0);
-        let mut output: Vec<i32> = Vec::with_capacity(l_len + r_len + 2);
+        let (l_len,r_len) = (left.len() - 1, right.len() - 1);
 
-        // go into a loop until one of the slices goes off bounds
-        // indicate which slice caused the exit for use by the
-        // following append instruction
-        match loop {
-            if right[r] > left[l] {
-                output.push(left[l]);
-                l += 1;
-                if l > l_len {
-                    break Condition::LeftExit;
-                }
-            } else {
-                output.push(right[r]);
-                r += 1;
-                if r > r_len {
-                    break Condition::RightExit;
-                }
-            }
-        } {
-            // append the remaining slice on the output vector
-            // based on the loop exit condition
-            Condition::LeftExit => output.extend_from_slice(&right[r..]),
-            Condition::RightExit => output.extend_from_slice(&left[l..]),
-        }
+        let output = MergeIterator::new(left.iter(),right.iter()).cloned().collect();
 
         print!("merge: {},{:?} <> {},{:?},", r_len, right, l_len, left);
         println!("=> {:?},", output);

@@ -42,7 +42,6 @@ pub mod divnconq {
         right: Peekable<I>,
     }
 
-
     impl<I: Iterator> MergeIterator<I>
     {
         fn new(left: I, right: I) -> Self {
@@ -59,14 +58,14 @@ pub mod divnconq {
         type Item = I::Item;
 
         fn next(&mut self) -> Option<Self::Item> {
-            let which = match (self.left.peek(), self.right.peek()) {
+            match
+                match (self.left.peek(), self.right.peek()) {
                 (Some(l), Some(r)) => { Some(l.cmp(r)) },
                 (Some(_), None) => Some(Ordering::Less),
                 (None, Some(_)) => Some(Ordering::Greater),
                 (None, None) => None,
-            };
-
-            match which {
+            }
+            {
                 Some(Ordering::Equal) => self.left.next(),
                 Some(Ordering::Less) => self.left.next(),
                 Some(Ordering::Greater) => self.right.next(),

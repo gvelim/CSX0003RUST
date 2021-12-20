@@ -68,7 +68,7 @@ pub mod divnconq {
             Condition::RightExit => output.extend_from_slice(&left[l..]),
         }
 
-        print!("merge: {},{:?} <> {},{:?},", r_len, right, l_len, left);
+        print!("merge: ({}){:?} <> ({}){:?},", r_len, right, l_len, left);
         println!("=> {:?},", output);
         output
     }

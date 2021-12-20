@@ -28,7 +28,9 @@ pub mod divnconq {
                 let right = merge_sort(right);
 
                 // return a vector of the merged but ordered slices
-                merge(&left, &right)
+                let out = merge(&left, &right);
+                println!("Merged: {:?} <> {:?} => {:?}", left, right, out);
+                out
             }
         }
     }
@@ -36,41 +38,45 @@ pub mod divnconq {
     /// Merge subroutine
     /// Join to slices while in the right Order
     fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
-        enum Condition {
-            LeftExit,
-            RightExit,
+
+        use std::iter::Peekable;
+        use std::cmp::Ordering;
+
+        struct MergeIterator<I: Iterator> {
+            left: Peekable<I>,
+            right: Peekable<I>,
         }
-
-        let (l_len,r_len,mut r,mut l) = (left.len() - 1, right.len() - 1, 0, 0);
-        let mut output: Vec<i32> = Vec::with_capacity(l_len + r_len + 2);
-
-        // go into a loop until one of the slices goes off bounds
-        // indicate which slice caused the exit for use by the
-        // following append instruction
-        match loop {
-            if right[r] > left[l] {
-                output.push(left[l]);
-                l += 1;
-                if l > l_len {
-                    break Condition::LeftExit;
-                }
-            } else {
-                output.push(right[r]);
-                r += 1;
-                if r > r_len {
-                    break Condition::RightExit;
+        impl<I: Iterator> MergeIterator<I> {
+            fn new(left: I, right: I) -> Self {
+                MergeIterator {
+                    left: left.peekable(),
+                    right: right.peekable(),
                 }
             }
-        } {
-            // append the remaining slice on the output vector
-            // based on the loop exit condition
-            Condition::LeftExit => output.extend_from_slice(&right[r..]),
-            Condition::RightExit => output.extend_from_slice(&left[l..]),
+        }
+        impl<I> Iterator for MergeIterator<I>
+            where I: Iterator, I::Item: Ord, {
+            type Item = I::Item;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                match
+                match (self.left.peek(), self.right.peek()) {
+                    (Some(l), Some(r)) => { Some(l.cmp(r)) },
+                    (Some(_), None) => Some(Ordering::Less),
+                    (None, Some(_)) => Some(Ordering::Greater),
+                    (None, None) => None,
+                }
+                {
+                    Some(Ordering::Equal) => self.left.next(),
+                    Some(Ordering::Less) => self.left.next(),
+                    Some(Ordering::Greater) => self.right.next(),
+                    None => None,
+                }
+            }
         }
 
-        print!("merge: ({}){:?} <> ({}){:?},", r_len, right, l_len, left);
-        println!("=> {:?},", output);
-        output
+        MergeIterator::new(left.iter(),right.iter())
+            .map(|&x| x)
+            .collect()
     }
-
 }

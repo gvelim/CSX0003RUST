@@ -38,6 +38,7 @@ pub mod divnconq {
     /// Merge subroutine
     /// Join to slices while in the right Order
     fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
+
         use std::iter::Peekable;
         use std::cmp::Ordering;
 
@@ -45,7 +46,6 @@ pub mod divnconq {
             left: Peekable<I>,
             right: Peekable<I>,
         }
-
         impl<I: Iterator> MergeIterator<I> {
             fn new(left: I, right: I) -> Self {
                 MergeIterator {
@@ -54,7 +54,6 @@ pub mod divnconq {
                 }
             }
         }
-
         impl<I> Iterator for MergeIterator<I>
             where I: Iterator, I::Item: Ord, {
             type Item = I::Item;
@@ -80,5 +79,4 @@ pub mod divnconq {
             .map(|&x| x)
             .collect()
     }
-
 }

@@ -81,7 +81,9 @@ pub mod divnconq {
 
         let (l_len,r_len) = (left.len() - 1, right.len() - 1);
 
-        let output = MergeIterator::new(left.iter(),right.iter()).cloned().collect();
+        let output = MergeIterator::new(left.iter(),right.iter())
+            .map(|&x| x)
+            .collect();
 
         print!("merge: {},{:?} <> {},{:?},", r_len, right, l_len, left);
         println!("=> {:?},", output);

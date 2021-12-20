@@ -79,13 +79,13 @@ pub mod divnconq {
     /// Join to slices while in the right Order
     fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
 
-        let (l_len,r_len) = (left.len() - 1, right.len() - 1);
+        let (l_len,r_len) = (left.len(), right.len());
 
         let output = MergeIterator::new(left.iter(),right.iter())
             .map(|&x| x)
             .collect();
 
-        print!("merge: {},{:?} <> {},{:?},", r_len, right, l_len, left);
+        print!("merge: ({}){:?} <> ({}){:?},", r_len, right, l_len, left);
         println!("=> {:?},", output);
         output
     }

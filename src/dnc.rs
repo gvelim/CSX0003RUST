@@ -76,3 +76,19 @@ pub fn merge_sort(v: &[i32]) -> Vec<i32> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_sort() {
+        let v = vec![9,2,8,3,7,4,6,5];
+        assert_eq!(merge_sort(&v), vec![2,3,4,5,6,7,8,9]);
+    }
+    #[test]
+    fn test_merge() {
+        let s1 = &[2, 5, 7, 9];
+        let s2 = &[1, 3, 6, 8];
+        assert_eq!(merge(s1, s2), vec![1, 2, 3, 5, 6, 7, 8, 9]);
+    }
+}

@@ -1,7 +1,6 @@
 
 #[derive(Debug)]
-pub enum BinaryTree<T>
-{
+pub enum BinaryTree<T> {
     Empty,
     NonEmpty(Box<TreeNode<T>>)
 }
@@ -25,7 +24,6 @@ impl<T> BinaryTree<T>
             }))
     }
     pub fn add(&mut self, val: T) {
-
         match self {
             BinaryTree::Empty => {
                 *self = BinaryTree::NonEmpty(
@@ -36,7 +34,7 @@ impl<T> BinaryTree<T>
                     }));
             }
             BinaryTree::NonEmpty(node) => {
-                if node.val <= val {
+                if node.val < val {
                     node.left.add(val)
                 } else {
                     node.right.add(val)
@@ -101,7 +99,7 @@ mod test {
             a.iter()
                 .map( |x| *x )
                 .collect::<Vec<i32>>(),
-            [60,50,45,41,40]
+            vec![60,50,45,41,40]
         );
     }
 }

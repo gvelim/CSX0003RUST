@@ -1,4 +1,5 @@
 
+pub mod trees;
 
 /// Divide and Conquere algorithms
 pub mod divnconq {
@@ -21,7 +22,7 @@ pub mod divnconq {
                 }
                 out
             },
-            // if slice length longer than 2 then split recursively
+            // if slice length longeCopy + Clone + Ordr than 2 then split recursively
             _ => {
                 let (left,right) = v.split_at(len >> 1);
                 let left = merge_sort(left);

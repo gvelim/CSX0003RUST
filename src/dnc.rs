@@ -47,7 +47,6 @@ fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
 /// Sort function based on the merge sort algorithm
 pub fn merge_sort(v: &[i32]) -> Vec<i32> {
 
-
     let len = v.len();
     println!("Input: ({}){:?} =>", len, v);
     match len {

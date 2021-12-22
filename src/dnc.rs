@@ -63,7 +63,7 @@ pub fn merge_sort(v: &[i32]) -> Vec<i32> {
             }
             out
         },
-        // if slice length longeCopy + Clone + Ordr than 2 then split recursively
+        // if slice length longer than 2 then split recursively
         _ => {
             let (left,right) = v.split_at(len >> 1);
             let left = merge_sort(left);

@@ -1,5 +1,3 @@
-use crate::linkedlists::List::NotEmpty;
-
 #[derive(Debug, PartialEq)]
 enum List<T> {
     Empty,
@@ -19,8 +17,8 @@ impl<T> List<T> where T: Copy + Clone {
                     Box::new(List::Empty)
                 );
             }
-            NotEmpty(val, next) => {
-                next.push(*val);
+            List::NotEmpty(_, next) => {
+                next.push(item);
             }
         }
     }

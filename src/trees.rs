@@ -63,13 +63,25 @@ impl<'a, T> TreeIter<'a, T> {
 }
 
 impl<'a, T: 'a> IntoIterator for &'a BinaryTree<T>
-    where T: Ord + Copy + Clone
-{
+    where T: Ord + Copy + Clone {
+
     type Item = &'a T;
     type IntoIter = TreeIter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl<T> FromIterator<T> for BinaryTree<T>
+    where T: Copy + Ord {
+
+    fn from_iter<I: IntoIterator<Item=T>>(iter: I) -> Self {
+        let mut bt = BinaryTree::Empty;
+        for x in iter {
+            bt.add(x);
+        }
+        bt
     }
 }
 

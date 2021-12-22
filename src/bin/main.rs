@@ -7,5 +7,5 @@ fn main() {
 
     println!("Merge Sort: {:?}", merge_sort(&v));
 
-    println!("bTree: {:?}", bt.iter().collect::<Vec<&i32>>());
+    println!("bTree Sort: {:?}", bt.iter().collect::<Vec<&i32>>());
 }

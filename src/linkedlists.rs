@@ -1,14 +1,17 @@
 #[derive(Debug, PartialEq)]
-enum List<T> {
+enum List<T>
+    where T: Copy + Clone + PartialEq
+{
     Empty,
     NotEmpty(T, Box<List<T>>),
 }
 
-impl<T> List<T> where T: Copy + Clone {
+impl<T> List<T>
+    where T: Copy + Clone + PartialEq {
+
     fn new() -> List<T> {
         List::Empty
     }
-
     fn push(&mut self, item: T) {
         match self {
             List::Empty => {
@@ -22,7 +25,23 @@ impl<T> List<T> where T: Copy + Clone {
             }
         }
     }
+    fn pop(&mut self) -> Option<T> {
+        match self {
+            List::Empty => None,
+            List::NotEmpty(val, next) => {
+                if List::Empty == **next {
+                    let item = *val;
+                    *self = List::Empty;
+                    Some(item)
+                }
+                else {
+                    next.pop()
+                }
+            }
+        }
+    }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -45,5 +64,16 @@ mod tests {
                        ))
                    ))
         )
+    }
+    #[test]
+    fn test_pop() {
+        let mut l = List::new();
+        l.push(1);
+        l.push(2);
+
+        assert_eq!(l.pop(), Some(2));
+        assert_eq!(l.pop(), Some(1));
+        assert_eq!(l.pop(), None);
+        assert_eq!(l.pop(), None);
     }
 }

@@ -6,6 +6,5 @@ fn main() {
     let bt : BinaryTree<i32> = v.iter().map(|x| *x ).collect();
 
     println!("Merge Sort: {:?}", merge_sort(&v));
-
     println!("bTree Sort: {:?}", bt.iter().collect::<Vec<&i32>>());
 }

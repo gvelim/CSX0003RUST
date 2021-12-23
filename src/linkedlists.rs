@@ -46,25 +46,43 @@ impl<T> List<T>
             }
         }
     }
-    pub fn iter(&self) -> ListIter<T> {
-        ListIter {
-            cursor: self,
-        }
-    }
+    // pub fn iter(&self) -> ListIter<T> {
+    //     match self {
+    //         List::Empty => ListIter { cursor: List::Empty },
+    //         List::NotEmpty(val, next) => {
+    //             ListIter {
+    //                 cursor: List::NotEmpty(
+    //                     val,
+    //                     next,
+    //                 )
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 /// List provides a "non-consuming" iterator... against the norm
 /// '''
 /// for i in &list
 /// '''
-impl<'a, T> IntoIterator for &'a List<T>
+impl<T> IntoIterator for List<T>
     where T: Copy + Clone + PartialEq {
 
     type Item = T;
-    type IntoIter = ListIter<'a, T>;
+    type IntoIter = ListIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        match self {
+            List::Empty => ListIter { cursor: List::Empty },
+            List::NotEmpty(val, next) => {
+                ListIter {
+                    cursor: List::NotEmpty(
+                        val,
+                        next,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -84,23 +102,36 @@ impl<T> FromIterator<T> for List<T>
     }
 }
 
-/// A List Iterator
-/// Sets up a cursor that references current node
-pub struct ListIter<'a, T>
+pub struct ListIterByRef<'a, T>
     where T: Copy + Clone + PartialEq {
     cursor: &'a List<T>,
 }
 
-impl<'a, T> Iterator for ListIter<'a, T>
+
+/// A List Iterator
+/// Sets up a cursor that references current node
+pub struct ListIter<T>
+    where T: Copy + Clone + PartialEq {
+    cursor: List<T>,
+}
+
+impl<T> Iterator for ListIter<T>
     where T: Copy + Clone + PartialEq {
 
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         match self.cursor {
             List::Empty => None,
-            List::NotEmpty(value, next) => {
-                self.cursor = next;
-                Some(*value)
+            List::NotEmpty(value, ref mut next) => {
+
+                // WE CANNOT MOVE A BOXED VALUE, hence we need to resort to this trick
+                // create a tmp memory space,
+                let mut tmp = Box::new( List::Empty );
+                //  swap the values and
+                std::mem::swap( next, &mut tmp);
+                // assign the tmp to self
+                self.cursor = *tmp;
+                Some(value)
             }
         }
     }
@@ -145,7 +176,7 @@ mod tests {
         l.push(1);
         l.push(2);
 
-        let mut iter = (&l).into_iter();
+        let mut iter = l.into_iter();
 
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
@@ -155,7 +186,7 @@ mod tests {
     fn test_from_iter() {
         let v = vec![1,2,3];
 
-        let mut l : List<i32> = v.iter().map(|x| *x).collect();
+        let mut l : List<i32> = v.into_iter().collect();
 
         assert_eq!(l.pop(), Some(3));
         assert_eq!(l.pop(), Some(2));

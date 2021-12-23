@@ -46,19 +46,11 @@ impl<T> List<T>
             }
         }
     }
-    // pub fn iter(&self) -> ListIter<T> {
-    //     match self {
-    //         List::Empty => ListIter { cursor: List::Empty },
-    //         List::NotEmpty(val, next) => {
-    //             ListIter {
-    //                 cursor: List::NotEmpty(
-    //                     val,
-    //                     next,
-    //                 )
-    //             }
-    //         }
-    //     }
-    // }
+    pub fn iter(&self) -> ListIterByRef<T> {
+        ListIterByRef {
+            cursor: self
+        }
+    }
 }
 
 /// List provides a "non-consuming" iterator... against the norm
@@ -107,6 +99,20 @@ pub struct ListIterByRef<'a, T>
     cursor: &'a List<T>,
 }
 
+impl<'a, T> Iterator for ListIterByRef<'a, T>
+    where T: Copy + Clone + PartialEq {
+
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.cursor {
+            List::Empty => None,
+            List::NotEmpty(value, next) => {
+                self.cursor = next;
+                Some(*value)
+            }
+        }
+    }
+}
 
 /// A List Iterator
 /// Sets up a cursor that references current node
@@ -171,7 +177,19 @@ mod tests {
         assert_eq!(l.pop(), None);
     }
     #[test]
-    fn test_list_into_iter() {
+    fn test_iter() {
+        let mut l = List::new();
+        l.push(1);
+        l.push(2);
+
+        let mut iter = l.iter();
+
+        assert_eq!(iter.next(), Some(1));
+        assert_eq!(iter.next(), Some(2));
+        assert_eq!(iter.next(), None)
+    }
+    #[test]
+    fn test_into_iter() {
         let mut l = List::new();
         l.push(1);
         l.push(2);

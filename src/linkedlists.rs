@@ -70,11 +70,18 @@ impl<T> IntoIterator for List<T>
     type Item = T;
     type IntoIter = ListIter<T>;
 
+    /// Here we are taking ownership of self hence destroying the node
+    /// when we go out of scope.
+    /// Self contents are MOVED onto ListIter structure
+    /// hence ListIter becomes the list's head
     fn into_iter(self) -> Self::IntoIter {
+        // self taken by value, hence consumed
         match self {
             List::Empty => ListIter { cursor: List::Empty },
+            // as a result val & next are consumed in this scope
             List::NotEmpty(val, next) => {
                 ListIter {
+                    // val & next are moved into cursor
                     cursor: List::NotEmpty(
                         val,
                         next,
@@ -137,8 +144,13 @@ impl<T> Iterator for ListIter<T>
         match self.cursor {
             List::Empty => None,
             List::NotEmpty(value, ref mut next) => {
-                // WE CANNOT MOVE A BOXED VALUE, hence we need to resort to this trick
-                // create a tmp memory space, swap the values and assign the tmp to self
+                // "next" deconstructed from "self",
+                // however we need *next copied onto self BUT Box cannot be copied
+                // given "self" is consumed and destroyed when exiting this scope
+                // we need to construct a new "tmp" List Node
+                // copy *next contents into this tmp Node
+                // then make self take onwership of tmp Node
+                // (that is, self points to new mem location) !
                 let mut tmp = Box::new( List::Empty );
                 std::mem::swap( next, &mut tmp);
                 self.cursor = *tmp;
@@ -208,7 +220,7 @@ mod tests {
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), None);
 
-        let mut l:List<i32> = List::new();
+        let l:List<i32> = List::new();
         assert_eq!(l.into_iter().cursor, List::Empty);
     }
     #[test]

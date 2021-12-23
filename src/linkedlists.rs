@@ -46,9 +46,16 @@ impl<T> List<T>
             }
         }
     }
-    pub fn iter(&self) -> ListIter<T> {
-        ListIter {
-            cursor: self,
+    pub fn iter(&self) -> ListIterByRef<T> {
+        match self {
+            List::Empty =>
+                ListIterByRef {
+                    cursor: &List::Empty,
+                },
+            List::NotEmpty(_, _) =>
+                ListIterByRef {
+                    cursor: self
+                },
         }
     }
 }
@@ -57,14 +64,24 @@ impl<T> List<T>
 /// '''
 /// for i in &list
 /// '''
-impl<'a, T> IntoIterator for &'a List<T>
+impl<T> IntoIterator for List<T>
     where T: Copy + Clone + PartialEq {
 
     type Item = T;
-    type IntoIter = ListIter<'a, T>;
+    type IntoIter = ListIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        match self {
+            List::Empty => ListIter { cursor: List::Empty },
+            List::NotEmpty(val, next) => {
+                ListIter {
+                    cursor: List::NotEmpty(
+                        val,
+                        next,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -84,23 +101,48 @@ impl<T> FromIterator<T> for List<T>
     }
 }
 
-/// A List Iterator
-/// Sets up a cursor that references current node
-pub struct ListIter<'a, T>
+/// List by reference iterator
+pub struct ListIterByRef<'a, T>
     where T: Copy + Clone + PartialEq {
     cursor: &'a List<T>,
 }
 
-impl<'a, T> Iterator for ListIter<'a, T>
+impl<'a, T> Iterator for ListIterByRef<'a, T>
+    where T: Copy + Clone + PartialEq {
+
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.cursor {
+            List::Empty => None,
+            List::NotEmpty(value, next) => {
+                self.cursor = next;
+                Some(value)
+            }
+        }
+    }
+}
+
+/// A List Iterator
+/// Sets up a cursor that references current node
+pub struct ListIter<T>
+    where T: Copy + Clone + PartialEq {
+    cursor: List<T>,
+}
+
+impl<T> Iterator for ListIter<T>
     where T: Copy + Clone + PartialEq {
 
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         match self.cursor {
             List::Empty => None,
-            List::NotEmpty(value, next) => {
-                self.cursor = next;
-                Some(*value)
+            List::NotEmpty(value, ref mut next) => {
+                // WE CANNOT MOVE A BOXED VALUE, hence we need to resort to this trick
+                // create a tmp memory space, swap the values and assign the tmp to self
+                let mut tmp = Box::new( List::Empty );
+                std::mem::swap( next, &mut tmp);
+                self.cursor = *tmp;
+                Some(value)
             }
         }
     }
@@ -140,22 +182,40 @@ mod tests {
         assert_eq!(l.pop(), None);
     }
     #[test]
-    fn test_list_into_iter() {
+    fn test_iter() {
         let mut l = List::new();
         l.push(1);
         l.push(2);
 
-        let mut iter = (&l).into_iter();
+        let mut iter = l.iter();
+
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), None);
+
+        let m: List<i32> = List::new();
+        assert_eq!(m.iter().cursor, &List::Empty);
+    }
+    #[test]
+    fn test_into_iter() {
+        let mut l = List::new();
+        l.push(1);
+        l.push(2);
+
+        let mut iter = l.into_iter();
 
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
-        assert_eq!(iter.next(), None)
+        assert_eq!(iter.next(), None);
+
+        let mut l:List<i32> = List::new();
+        assert_eq!(l.into_iter().cursor, List::Empty);
     }
     #[test]
     fn test_from_iter() {
         let v = vec![1,2,3];
 
-        let mut l : List<i32> = v.iter().map(|x| *x).collect();
+        let mut l : List<i32> = v.into_iter().collect();
 
         assert_eq!(l.pop(), Some(3));
         assert_eq!(l.pop(), Some(2));

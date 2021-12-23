@@ -1,19 +1,21 @@
 
 #[derive(Debug, PartialEq)]
-enum List<T>
+pub enum List<T>
     where T: Copy + Clone + PartialEq {
-
     Empty,
     NotEmpty(T, Box<List<T>>),
 }
 
+/// List related methods
 impl<T> List<T>
     where T: Copy + Clone + PartialEq {
 
-    fn new() -> List<T> {
+    /// Constract an empty list
+    pub fn new() -> List<T> {
         List::Empty
     }
-    fn push(&mut self, item: T) {
+    /// Push to the end of the list. inefficiently for now
+    pub fn push(&mut self, item: T) {
         match self {
             List::Empty => {
                 *self = List::NotEmpty(
@@ -26,7 +28,8 @@ impl<T> List<T>
             }
         }
     }
-    fn pop(&mut self) -> Option<T> {
+    /// Pop from the end of the list, inefficiently for now
+    pub fn pop(&mut self) -> Option<T> {
         match self {
             List::Empty => None,
             List::NotEmpty(val, next) => {
@@ -43,6 +46,10 @@ impl<T> List<T>
     }
 }
 
+/// List provides an iterator
+/// '''
+/// for i in list
+/// '''
 impl<'a, T> IntoIterator for &'a List<T>
     where T: Copy + Clone + PartialEq {
 
@@ -56,6 +63,10 @@ impl<'a, T> IntoIterator for &'a List<T>
     }
 }
 
+/// A List can be constructed from other collections
+/// '''
+/// let mut l : List<i32> = v.into_iter().collect();
+/// '''
 impl<T> FromIterator<T> for List<T>
     where T: Copy + Clone + PartialEq {
 
@@ -66,10 +77,11 @@ impl<T> FromIterator<T> for List<T>
         }
         list
     }
-
 }
 
-struct ListIter<'a, T>
+/// A List Iterator
+/// Sets up a cursor that references current node
+pub struct ListIter<'a, T>
     where T: Copy + Clone + PartialEq {
     cursor: &'a List<T>,
 }
@@ -137,6 +149,7 @@ mod tests {
     #[test]
     fn test_from_iter() {
         let v = vec![1,2,3];
+
         let mut l : List<i32> = v.into_iter().collect();
 
         assert_eq!(l.pop(), Some(3));

@@ -46,7 +46,7 @@ impl<T> List<T>
     }
 }
 
-/// List provides an iterator
+/// List provides a "non-consuming" iterator
 /// '''
 /// for i in list
 /// '''

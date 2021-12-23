@@ -47,8 +47,15 @@ impl<T> List<T>
         }
     }
     pub fn iter(&self) -> ListIterByRef<T> {
-        ListIterByRef {
-            cursor: self
+        match self {
+            List::Empty =>
+                ListIterByRef {
+                    cursor: &List::Empty,
+                },
+            List::NotEmpty(_, _) =>
+                ListIterByRef {
+                    cursor: self
+                },
         }
     }
 }
@@ -94,6 +101,7 @@ impl<T> FromIterator<T> for List<T>
     }
 }
 
+/// List by reference iterator
 pub struct ListIterByRef<'a, T>
     where T: Copy + Clone + PartialEq {
     cursor: &'a List<T>,
@@ -102,13 +110,13 @@ pub struct ListIterByRef<'a, T>
 impl<'a, T> Iterator for ListIterByRef<'a, T>
     where T: Copy + Clone + PartialEq {
 
-    type Item = T;
+    type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
         match self.cursor {
             List::Empty => None,
             List::NotEmpty(value, next) => {
                 self.cursor = next;
-                Some(*value)
+                Some(value)
             }
         }
     }
@@ -129,13 +137,10 @@ impl<T> Iterator for ListIter<T>
         match self.cursor {
             List::Empty => None,
             List::NotEmpty(value, ref mut next) => {
-
                 // WE CANNOT MOVE A BOXED VALUE, hence we need to resort to this trick
-                // create a tmp memory space,
+                // create a tmp memory space, swap the values and assign the tmp to self
                 let mut tmp = Box::new( List::Empty );
-                //  swap the values and
                 std::mem::swap( next, &mut tmp);
-                // assign the tmp to self
                 self.cursor = *tmp;
                 Some(value)
             }
@@ -184,9 +189,12 @@ mod tests {
 
         let mut iter = l.iter();
 
-        assert_eq!(iter.next(), Some(1));
-        assert_eq!(iter.next(), Some(2));
-        assert_eq!(iter.next(), None)
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), None);
+
+        let m: List<i32> = List::new();
+        assert_eq!(m.iter().cursor, &List::Empty);
     }
     #[test]
     fn test_into_iter() {
@@ -198,7 +206,10 @@ mod tests {
 
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
-        assert_eq!(iter.next(), None)
+        assert_eq!(iter.next(), None);
+
+        let mut l:List<i32> = List::new();
+        assert_eq!(l.into_iter().cursor, List::Empty);
     }
     #[test]
     fn test_from_iter() {

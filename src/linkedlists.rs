@@ -1,4 +1,6 @@
 
+/// I could have done it differently
+/// but I wanted to see how far I could go with this simple enum structure
 #[derive(Debug, PartialEq)]
 pub enum List<T>
     where T: Copy + Clone + PartialEq {
@@ -10,7 +12,7 @@ pub enum List<T>
 impl<T> List<T>
     where T: Copy + Clone + PartialEq {
 
-    /// Constract an empty list
+    /// Construct an empty list
     pub fn new() -> List<T> {
         List::Empty
     }
@@ -44,11 +46,16 @@ impl<T> List<T>
             }
         }
     }
+    pub fn iter(&self) -> ListIter<T> {
+        ListIter {
+            cursor: self,
+        }
+    }
 }
 
-/// List provides a "non-consuming" iterator
+/// List provides a "non-consuming" iterator... against the norm
 /// '''
-/// for i in list
+/// for i in &list
 /// '''
 impl<'a, T> IntoIterator for &'a List<T>
     where T: Copy + Clone + PartialEq {
@@ -57,9 +64,7 @@ impl<'a, T> IntoIterator for &'a List<T>
     type IntoIter = ListIter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        ListIter {
-            cursor: &self,
-        }
+        self.iter()
     }
 }
 
@@ -135,12 +140,12 @@ mod tests {
         assert_eq!(l.pop(), None);
     }
     #[test]
-    fn test_list_iter() {
+    fn test_list_into_iter() {
         let mut l = List::new();
         l.push(1);
         l.push(2);
 
-        let mut iter = l.into_iter();
+        let mut iter = (&l).into_iter();
 
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
@@ -150,7 +155,7 @@ mod tests {
     fn test_from_iter() {
         let v = vec![1,2,3];
 
-        let mut l : List<i32> = v.into_iter().collect();
+        let mut l : List<i32> = v.iter().map(|x| *x).collect();
 
         assert_eq!(l.pop(), Some(3));
         assert_eq!(l.pop(), Some(2));

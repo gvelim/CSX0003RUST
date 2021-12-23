@@ -137,8 +137,11 @@ impl<T> Iterator for ListIter<T>
         match self.cursor {
             List::Empty => None,
             List::NotEmpty(value, ref mut next) => {
-                // WE CANNOT MOVE A BOXED VALUE, hence we need to resort to this trick
-                // create a tmp memory space, swap the values and assign the tmp to self
+                // next is part of self, so we cannot assign self to self
+                // hence since self is consumed and destroyed when exiting this scope
+                // we need to construct a new "tmp" List Node
+                // copy next contents into this tmp Node
+                // then move the new tmp Node onto self so we own it !
                 let mut tmp = Box::new( List::Empty );
                 std::mem::swap( next, &mut tmp);
                 self.cursor = *tmp;

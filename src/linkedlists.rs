@@ -99,6 +99,9 @@ impl<T> List<T>
     }
 }
 
+/// since we implement Iterator for List
+/// we get by default also an IntoIterator implementation
+/// hence this will also work with "for" loops
 impl<T> Iterator for List<T>
     where T: Copy + Clone + PartialEq {
     type Item = T;

@@ -148,7 +148,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_push() {
+    fn test_push_first() {
         let mut list = List::new();
 
         list.push_first(1);
@@ -184,7 +184,7 @@ mod tests {
         )
     }
     #[test]
-    fn test_pop() {
+    fn test_pop_first() {
         let mut l = List::new();
         l.push_last(1);
         l.push_last(2);
@@ -192,18 +192,20 @@ mod tests {
         assert_eq!(l.pop_first(), Some(1));
         assert_eq!(l.pop_first(), Some(2));
         assert_eq!(l.pop_first(), None);
-        assert_eq!(l.pop_first(), None);
     }
     #[test]
-    fn test_pop_last() {
+    fn test_pop_push_mixed() {
         let mut l = List::new();
-        l.push_last(1);
-        l.push_last(2);
-
-        assert_eq!(l.pop_last(), Some(2));
-        assert_eq!(l.pop_last(), Some(1));
-        assert_eq!(l.pop_last(), None);
-        assert_eq!(l.pop_last(), None);
+        l.push_first(1);
+        l.push_first(2);
+        l.push_last(3);
+        l.push_last(4);
+        // [2,1,3,4]
+        assert_eq!(l.pop_last(), Some(4));
+        assert_eq!(l.pop_last(), Some(3));
+        assert_eq!(l.pop_first(), Some(2));
+        assert_eq!(l.pop_first(), Some(1));
+        assert_eq!(l.pop_first(), None);
     }
     #[test]
     fn test_iter() {
@@ -228,8 +230,8 @@ mod tests {
 
         let mut iter = l.into_iter();
 
-        assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), Some(1));
+        assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), None);
 
         let l:List<i32> = List::new();
@@ -241,9 +243,9 @@ mod tests {
 
         let mut l : List<i32> = v.into_iter().collect();
 
-        assert_eq!(l.pop_last(), Some(3));
-        assert_eq!(l.pop_last(), Some(2));
         assert_eq!(l.pop_last(), Some(1));
+        assert_eq!(l.pop_last(), Some(2));
+        assert_eq!(l.pop_last(), Some(3));
         assert_eq!(l.pop_last(), None);
     }
 }

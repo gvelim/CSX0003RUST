@@ -1,7 +1,9 @@
+use std::fmt::Debug;
 
 /// Merge subroutine
 /// Join to slices while in the right Order
-fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
+fn merge<T>(left: &[T], right: &[T]) -> Vec<T>
+    where T: Copy + Clone + Ord {
 
     use std::iter::Peekable;
     use std::cmp::Ordering;
@@ -45,7 +47,8 @@ fn merge(left: &[i32], right: &[i32]) -> Vec<i32> {
 }
 
 /// Sort function based on the merge sort algorithm
-pub fn merge_sort(v: &[i32]) -> Vec<i32> {
+pub fn merge_sort<T>(v: &[T]) -> Vec<T>
+    where T: Copy + Clone + Ord + Debug {
 
     let len = v.len();
     println!("Input: ({}){:?} =>", len, v);

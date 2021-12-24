@@ -10,6 +10,9 @@ fn main() {
 
     println!("Merge Sort: {:?}", merge_sort(&v));
     println!("bTree Sort: {:?}", bt.iter().collect::<Vec<&i32>>());
-    println!("List      : {:?}", list.into_iter().collect::<Vec<i32>>() );
+    println!("List      : {:?}", list.iter().collect::<Vec<&i32>>() );
 
+    for i in list {
+        print!("{},",i)
+    }
 }

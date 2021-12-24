@@ -129,37 +129,6 @@ impl<'a, T> Iterator for ListIterByRef<'a, T>
     }
 }
 
-/// A List Iterator
-/// Sets up a cursor that references current node
-pub struct ListIter<T>
-    where T: Copy + Clone + PartialEq {
-    cursor: List<T>,
-}
-
-impl<T> Iterator for ListIter<T>
-    where T: Copy + Clone + PartialEq {
-
-    type Item = T;
-    fn next(&mut self) -> Option<Self::Item> {
-        match self.cursor {
-            List::Empty => None,
-            List::NotEmpty(value, ref mut next) => {
-                // "next" deconstructed from "self",
-                // however we need *next copied onto self BUT Box cannot be copied
-                // given "self" is consumed and destroyed when exiting this scope
-                // we need to construct a new "tmp" List Node
-                // copy *next contents into this tmp Node
-                // then make self take onwership of tmp Node
-                // (that is, self points to new mem location) !
-                let mut tmp = Box::new( List::Empty );
-                std::mem::swap( next, &mut tmp);
-                self.cursor = *tmp;
-                Some(value)
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

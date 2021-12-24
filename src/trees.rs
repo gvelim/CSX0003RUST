@@ -78,9 +78,8 @@ impl<T> FromIterator<T> for BinaryTree<T>
 
     fn from_iter<I: IntoIterator<Item=T>>(iter: I) -> Self {
         let mut bt = BinaryTree::Empty;
-        for x in iter {
-            bt.add(x);
-        }
+        iter.into_iter()
+            .for_each(|i| bt.add(i));
         bt
     }
 }

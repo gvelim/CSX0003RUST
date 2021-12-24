@@ -60,35 +60,11 @@ impl<T> List<T>
     }
 }
 
-/// List provides a "non-consuming" iterator... against the norm
-/// '''
-/// for i in &list
-/// '''
-impl<T> IntoIterator for List<T>
+impl<T> Iterator for List<T>
     where T: Copy + Clone + PartialEq {
-
     type Item = T;
-    type IntoIter = ListIter<T>;
-
-    /// Here we are taking ownership of self hence destroying the node
-    /// when we go out of scope.
-    /// Self contents are MOVED onto ListIter structure
-    /// hence ListIter becomes the list's head
-    fn into_iter(self) -> Self::IntoIter {
-        // self taken by value, hence consumed
-        match self {
-            List::Empty => ListIter { cursor: List::Empty },
-            // as a result val & next are consumed in this scope
-            List::NotEmpty(val, next) => {
-                ListIter {
-                    // val & next are moved into cursor
-                    cursor: List::NotEmpty(
-                        val,
-                        next,
-                    )
-                }
-            }
-        }
+    fn next(&mut self) -> Option<Self::Item> {
+        self.pop()
     }
 }
 
@@ -101,9 +77,8 @@ impl<T> FromIterator<T> for List<T>
 
     fn from_iter<I: IntoIterator<Item=T>>(iter: I) -> Self {
         let mut list = List::Empty;
-        for item in iter {
-            list.push(item);
-        }
+        iter.into_iter()
+            .for_each( |item| list.push(item));
         list
     }
 }
@@ -185,12 +160,12 @@ mod tests {
 
         let mut iter = l.into_iter();
 
-        assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
+        assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), None);
 
         let l:List<i32> = List::new();
-        assert_eq!(l.into_iter().cursor, List::Empty);
+        assert_eq!(l.into_iter(), List::Empty);
     }
     #[test]
     fn test_from_iter() {

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 /// Merge subroutine
 /// Join to slices while in the right Order
-fn merge<T>(left: &[T], right: &[T]) -> Vec<T>
+fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
     where T: Copy + Clone + Ord {
 
     use std::iter::Peekable;
@@ -44,18 +44,20 @@ fn merge<T>(left: &[T], right: &[T]) -> Vec<T>
     let (inv, miter): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter())
         .unzip();
     println!("Inv: {:?}", inv);
-    miter
+    (inv.into_iter().sum(), miter)
 }
 
 /// Sort function based on the merge sort algorithm
-pub fn merge_sort<T>(v: &[T]) -> Vec<T>
+pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     where T: Copy + Clone + Ord + Debug {
 
     let len = v.len();
+    let mut inversions: u32 = 0;
+
     println!("Input: ({}){:?} =>", len, v);
     match len {
         // unity slice, just return it
-        0..=1 => v.to_vec(),
+        0..=1 => (0, v.to_vec()),
         // sort the binary slice and exit
         // use a local variable to eliminate the need for &mut as input
         // and given we output a new vector
@@ -63,19 +65,20 @@ pub fn merge_sort<T>(v: &[T]) -> Vec<T>
             let mut out = Vec::from(v);
             if out[0] > out[1] {
                 out.swap(0, 1);
+                inversions += 1;
             }
-            out
+            (inversions, out)
         },
         // if slice length longer than 2 then split recursively
         _ => {
             let (left,right) = v.split_at(len >> 1);
-            let left = merge_sort(left);
-            let right = merge_sort(right);
+            let (linv, left) = merge_sort(left);
+            let (rinv, right) = merge_sort(right);
 
             // return a vector of the merged but ordered slices
-            let out = merge(&left, &right);
-            println!("Merged: {:?} <> {:?} => {:?}", left, right, out);
-            out
+            let (minv, out) = merge(&left, &right);
+            println!("Merged: {:?} <> {:?} => {}:{:?}", left, right, linv+rinv+minv, out);
+            (linv + rinv + minv, out)
         }
     }
 }
@@ -85,13 +88,13 @@ mod test {
     use super::*;
     #[test]
     fn test_sort() {
-        let v = vec![9,2,8,3,7,4,6,5];
-        assert_eq!(merge_sort(&v), vec![2,3,4,5,6,7,8,9]);
+        let v = vec![1,3,5,2,4];
+        assert_eq!(merge_sort(&v), (3, vec![1,2,3,4,5]));
     }
     #[test]
     fn test_merge() {
         let s1 = &[2, 5, 7, 9];
         let s2 = &[1, 3, 6, 8];
-        assert_eq!(merge(s1, s2), vec![1, 2, 3, 5, 6, 7, 8, 9]);
+        assert_eq!(merge(s1, s2).1, vec![1, 2, 3, 5, 6, 7, 8, 9]);
     }
 }

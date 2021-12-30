@@ -22,7 +22,7 @@ fn merge<T>(left: &[T], right: &[T]) -> Vec<T>
     }
     impl<I> Iterator for MergeIterator<I>
         where I: Iterator, I::Item: Ord, {
-        type Item = I::Item;
+        type Item = (u32, I::Item);
 
         fn next(&mut self) -> Option<Self::Item> {
             match
@@ -33,17 +33,18 @@ fn merge<T>(left: &[T], right: &[T]) -> Vec<T>
                 (None, None) => None,
             }
             {
-                Some(Ordering::Equal) => self.left.next(),
-                Some(Ordering::Less) => self.left.next(),
-                Some(Ordering::Greater) => self.right.next(),
+                Some(Ordering::Equal) => Some((0, self.left.next().unwrap())),
+                Some(Ordering::Less) => Some((0, self.left.next().unwrap())),
+                Some(Ordering::Greater) => Some((1, self.right.next().unwrap())),
                 None => None,
             }
         }
     }
 
-    MergeIterator::new(left.iter(),right.iter())
-        .map(|&x| x)
-        .collect()
+    let (inv, miter): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter())
+        .unzip();
+    println!("Inv: {:?}", inv);
+    miter
 }
 
 /// Sort function based on the merge sort algorithm

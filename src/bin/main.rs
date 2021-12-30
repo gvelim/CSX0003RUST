@@ -6,7 +6,7 @@ use mergeshort::linkedlists::*;
 fn main() {
 
     let list: List<i8> = from_fn(|| { Some(rand::random::<i8>()) })
-        .take(32)
+        .take(16)
         .collect();
     let v: Vec<i8> = list.iter().map(|x| *x).collect();
     let bt : BinaryTree<i8> = list.iter().map(|x| *x).collect();

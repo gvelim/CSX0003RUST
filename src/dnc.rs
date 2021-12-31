@@ -34,18 +34,15 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
                     match l.cmp(r) {
                         Ordering::Less | Ordering::Equal=> {
                             self.leftcount += 1;
-                            print!("L{}",self.leftcount);
                             Some((0, self.left.next().unwrap()))
                         },
                         Ordering::Greater => {
                             self.rightcount += 1;
-                            print!("R{}",self.rightcount);
                             Some((1, self.right.next().unwrap()))
                         },
                     }
                 },
                 (Some(_), None) => {
-                    print!("L{}",self.leftcount);
                     match (self.left.next(), self.left.peek()) {
                         (Some(val), Some(_)) => Some((self.rightcount,val)),
                         (Some(val), None) => Some((0,val)),
@@ -53,7 +50,6 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
                     }
                 },
                 (None, Some(_)) => {
-                    print!("R{}",self.rightcount);
                     match (self.right.next(), self.right.peek()) {
                         (Some(val), Some(_)) => Some((self.leftcount,val)),
                         (Some(val), None) => Some((0,val)),

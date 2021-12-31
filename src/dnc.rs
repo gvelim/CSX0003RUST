@@ -130,5 +130,6 @@ mod test {
         let s1 = &[2, 4, 6];
         let s2 = &[1, 3, 5];
         assert_eq!(merge(s1, s2), (3,vec![1, 2, 3, 4, 5, 6]));
+        assert_eq!(merge(s2, s1), (2,vec![1, 2, 3, 4, 5, 6]));
     }
 }

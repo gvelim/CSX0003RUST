@@ -10,22 +10,32 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
 
     struct MergeIterator<I: Iterator> {
         left: Peekable<I>,
-        leftcount: u32,
+        left_count: u32,
+        left_len: u32,
         right: Peekable<I>,
-        rightcount: u32,
+        right_count: u32,
+        right_len: u32,
     }
     impl<I: Iterator> MergeIterator<I> {
         fn new(left: I, right: I) -> Self {
-            MergeIterator {
+            let mut mi = MergeIterator {
                 left: left.peekable(),
-                leftcount: 0,
+                left_count: 0,
+                left_len: 0,
                 right: right.peekable(),
-                rightcount: 0,
-            }
+                right_count: 0,
+                right_len: 0,
+            };
+            mi.left_len = mi.left.size_hint().0 as u32;
+            mi.right_len = mi.right.size_hint().0 as u32;
+            print!("({},{})", mi.left_len, mi.right_len);
+            mi
         }
     }
     impl<I> Iterator for MergeIterator<I>
-        where I: Iterator, I::Item: Ord, {
+        where I: Iterator,
+              I::Item: Ord,
+    {
         type Item = (u32, I::Item);
 
         fn next(&mut self) -> Option<Self::Item> {
@@ -33,28 +43,27 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
                 (Some(l), Some(r)) => {
                     match l.cmp(r) {
                         Ordering::Less | Ordering::Equal=> {
-                            self.leftcount += 1;
+                            self.left_count += 1;
+                            print!("L{}",self.left_count);
                             Some((0, self.left.next().unwrap()))
                         },
                         Ordering::Greater => {
-                            self.rightcount += 1;
-                            Some((1, self.right.next().unwrap()))
+                            let inv = self.left_len-self.left_count;
+                            self.right_count += 1;
+                            print!("R{}",self.right_count);
+                            Some( (inv, self.right.next().unwrap()) )
                         },
                     }
                 },
                 (Some(_), None) => {
-                    match (self.left.next(), self.left.peek()) {
-                        (Some(val), Some(_)) => Some((self.rightcount,val)),
-                        (Some(val), None) => Some((0,val)),
-                        (None, _) => None,
-                    }
+                    self.left_count += 1;
+                    print!("L{}",self.left_count);
+                    Some( (0, self.left.next().unwrap()) )
                 },
                 (None, Some(_)) => {
-                    match (self.right.next(), self.right.peek()) {
-                        (Some(val), Some(_)) => Some((self.leftcount,val)),
-                        (Some(val), None) => Some((0,val)),
-                        (None, _) => None,
-                    }
+                    self.right_count += 1;
+                    print!("R{}",self.right_count);
+                    Some( (0,self.right.next().unwrap()) )
                 },
                 (None, None) => None,
             }
@@ -113,11 +122,11 @@ mod test {
         let v3 = vec![8, 4, 2, 1];
         let v4 = vec![6,2,4,3,5,1];
         let v5 = vec![7,6,5,4,3,2,1];
-        let v6 = vec![8,7, 6,5,4,3,2,1];
+        let v6 = vec![8,7,6,5,4,3,2,1];
         assert_eq!(merge_sort(&v1), (3, vec![1,2,3]));
         assert_eq!(merge_sort(&v2), (4, vec![1,2,3,4]));
         assert_eq!(merge_sort(&v3), (6, vec![1,2,4,8]));
-        assert_eq!(merge_sort(&v4), (7, vec![1,2,3,4,5,6]));
+        assert_eq!(merge_sort(&v4), (10, vec![1,2,3,4,5,6]));
         assert_eq!(merge_sort(&v5), (21, vec![1,2,3,4,5,6,7]));
         assert_eq!(merge_sort(&v6), (28, vec![1,2,3,4,5,6,7,8]));
     }
@@ -125,7 +134,7 @@ mod test {
     fn test_merge() {
         let s1 = &[2, 4, 6];
         let s2 = &[1, 3, 5];
-        assert_eq!(merge(s1, s2), (3,vec![1, 2, 3, 4, 5, 6]));
-        assert_eq!(merge(s2, s1), (2,vec![1, 2, 3, 4, 5, 6]));
+        assert_eq!(merge(s1, s2), (6,vec![1, 2, 3, 4, 5, 6]));
+        assert_eq!(merge(s2, s1), (3,vec![1, 2, 3, 4, 5, 6]));
     }
 }

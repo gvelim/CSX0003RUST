@@ -13,22 +13,16 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
         left_count: u32,
         left_len: u32,
         right: Peekable<I>,
-        right_count: u32,
-        right_len: u32,
     }
     impl<I: Iterator> MergeIterator<I> {
         fn new(left: I, right: I) -> Self {
             let mut mi = MergeIterator {
+                right: right.peekable(),
                 left: left.peekable(),
                 left_count: 0,
                 left_len: 0,
-                right: right.peekable(),
-                right_count: 0,
-                right_len: 0,
             };
             mi.left_len = mi.left.size_hint().0 as u32;
-            mi.right_len = mi.right.size_hint().0 as u32;
-            print!("({},{})", mi.left_len, mi.right_len);
             mi
         }
     }
@@ -44,25 +38,18 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
                     match l.cmp(r) {
                         Ordering::Less | Ordering::Equal=> {
                             self.left_count += 1;
-                            print!("L{}",self.left_count);
                             Some((0, self.left.next().unwrap()))
                         },
                         Ordering::Greater => {
                             let inv = self.left_len-self.left_count;
-                            self.right_count += 1;
-                            print!("R{}",self.right_count);
                             Some( (inv, self.right.next().unwrap()) )
                         },
                     }
                 },
                 (Some(_), None) => {
-                    self.left_count += 1;
-                    print!("L{}",self.left_count);
                     Some( (0, self.left.next().unwrap()) )
                 },
                 (None, Some(_)) => {
-                    self.right_count += 1;
-                    print!("R{}",self.right_count);
                     Some( (0,self.right.next().unwrap()) )
                 },
                 (None, None) => None,

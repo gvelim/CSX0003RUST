@@ -9,29 +9,25 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
     use std::cmp::Ordering;
 
     struct MergeIterator<I: Iterator> {
+        right: Peekable<I>,
         left: Peekable<I>,
         left_count: u32,
         left_len: u32,
-        right: Peekable<I>,
-        right_count: u32,
-        right_len: u32,
     }
+
     impl<I: Iterator> MergeIterator<I> {
         fn new(left: I, right: I) -> Self {
             let mut mi = MergeIterator {
+                right: right.peekable(),
                 left: left.peekable(),
                 left_count: 0,
                 left_len: 0,
-                right: right.peekable(),
-                right_count: 0,
-                right_len: 0,
             };
             mi.left_len = mi.left.size_hint().0 as u32;
-            mi.right_len = mi.right.size_hint().0 as u32;
-            print!("({},{})", mi.left_len, mi.right_len);
             mi
         }
     }
+
     impl<I> Iterator for MergeIterator<I>
         where I: Iterator,
               I::Item: Ord,
@@ -44,25 +40,18 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
                     match l.cmp(r) {
                         Ordering::Less | Ordering::Equal=> {
                             self.left_count += 1;
-                            print!("L{}",self.left_count);
                             Some((0, self.left.next().unwrap()))
                         },
                         Ordering::Greater => {
                             let inv = self.left_len-self.left_count;
-                            self.right_count += 1;
-                            print!("R{}",self.right_count);
                             Some( (inv, self.right.next().unwrap()) )
                         },
                     }
                 },
                 (Some(_), None) => {
-                    self.left_count += 1;
-                    print!("L{}",self.left_count);
                     Some( (0, self.left.next().unwrap()) )
                 },
                 (None, Some(_)) => {
-                    self.right_count += 1;
-                    print!("R{}",self.right_count);
                     Some( (0,self.right.next().unwrap()) )
                 },
                 (None, None) => None,
@@ -71,7 +60,6 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
     }
 
     let (inv, vec): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
-
     print!("Inv: {:?}::", inv);
     (inv.into_iter().sum(), vec)
 }
@@ -90,24 +78,24 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
         // use a local variable to eliminate the need for &mut as input
         // and given we output a new vector
         2 => {
-            let mut out = Vec::from(v);
+            let mut sorted_vec = Vec::from(v);
             let mut inv = 0;
-            if out[0] > out[1] {
-                out.swap(0, 1);
+            if sorted_vec[0] > sorted_vec[1] {
+                sorted_vec.swap(0, 1);
                 inv += 1;
             }
-            (inv, out)
+            (inv, sorted_vec)
         },
         // if slice length longer than 2 then split recursively
         _ => {
             let (left, right) = v.split_at(len >> 1);
-            let (linv, left) = merge_sort(left);
-            let (rinv, right) = merge_sort(right);
+            let (left_inv, left) = merge_sort(left);
+            let (right_inv, right) = merge_sort(right);
 
             // return a vector of the merged but ordered slices
-            let (minv, out) = merge(&left, &right);
-            println!("Merged: {}:{:?} <> {}:{:?} => {}:{:?}", linv, left, rinv, right, linv+rinv+minv, out);
-            (linv + rinv + minv, out)
+            let (merge_inv, sorted_vec) = merge(&left, &right);
+            println!("Merged: {}:{:?} <> {}:{:?} => {}:{:?}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv, sorted_vec);
+            (left_inv + right_inv + merge_inv, sorted_vec)
         }
     }
 }

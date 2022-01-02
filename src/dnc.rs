@@ -8,6 +8,22 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
     use std::iter::Peekable;
     use std::cmp::Ordering;
 
+    /// Takes two iterators as input with each iteration returning
+    /// the next in order item out of the two, plus its inversions' count
+    /// ```
+    /// let s1 = &[2, 4, 6];
+    /// let s2 = &[1, 3, 5];
+    ///
+    /// let iter = MergeIterator::new(&s1.iter(), &s2.iter());
+    ///
+    /// assert_eq!(iter.next(), (3,1));
+    /// assert_eq!(iter.next(), (0,2));
+    /// assert_eq!(iter.next(), (2,3));
+    /// assert_eq!(iter.next(), (0,4));
+    /// assert_eq!(iter.next(), (1,5));
+    /// assert_eq!(iter.next(), (0,6));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     struct MergeIterator<I: Iterator> {
         right: Peekable<I>,
         left: Peekable<I>,
@@ -16,6 +32,7 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
     }
 
     impl<I: Iterator> MergeIterator<I> {
+        /// Constructs a new MergeIterator given two iterators
         fn new(left: I, right: I) -> Self {
             let mut mi = MergeIterator {
                 right: right.peekable(),
@@ -32,39 +49,55 @@ fn merge<T>(left: &[T], right: &[T]) -> (u32, Vec<T>)
         where I: Iterator,
               I::Item: Ord,
     {
+        // tuple returned = (number of inversions at position, value at position)
         type Item = (u32, I::Item);
 
+        /// Outputs the next in order value out of the two iterators
+        /// in the form of Some( tuple ), where
+        /// tuple = ( inversions at position, value at position)
         fn next(&mut self) -> Option<Self::Item> {
             match (self.left.peek(), self.right.peek()) {
+                // left & right parts remain within their bounds
                 (Some(l), Some(r)) => {
                     match l.cmp(r) {
+                        // left is smaller hence move to output
+                        // there are no inversions to count
+                        // keep count of current position
                         Ordering::Less | Ordering::Equal=> {
                             self.left_count += 1;
                             Some((0, self.left.next().unwrap()))
                         },
+                        // right is smaller hence move to output
+                        // inversions are equal to left items remain to iterate over
                         Ordering::Greater => {
                             let inv = self.left_len-self.left_count;
                             Some( (inv, self.right.next().unwrap()) )
                         },
                     }
                 },
+                // right part out of bounds, hence move left item to output
                 (Some(_), None) => {
                     Some( (0, self.left.next().unwrap()) )
                 },
+                // left part out of bounds, hence move right item to output
                 (None, Some(_)) => {
                     Some( (0,self.right.next().unwrap()) )
                 },
+                // both left & right parts out of bounds
                 (None, None) => None,
             }
         }
     }
 
+    // Unzip() consumes the MergeIterator plus splits the tuple (inv, val) into two Vectors
     let (inv, vec): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
     print!("Inv: {:?}::", inv);
+    // Sum-up inversions
     (inv.into_iter().sum(), vec)
 }
 
 /// Sort function based on the merge sort algorithm
+/// returning a sorted vector plus the count of inversions
 pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     where T: Copy + Clone + Ord + Debug {
 
@@ -93,6 +126,7 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
             let (right_inv, right) = merge_sort(right);
 
             // return a vector of the merged but ordered slices
+            // plus total number of inversions occurred
             let (merge_inv, sorted_vec) = merge(&left, &right);
             println!("Merged: {}:{:?} <> {}:{:?} => {}:{:?}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv, sorted_vec);
             (left_inv + right_inv + merge_inv, sorted_vec)

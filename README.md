@@ -2,6 +2,8 @@
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
-Merge short
+Merge sort
+
 Linked list
+
 Binary tree

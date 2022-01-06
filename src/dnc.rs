@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
-use std::ops::Range;
 
 
 /// Takes two iterators as input with each iteration returning
@@ -126,33 +125,68 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     }
 }
 
-fn partition_at_index<T>(v: &mut [T], idx: usize) -> usize
+fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
     where T: Copy + Clone + Ord + Debug  {
 
-    let mut i = 1usize;
+    use std::ptr::{slice_from_raw_parts_mut};
+
+    let mut i = 0usize;
+
+    // swap v[idx] to v[0] before entering the for loop
     v.swap(0, idx);
+
+    // v[0] holds the pivot point hence we start comparing from 2nd item v[1]
+    // j : points to last element checked
+    // i : position in array so that v[1..i] < v[i] < r[i+1..j]
     for j in 1..(v.len()) {
         if v[0] > v[j] {
-            v.swap(i,j);
             i+=1;
+            v.swap(i,j);
             print!("s:");
         } else {
             print!("-:");
         }
         println!("{:?}, ({},{})", v, i,j);
     }
-    v.swap(0,i-1);
-    println!("f:{:?}, ({})", v, i);
-    (i-1)
+    // we found the correct order for pivot
+    // hence swap v[i] with v[0]
+    v.swap(0,i);
+    println!("f:{:?}, ({})", v, i+1);
+
+    let (l, r) = v.split_at_mut(i);
+    let (m, r) = r.split_at_mut(1);
+
+    (&mut l[..], &m[0], &mut r[..])
+
+    // since we already hold a mutable reference to 'v'
+    // we will violate rust's policy if we try to split it mutably
+    // since we know the partitions don't overlap we can resort to this
+    // unsafe {
+    //     // since slice { ptr, len } the below
+    //     // will return a mut pointer to the actual data
+    //     let ptr = v.as_mut_ptr();
+    //     (
+    //         // return a slice pointer containing up to 0...i elements
+    //         &mut *slice_from_raw_parts_mut(ptr, i),
+    //         // return the partitioning position against the input array
+    //         &v[i],
+    //         // // return a slice pointer containing i+1 ... v.len() elements
+    //         &mut *slice_from_raw_parts_mut(ptr.offset((i + 1) as isize), v.len() - i - 1),
+    //     )
+    // }
 }
 
 pub fn quick_sort<T>(v: &mut [T])
     where T: Copy + Clone + Ord + Debug {
 
-    let idx= partition_at_index(v, 3);
+    if v.len() < 2 {
+        return;
+    }
 
-    //quick_sort(&mut v[..left_partition.len()]);
-    //quick_sort(&mut v[left_partition.len() + 1..]);
+    let (lp,_ ,rp) = partition_at_index(v, v.len() >> 1);
+
+    quick_sort(lp);
+    quick_sort(rp);
 }
 
 
@@ -162,13 +196,13 @@ mod test {
     #[test]
     fn test_partition_at_index() {
         let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
-        let idx = partition_at_index(&mut v[..], 4);
+        let (l, idx, r) = partition_at_index(&mut v[..], 4);
 
         // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
         // idx = 6 (7th position)
-        assert_eq!(v[..idx], [2,5,6,3,1,4]);
-        assert_eq!(v[idx], 7);
-        assert_eq!(v[idx+1..v.len()], [9,12,8,11,10]);
+        assert_eq!(l, &[2,5,6,3,1,4]);
+        assert_eq!(idx, &7);
+        assert_eq!(r, &[9,12,8,11,10]);
     }
     #[test]
     fn test_sort() {

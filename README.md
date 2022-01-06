@@ -7,4 +7,4 @@ Rust playground; familiarising with ownership, generics, trait objects, etc
 - Linked list
 - Binary tree
 
-No performance/optimisation warranties
+No performance and/or optimisation warranties :-)

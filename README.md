@@ -2,8 +2,9 @@
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
-Merge sort
+- Merge sort
+- Quick sort
+- Linked list
+- Binary tree
 
-Linked list
-
-Binary tree
+No performance/optimisation warranties

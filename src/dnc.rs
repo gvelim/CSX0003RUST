@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
-use std::ptr::{slice_from_raw_parts, slice_from_raw_parts_mut};
 
 
 /// Takes two iterators as input with each iteration returning

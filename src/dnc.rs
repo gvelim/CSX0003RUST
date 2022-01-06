@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
+use std::ops::Range;
+
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -24,7 +26,6 @@ struct MergeIterator<I: Iterator> {
     left_count: u32,
     left_len: u32,
 }
-
 impl<I: Iterator> MergeIterator<I> {
     /// Constructs a new MergeIterator given two iterators
     fn new(left: I, right: I) -> Self {
@@ -38,11 +39,9 @@ impl<I: Iterator> MergeIterator<I> {
         mi
     }
 }
-
 impl<I> Iterator for MergeIterator<I>
     where I: Iterator,
-          I::Item: Ord,
-{
+          I::Item: Ord, {
     // tuple returned = (number of inversions at position, value at position)
     type Item = (u32, I::Item);
 
@@ -82,8 +81,6 @@ impl<I> Iterator for MergeIterator<I>
         }
     }
 }
-
-
 
 /// Sort function based on the merge sort algorithm
 /// returning a sorted vector plus the count of inversions
@@ -129,9 +126,50 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     }
 }
 
+fn partition_at_index<T>(v: &mut [T], idx: usize) -> usize
+    where T: Copy + Clone + Ord + Debug  {
+
+    let mut i = 1usize;
+    v.swap(0, idx);
+    for j in 1..(v.len()) {
+        if v[0] > v[j] {
+            v.swap(i,j);
+            i+=1;
+            print!("s:");
+        } else {
+            print!("-:");
+        }
+        println!("{:?}, ({},{})", v, i,j);
+    }
+    v.swap(0,i-1);
+    println!("f:{:?}, ({})", v, i);
+    (i-1)
+}
+
+pub fn quick_sort<T>(v: &mut [T])
+    where T: Copy + Clone + Ord + Debug {
+
+    let idx= partition_at_index(v, 3);
+
+    //quick_sort(&mut v[..left_partition.len()]);
+    //quick_sort(&mut v[left_partition.len() + 1..]);
+}
+
+
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn test_partition_at_index() {
+        let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
+        let idx = partition_at_index(&mut v[..], 4);
+
+        // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
+        // idx = 6 (7th position)
+        assert_eq!(v[..idx], [2,5,6,3,1,4]);
+        assert_eq!(v[idx], 7);
+        assert_eq!(v[idx+1..v.len()], [9,12,8,11,10]);
+    }
     #[test]
     fn test_sort() {
         let v1 = vec![3,2,1];

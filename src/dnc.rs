@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
+use std::ptr::{slice_from_raw_parts, slice_from_raw_parts_mut};
 
 
 /// Takes two iterators as input with each iteration returning
@@ -135,19 +136,37 @@ fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
     // swap v[idx] to v[0] before entering the for loop
     v.swap(0, idx);
 
+    // the for_each will own the &mut v anything we need within the loop
+    // we'll have to get it before we get in
+    let pivot = v[0];
+    let ptr = v.as_mut_ptr();
+
     // v[0] holds the pivot point hence we start comparing from 2nd item v[1]
     // j : points to last element checked
     // i : position in array so that v[1..i] < v[i] < r[i+1..j]
-    for j in 1..(v.len()) {
-        if v[0] > v[j] {
-            i+=1;
-            v.swap(i,j);
-            print!("\ts:");
-        } else {
-            print!("\t-:");
-        }
-        println!("{:?}, ({},{})", v, i,j);
-    }
+    v.into_iter()
+        .enumerate()
+        .skip(1)
+        .for_each( |(j, val)| {
+            if pivot > *val {
+                i+=1;
+                // would be nice to make a call to v.swap(i, j) but &mut v is now owned by for_each
+                // so we cannot use it in the loop as this increases its borrow counter hence we need another way
+                // We extract a ptr before entering the loop to use for swapping the item
+                // .. and unless we find a better way that doesn't need unsafe
+                unsafe {
+                    std::ptr::swap::<T>(
+                        ptr.offset(i as isize),
+                        ptr.offset(j as isize)
+                    );
+                }
+                print!("\ts:");
+            } else {
+                print!("\t-:");
+            }
+            //
+            println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts(ptr, j+1) }, i, j);
+        });
     // we found the correct order for pivot
     // hence swap v[i] with v[0]
     v.swap(0,i);

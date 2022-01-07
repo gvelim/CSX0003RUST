@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
 /// ```
-/// use mergeshort::dnc::*;
+/// use csx3::sort::*;
 /// let s1 = &[2, 4, 6];
 /// let s2 = &[1, 3, 5];
 ///
@@ -84,11 +84,11 @@ impl<I> Iterator for MergeIterator<I>
 /// Sort function based on the merge sort algorithm
 /// returning a sorted vector plus the total count of inversions occurred
 /// ```
-/// use mergeshort::dnc::merge_sort;
+/// use csx3::sort::merge_sort;
 ///
 /// let v = &[8, 4, 2, 1];
 ///
-/// assert_eq!(merge_sort(&v), (6, &[1,2,4,8]));
+/// assert_eq!(merge_sort(v), (6, vec![1,2,4,8]));
 /// ```
 pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     where T: Copy + Clone + Ord + Debug {
@@ -134,7 +134,7 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
 /// Splits an array into two mutable slices/partitions around a pivot that is derived by the value at given index
 /// so that *[values in left partition] < [pivot] < [values in right partition]*
 /// ```
-/// use mergeshort::dnc::*;
+/// use csx3::sort::*;
 /// let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
 /// let (l, idx, r) = partition_at_index(&mut v[..], 4);
 ///
@@ -204,7 +204,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T]
 /// Short a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
 /// ```
-/// use mergeshort::dnc::quick_sort;
+/// use csx3::sort::quick_sort;
 ///
 /// let v = &mut [3,5,8,1,2,4,6,0];
 ///

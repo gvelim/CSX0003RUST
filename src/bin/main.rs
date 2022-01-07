@@ -1,7 +1,7 @@
 use std::iter::from_fn;
-use mergeshort::dnc::*;
-use mergeshort::trees::*;
-use mergeshort::linkedlists::*;
+use csx3::sort::*;
+use csx3::trees::*;
+use csx3::linkedlists::*;
 
 fn main() {
 

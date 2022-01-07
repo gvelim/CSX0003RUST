@@ -2,10 +2,10 @@ use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
 
-
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
 /// ```
+/// use mergeshort::dnc::*;
 /// let s1 = &[2, 4, 6];
 /// let s2 = &[1, 3, 5];
 ///
@@ -19,7 +19,7 @@ use std::cmp::Ordering;
 /// assert_eq!(iter.next(), Some( (0,&6) ));
 /// assert_eq!(iter.next(), None);
 /// ```
-struct MergeIterator<I: Iterator> {
+pub struct MergeIterator<I: Iterator> {
     right: Peekable<I>,
     left: Peekable<I>,
     left_count: u32,
@@ -27,7 +27,7 @@ struct MergeIterator<I: Iterator> {
 }
 impl<I: Iterator> MergeIterator<I> {
     /// Constructs a new MergeIterator given two iterators
-    fn new(left: I, right: I) -> Self {
+    pub fn new(left: I, right: I) -> Self {
         let mut mi = MergeIterator {
             right: right.peekable(),
             left: left.peekable(),
@@ -82,7 +82,14 @@ impl<I> Iterator for MergeIterator<I>
 }
 
 /// Sort function based on the merge sort algorithm
-/// returning a sorted vector plus the count of inversions
+/// returning a sorted vector plus the total count of inversions occurred
+/// ```
+/// use mergeshort::dnc::merge_sort;
+///
+/// let v = &[8, 4, 2, 1];
+///
+/// assert_eq!(merge_sort(&v), (6, &[1,2,4,8]));
+/// ```
 pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     where T: Copy + Clone + Ord + Debug {
 
@@ -124,15 +131,29 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
         }
     }
 }
-
-fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
+/// Splits an array into two mutable slices/partitions around a pivot that is derived by the value at given index
+/// so that *[values in left partition] < [pivot] < [values in right partition]*
+/// ```
+/// use mergeshort::dnc::*;
+/// let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
+/// let (l, idx, r) = partition_at_index(&mut v[..], 4);
+///
+/// // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
+/// // idx = 6 (7th position)
+/// assert_eq!(l, &[2,5,6,3,1,4]);
+/// assert_eq!(idx, &7);
+/// assert_eq!(r, &[9,12,8,11,10]);
+/// ```
+pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
     where T: Copy + Clone + Ord + Debug  {
 
     use std::ptr::{slice_from_raw_parts};
 
-    let mut i = 0usize;
+    let len = v.len();
+    assert!(idx < len);
+    println!("\tInput: {:?}, (@{}{})",v, idx+1, match idx {0=>"st",1=>"nd",2=>"rd",_=>"th"});
 
-    println!("\tInput: {:?}::{}",v, idx);
+    let mut i = 0usize;
 
     // swap v[idx] to v[0] before entering the for loop
     v.swap(0, idx);
@@ -157,8 +178,8 @@ fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
                 // .. and unless we find a better way that doesn't need unsafe
                 unsafe {
                     std::ptr::swap::<T>(
-                        ptr.offset(i as isize),
-                        ptr.offset(j as isize)
+                        ptr.wrapping_offset(i as isize),
+                        ptr.wrapping_offset(j as isize)
                     );
                 }
                 print!("\ts:");
@@ -166,40 +187,34 @@ fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
                 print!("\t-:");
             }
             //
-            println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts(ptr, j+1) }, i, j);
+            println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts::<T>(ptr, len) }, i+1, j+1);
         });
     // we found the correct order for pivot
     // hence swap v[i] with v[0]
     v.swap(0,i);
     println!("\tf:{:?}, ({})", v, i+1);
 
+    // split the array into [left part], [pivot + right partition]
     let (l, r) = v.split_at_mut(i);
-    let (m, r) = r.split_at_mut(1);
+    // split further into [pivot], [right partition]
+    let (p, r) = r.split_at_mut(1);
 
-    (&mut l[..], &m[0], &mut r[..])
-
-    //// since we already hold a mutable reference to 'v'
-    //// we will violate rust's policy if we try to split it mutably
-    //// since we know the partitions don't overlap we can resort to this
-    // use std::ptr::{slice_from_raw_parts_mut};
-    // unsafe {
-    //     // since slice { ptr, len } the below
-    //     // will return a mut pointer to the actual data
-    //     let ptr = v.as_mut_ptr();
-    //     (
-    //         // return a slice pointer containing up to 0...i elements
-    //         &mut *slice_from_raw_parts_mut(ptr, i),
-    //         // return the partitioning position against the input array
-    //         &v[i],
-    //         // // return a slice pointer containing i+1 ... v.len() elements
-    //         &mut *slice_from_raw_parts_mut(ptr.offset((i + 1) as isize), v.len() - i - 1),
-    //     )
-    // }
+    (&mut l[..], &p[0], &mut r[..])
 }
-
+/// Short a given array using the Quick Sort algorithm.
+/// The function rearranges the array contents rather than returning a new sorted copy of the input array
+/// ```
+/// use mergeshort::dnc::quick_sort;
+///
+/// let v = &mut [3,5,8,1,2,4,6,0];
+///
+/// quick_sort(v);
+/// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
+/// ```
 pub fn quick_sort<T>(v: &mut [T])
     where T: Copy + Clone + Ord + Debug {
 
+    // have we reached the end of the recursion ?
     if v.len() < 2 {
         return;
     }
@@ -207,6 +222,7 @@ pub fn quick_sort<T>(v: &mut [T])
     // partition the array into to mutable slices for further sorting
     let (left_partition,_ , right_partition) = partition_at_index(v, v.len() >> 1);
 
+    // Recurse against left an right partitions
     quick_sort(left_partition);
     quick_sort(right_partition);
 }

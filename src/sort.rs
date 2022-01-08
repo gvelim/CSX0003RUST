@@ -95,7 +95,7 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
 
     let len = v.len();
 
-    println!("\tInput: ({}){:?} =>", len, v);
+    //println!("\tInput: ({}){:?} =>", len, v);
     match len {
         // unity slice, just return it
         0..=1 => (0, v.to_vec()),
@@ -121,12 +121,12 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
             // plus inversions vector; inversion count per position
             let (merge_vec, sorted_vec): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
 
-            println!("\tInversion Vector: {:?}", &merge_vec);
+            //println!("\tInversion Vector: {:?}", &merge_vec);
 
             // sum up the inversion count vector
             let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
 
-            println!("\tMerge: {}:{:?} <> {}:{:?} => {}:{:?}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv, sorted_vec);
+            //println!("\tMerge: {}:{:?} <> {}:{:?} => {}:{:?}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv, sorted_vec);
             (left_inv + right_inv + merge_inv, sorted_vec)
         }
     }
@@ -147,11 +147,9 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
 pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
     where T: Copy + Clone + Ord + Debug  {
 
-    use std::ptr::{slice_from_raw_parts};
-
     let len = v.len();
     assert!(idx < len);
-    println!("\tInput: {:?}, (@{}{})",v, idx+1, match idx {0=>"st",1=>"nd",2=>"rd",_=>"th"});
+    //println!("\tInput: {:?}, (@{}{})",v, idx+1, match idx {0=>"st",1=>"nd",2=>"rd",_=>"th"});
 
     let mut i = 0usize;
 
@@ -182,17 +180,18 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T]
                         ptr.wrapping_offset(j as isize)
                     );
                 }
-                print!("\ts:");
-            } else {
-                print!("\t-:");
+                //print!("\ts:");
             }
+            // else {
+            //     print!("\t-:");
+            // }
             //
-            println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts::<T>(ptr, len) }, i+1, j+1);
+            // println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts::<T>(ptr, len) }, i+1, j+1);
         });
     // we found the correct order for pivot
     // hence swap v[i] with v[0]
     v.swap(0,i);
-    println!("\tf:{:?}, ({})", v, i+1);
+    //println!("\tf:{:?}, ({})", v, i+1);
 
     // split the array into [left part], [pivot + right partition]
     let (l, r) = v.split_at_mut(i);

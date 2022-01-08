@@ -16,5 +16,5 @@ fn main() {
     println!("Quick Sort: {:?}", v);
     println!("bTree Sort: {:?}", bt.iter().collect::<Vec<_>>());
     println!("List      : {:?}", list.iter().collect::<Vec<_>>() );
-
+    println!("List      : {:?}", list.sort_with_count().1 );
 }

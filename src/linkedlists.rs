@@ -1,16 +1,17 @@
+use std::fmt::Debug;
 
 /// I could have done it differently
 /// but I wanted to see how far I could go with this simple enum structure
 #[derive(Debug, PartialEq)]
 pub enum List<T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone  {
     Empty,
     NotEmpty(T, Box<List<T>>),
 }
 
 /// List related methods
 impl<T> List<T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone + Ord + Debug {
 
     /// Construct an empty list
     pub fn new() -> List<T> {
@@ -97,13 +98,18 @@ impl<T> List<T>
                 },
         }
     }
+    pub fn sort_with_count(&self) -> (u32, Vec<T>){
+        use super::sort::merge_sort;
+        let s  = self.iter().map(|x| *x).collect::<Vec<T>>();
+        merge_sort(&s[..])
+    }
 }
 
 /// since we implement Iterator for List
 /// we get by default also an IntoIterator implementation
 /// hence this will also work with "for" loops
 impl<T> Iterator for List<T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone + Ord + Debug {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         self.pop_first()
@@ -115,7 +121,7 @@ impl<T> Iterator for List<T>
 /// let mut l : List<i32> = v.into_iter().collect();
 /// '''
 impl<T> FromIterator<T> for List<T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone + Ord + Debug {
 
     fn from_iter<I: IntoIterator<Item=T>>(iter: I) -> Self {
         let mut list = List::Empty;

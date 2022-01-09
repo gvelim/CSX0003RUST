@@ -8,12 +8,13 @@ type MyType = i8;
 fn main() {
 
     let list: List<MyType> = from_fn(|| { Some(rand::random::<MyType>()) })
-        .take(16)
+        .take(8)
         .collect();
     let mut v: Vec<MyType> = list.iter().map(|x| *x).collect();
     let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
 
-    println!("Merge Sort: {:?}", merge_sort(&mut v));
+    merge_sort(&mut v);
+    println!("Merge Sort: {:?}", v);
     quick_sort(&mut v);
     println!("Quick Sort: {:?}", v);
     println!("bTree Sort: {:?}", bt.iter().collect::<Vec<_>>());

@@ -85,7 +85,7 @@ impl<I> Iterator for MergeIterator<I>
 }
 
 
-pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
+fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     where T: Ord + Debug
 {
     println!("\tInput: {:?},{:?}", s1, s2);
@@ -96,7 +96,7 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     // sort the right edges, hence largest first
     if s1[l1] > s2[l2] {
         swap(&mut s1[l1],&mut s2[l2]);
-        inv_count += 1;
+        inv_count += 1 as u32;
     }
     // sort the left edges. hence smallest last
     if s1[0] > s2[0] {
@@ -146,14 +146,15 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
             let left_inv = merge_sort(left);
             let right_inv = merge_sort(right);
 
-            // return a vector of the merged but ordered slices
-            // plus inversions vector; inversion count per position
-            let (merge_vec, _ ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            // // return a vector of the merged but ordered slices
+            // // plus inversions vector; inversion count per position
+            // let (merge_vec, _ ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            // println!("\tInversion Vector: {:?}", &merge_vec);
 
-            println!("\tInversion Vector: {:?}", &merge_vec);
+            // // sum up the inversion count vector
+            // let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
 
-            // sum up the inversion count vector
-            let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
+            let merge_inv = merge_mut(left,right);
 
             println!("\tMerge: {}:{:?} <> {}:{:?} => {}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
@@ -306,25 +307,27 @@ mod test {
     }
     #[test]
     fn test_merge() {
-        let s1 = &[2, 4, 6];
-        let s2 = &[1, 3, 5];
+        let s1 = &[34, 36, 80, 127];
+        let s2 = &[-36, -22, -3, 109];
 
         let mut iter = MergeIterator::new(s1.iter(), s2.iter());
 
-        assert_eq!(iter.next(), Some( (3,&1) ));
-        assert_eq!(iter.next(), Some( (0,&2) ));
-        assert_eq!(iter.next(), Some( (2,&3) ));
-        assert_eq!(iter.next(), Some( (0,&4) ));
-        assert_eq!(iter.next(), Some( (1,&5) ));
-        assert_eq!(iter.next(), Some( (0,&6) ));
+        assert_eq!(iter.next(), Some( (4,&-36) ));
+        assert_eq!(iter.next(), Some( (4,&-22) ));
+        assert_eq!(iter.next(), Some( (4,&-3) ));
+        assert_eq!(iter.next(), Some( (0,&34) ));
+        assert_eq!(iter.next(), Some( (0,&36) ));
+        assert_eq!(iter.next(), Some( (0,&80) ));
+        assert_eq!(iter.next(), Some( (1,&109) ));
+        assert_eq!(iter.next(), Some( (0,&127) ));
         assert_eq!(iter.next(), None);
     }
     #[test]
     fn test_merge_mut() {
-        let arr:[(&mut[u32],&[u32]);11] = [
+        let arr:[(&mut[i32],&[i32]);11] = [
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
             (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
             (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
-            (&mut [1,2,3,4,5,6], &[1,2,3,4,5,6]),
             (&mut [2,4,1,3,5], &[1,2,3,4,5]),
             (&mut [1,3,2,4,5], &[1,2,3,4,5]),
             (&mut [1,2,3,4,5], &[1,2,3,4,5]),

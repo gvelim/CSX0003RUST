@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
-use std::mem::swap;
 use rand::Rng;
 
 /// Takes two iterators as input with each iteration returning
@@ -88,28 +87,33 @@ impl<I> Iterator for MergeIterator<I>
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     where T: Ord + Debug
 {
-    println!("\tInput: {:?},{:?}", s1, s2);
-
-    let (l1,l2) = (s1.len()-1, s2.len()-1);
-    let mut inv_count = 0u32;
-
-    // sort the right edges, hence largest first
-    if s1[l1] > s2[l2] {
-        swap(&mut s1[l1],&mut s2[l2]);
-        inv_count += 1 as u32;
+    // println!("\tInput: {:?},{:?}", s1, s2);
+    let v: &mut [T];
+    unsafe {
+        v = &mut *std::ptr::slice_from_raw_parts_mut::<T>( s1.as_mut_ptr(), s1.len()+s2.len());
     }
-    // sort the left edges. hence smallest last
-    if s1[0] > s2[0] {
-        swap(&mut s1[0], &mut s2[0]);
-        inv_count += (l1+1) as u32;
-    }
-    println!("\tEdges: {:?},{:?} ({},{}) ({})", s1, s2, l1, l2, inv_count);
 
-    match (l1,l2) {
-        (0, _) => return inv_count,
-        (_, 0) => return inv_count,
-        (_, _) => merge_mut(&mut s1[1..], &mut s2[..l2]) + inv_count
+    let (mut i,mut j, l1, mut inv)  = (0usize, s1.len(), v.len(), 0usize);
+
+    // println!("s:{:?} ({},{})",v, i, j);
+    while i < l1 && j < l1 && i != j {
+        match v[i].cmp(&v[j]) {
+            Ordering::Less | Ordering::Equal => {
+                i += 1;
+                // print!("-:");
+            }
+            Ordering::Greater => {
+                v[i..=j].rotate_right(1);
+                inv += j - i;
+                j += 1;
+                i += 1;
+                // print!("r:");
+            }
+        }
+        // println!("{:?} ({},{})({})",v, i, j, inv);
     }
+
+    inv as u32
 }
 
 /// Sort function based on the merge sort algorithm
@@ -156,7 +160,7 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
 
             let merge_inv = merge_mut(left,right);
 
-            println!("\tMerge: {}:{:?} <> {}:{:?} => {}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv);
+            println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
         }
     }

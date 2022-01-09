@@ -2,9 +2,9 @@
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
-- Merge sort
-- Quick sort
-- Linked list
+- Merge sort (mutable slices, in-place merging)
+- Quick sort (mutable slices, in-place partitioning)
+- Linked list 
 - Binary tree
 
 No performance and/or optimisation warranties :-)

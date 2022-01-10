@@ -83,37 +83,56 @@ impl<I> Iterator for MergeIterator<I>
     }
 }
 
-
+// Neve make this fn public !! as it is unsafe outsize this module/context
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     where T: Ord + Debug
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
-    let v: &mut [T];
+
+    // We resort to a trick given that slices are adjacent in memory
+    // we know they are, hence we pull a slice that encompass both
+    // we use the one big slice to do our merging
+    // Working Slice = (*S1) to (*S1 + s1.len + s2.len)
+    let ws: &mut [T];
     unsafe {
-        v = &mut *std::ptr::slice_from_raw_parts_mut::<T>( s1.as_mut_ptr(), s1.len()+s2.len());
+        ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
     }
 
-    let (mut i,mut j, l1, mut inv)  = (0usize, s1.len(), v.len(), 0usize);
+    // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
+    // j = position in working slice representing s2[0]
+    // len = working slice length
+    let (mut i,mut j, len, mut inv_count)  = (0usize, s1.len(), ws.len(), 0usize);
 
     // println!("s:{:?} ({},{})",v, i, j);
-    while i < l1 && j < l1 && i != j {
-        match v[i].cmp(&v[j]) {
+
+
+    // j < v.len() => no more comparisons required
+    // i == j => no more comparison required
+    while j < len && i != j {
+        match ws[i].cmp(&ws[j]) {
+            // so far the order is fine
             Ordering::Less | Ordering::Equal => {
-                i += 1;
                 // print!("-:");
             }
             Ordering::Greater => {
-                v[i..=j].rotate_right(1);
-                inv += j - i;
+                // We deploy the rotation trick for now rather swapping which doesn't work always
+                // with rotation we get
+                // ws[i],...ws[j-1],ws[j] --> ws[j],ws[i],...ws[j-1]
+                // hence the "sets" remain always in order
+                ws[i..=j].rotate_right(1);
+                // inversion are equal to all item between i and j
+                inv_count += j - i;
+                // pick next element from upper slice
                 j += 1;
-                i += 1;
                 // print!("r:");
             }
         }
+        // move sorted partition by 1 and ready to pick the next element for sorting
+        i += 1;
         // println!("{:?} ({},{})({})",v, i, j, inv);
     }
 
-    inv as u32
+    inv_count as u32
 }
 
 /// Sort function based on the merge sort algorithm

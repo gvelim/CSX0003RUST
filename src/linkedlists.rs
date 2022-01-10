@@ -100,8 +100,8 @@ impl<T> List<T>
     }
     pub fn sort_with_count(&self) -> (u32, Vec<T>){
         use super::sort::merge_sort;
-        let s  = self.iter().map(|x| *x).collect::<Vec<T>>();
-        merge_sort(&s[..])
+        let mut s  = self.iter().map(|x| *x).collect::<Vec<T>>();
+        (merge_sort(&mut s[..]), s)
     }
 }
 

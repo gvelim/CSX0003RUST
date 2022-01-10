@@ -164,7 +164,7 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
 
             let merge_inv = merge_mut(left,right);
 
-            println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
+            //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
         }
     }

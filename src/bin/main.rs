@@ -13,6 +13,7 @@ fn main() {
     let mut v: Vec<MyType> = list.iter().map(|x| *x).collect();
     let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
 
+    println!("List      : {:?}", v );
     merge_sort(&mut v);
     println!("Merge Sort: {:?}", v);
     quick_sort(&mut v);

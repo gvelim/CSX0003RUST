@@ -2,8 +2,8 @@
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
-- Merge sort (immutable slices)
-- Quick sort (mutable slices)
+- Merge sort (mutable slices, in-place merging)
+- Quick sort (mutable slices, in-place partitioning)
 - Linked list 
 - Binary tree
 

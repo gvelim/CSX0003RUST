@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
+use rand::Rng;
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -40,7 +41,8 @@ impl<I: Iterator> MergeIterator<I> {
 }
 impl<I> Iterator for MergeIterator<I>
     where I: Iterator,
-          I::Item: Ord, {
+          I::Item: Ord,
+{
     // tuple returned = (number of inversions at position, value at position)
     type Item = (u32, I::Item);
 
@@ -81,16 +83,50 @@ impl<I> Iterator for MergeIterator<I>
     }
 }
 
+
+fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
+    where T: Ord + Debug
+{
+    // println!("\tInput: {:?},{:?}", s1, s2);
+    let v: &mut [T];
+    unsafe {
+        v = &mut *std::ptr::slice_from_raw_parts_mut::<T>( s1.as_mut_ptr(), s1.len()+s2.len());
+    }
+
+    let (mut i,mut j, l1, mut inv)  = (0usize, s1.len(), v.len(), 0usize);
+
+    // println!("s:{:?} ({},{})",v, i, j);
+    while i < l1 && j < l1 && i != j {
+        match v[i].cmp(&v[j]) {
+            Ordering::Less | Ordering::Equal => {
+                i += 1;
+                // print!("-:");
+            }
+            Ordering::Greater => {
+                v[i..=j].rotate_right(1);
+                inv += j - i;
+                j += 1;
+                i += 1;
+                // print!("r:");
+            }
+        }
+        // println!("{:?} ({},{})({})",v, i, j, inv);
+    }
+
+    inv as u32
+}
+
 /// Sort function based on the merge sort algorithm
 /// returning a sorted vector plus the total count of inversions occurred
 /// ```
 /// use csx3::sort::merge_sort;
 ///
-/// let v = &[8, 4, 2, 1];
+/// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!(merge_sort(v), (6, vec![1,2,4,8]));
+/// assert_eq!( merge_sort(input), 6 );
+/// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
+pub fn merge_sort<T>(v: &mut [T]) -> u32
     where T: Copy + Clone + Ord + Debug {
 
     let len = v.len();
@@ -98,36 +134,38 @@ pub fn merge_sort<T>(v: &[T]) -> (u32, Vec<T>)
     //println!("\tInput: ({}){:?} =>", len, v);
     match len {
         // unity slice, just return it
-        0..=1 => (0, v.to_vec()),
+        0..=1 => (0),
         // sort the binary slice and exit
         // use a local variable to eliminate the need for &mut as input
         // and given we output a new vector
         2 => {
-            let mut sorted_vec = Vec::from(v);
-            let mut inv = 0;
-            if sorted_vec[0] > sorted_vec[1] {
-                sorted_vec.swap(0, 1);
-                inv += 1;
+            if v[0] > v[1] {
+                v.swap(0, 1);
+                return 1
             }
-            (inv, sorted_vec)
+            0
         },
         // if slice length longer than 2 then split recursively
         _ => {
-            let (left, right) = v.split_at(len >> 1);
-            let (left_inv, left) = merge_sort(left);
-            let (right_inv, right) = merge_sort(right);
+            let (left, right) = v.split_at_mut(len >> 1);
+            let left_inv = merge_sort(left);
+            let right_inv = merge_sort(right);
 
-            // return a vector of the merged but ordered slices
-            // plus inversions vector; inversion count per position
-            let (merge_vec, sorted_vec): (Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            // // return a vector of the merged but ordered slices
+            // // plus inversions vector; inversion count per position
+            // let (merge_vec, _ ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            // println!("\tInversion Vector: {:?}", &merge_vec);
 
+
+            // // sum up the inversion count vector
+            // let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
             //println!("\tInversion Vector: {:?}", &merge_vec);
 
-            // sum up the inversion count vector
-            let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
 
-            //println!("\tMerge: {}:{:?} <> {}:{:?} => {}:{:?}", left_inv, left, right_inv, right, left_inv + right_inv + merge_inv, sorted_vec);
-            (left_inv + right_inv + merge_inv, sorted_vec)
+            let merge_inv = merge_mut(left,right);
+
+            println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
+            left_inv + right_inv + merge_inv
         }
     }
 }
@@ -217,9 +255,10 @@ pub fn quick_sort<T>(v: &mut [T])
     if v.len() < 2 {
         return;
     }
-    // pick always an index in the middle+1 just for simplicity
+    // pick an index at random based on a uniform distribution
+    let idx = rand::thread_rng().gen_range(0..(v.len()-1) );
     // partition the array into to mutable slices for further sorting
-    let (left_partition,_ , right_partition) = partition_at_index(v, v.len() >> 1);
+    let (left_partition,_ , right_partition) = partition_at_index(v, idx);
 
     // Recurse against left an right partitions
     quick_sort(left_partition);
@@ -259,35 +298,57 @@ mod test {
     }
     #[test]
     fn test_merge_sort() {
-        let test_data: [(&[u32], (u32, &[u32]));6] = [
-            (&[3,2,1],              (3, &[1,2,3])),
-            (&[4,1,3,2],            (4, &[1,2,3,4])),
-            (&[8, 4, 2, 1],         (6, &[1,2,4,8])),
-            (&[6,2,4,3,5,1],        (10,&[1,2,3,4,5,6])),
-            (&[7,6,5,4,3,2,1],      (21,&[1,2,3,4,5,6,7])),
-            (&[8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8]))
+        let test_data: [(&mut [u32], (u32, &[u32]));6] = [
+            (&mut [3,2,1],              (3, &[1,2,3])),
+            (&mut [4,1,3,2],            (4, &[1,2,3,4])),
+            (&mut [8, 4, 2, 1],         (6, &[1,2,4,8])),
+            (&mut [6,2,4,3,5,1],        (10,&[1,2,3,4,5,6])),
+            (&mut [7,6,5,4,3,2,1],      (21,&[1,2,3,4,5,6,7])),
+            (&mut [8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8]))
         ];
 
         for (input,(inv_count, output)) in test_data {
-            assert_eq!(
-                merge_sort(&input.to_vec()),
-                (inv_count, output.to_vec())
-            );
+            assert_eq!( merge_sort(input),inv_count );
+            assert_eq!( input, output );
         }
     }
     #[test]
     fn test_merge() {
-        let s1 = &[2, 4, 6];
-        let s2 = &[1, 3, 5];
+        let s1 = &[34, 36, 80, 127];
+        let s2 = &[-36, -22, -3, 109];
 
         let mut iter = MergeIterator::new(s1.iter(), s2.iter());
 
-        assert_eq!(iter.next(), Some( (3,&1) ));
-        assert_eq!(iter.next(), Some( (0,&2) ));
-        assert_eq!(iter.next(), Some( (2,&3) ));
-        assert_eq!(iter.next(), Some( (0,&4) ));
-        assert_eq!(iter.next(), Some( (1,&5) ));
-        assert_eq!(iter.next(), Some( (0,&6) ));
+        assert_eq!(iter.next(), Some( (4,&-36) ));
+        assert_eq!(iter.next(), Some( (4,&-22) ));
+        assert_eq!(iter.next(), Some( (4,&-3) ));
+        assert_eq!(iter.next(), Some( (0,&34) ));
+        assert_eq!(iter.next(), Some( (0,&36) ));
+        assert_eq!(iter.next(), Some( (0,&80) ));
+        assert_eq!(iter.next(), Some( (1,&109) ));
+        assert_eq!(iter.next(), Some( (0,&127) ));
         assert_eq!(iter.next(), None);
+    }
+    #[test]
+    fn test_merge_mut() {
+        let arr:[(&mut[i32],&[i32]);11] = [
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
+            (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
+            (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
+            (&mut [2,4,1,3,5], &[1,2,3,4,5]),
+            (&mut [1,3,2,4,5], &[1,2,3,4,5]),
+            (&mut [1,2,3,4,5], &[1,2,3,4,5]),
+            (&mut [2,1,4], &[1,2,4]),
+            (&mut [3,1,2], &[1,2,3]),
+            (&mut [1,2,3], &[1,2,3]),
+            (&mut [2,1], &[1,2]),
+            (&mut [1,2], &[1,2]),
+        ];
+        for (input, output) in arr {
+            let len = input.len();
+            let (s1, s2) = input.split_at_mut(len >> 1);
+            merge_mut(s1, s2);
+            assert_eq!(input, output);
+        }
     }
 }

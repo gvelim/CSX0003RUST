@@ -121,9 +121,10 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
 /// ```
 /// use csx3::sort::merge_sort;
 ///
-/// let v = &[8, 4, 2, 1];
+/// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!(merge_sort(v), (6, vec![1,2,4,8]));
+/// assert_eq!( merge_sort(input), 6 );
+/// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn merge_sort<T>(v: &mut [T]) -> u32
     where T: Copy + Clone + Ord + Debug {

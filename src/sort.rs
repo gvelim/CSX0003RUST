@@ -103,33 +103,27 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     // len = working slice length
     let (mut i,mut j, len, mut inv_count)  = (0usize, s1.len(), ws.len(), 0usize);
 
-    // println!("s:{:?} ({},{})",v, i, j);
+    //println!("Merge:{:?}<>{:?} ({},{})",s1, s2, i, j);
 
 
-    // j < v.len() => no more comparisons required
+    // j == v.len() => no more comparisons required
     // i == j => no more comparison required
     while j < len && i != j {
-        match ws[i].cmp(&ws[j]) {
-            // so far the order is fine
-            Ordering::Less | Ordering::Equal => {
-                // print!("-:");
-            }
-            Ordering::Greater => {
-                // We deploy the rotation trick for now rather swapping which doesn't work always
-                // with rotation we get
-                // ws[i],...ws[j-1],ws[j] --> ws[j],ws[i],...ws[j-1]
-                // hence the "sets" remain always in order
-                ws[i..=j].rotate_right(1);
-                // inversion are equal to all item between i and j
-                inv_count += j - i;
-                // pick next element from upper slice
-                j += 1;
-                // print!("r:");
-            }
+        if let Ordering::Greater = ws[i].cmp(&ws[j]) {
+            // We deploy the rotation trick for now rather swapping which doesn't work always
+            // with rotation we get
+            // ws[i],...ws[j-1],ws[j] --> ws[j],ws[i],...ws[j-1]
+            // hence the "sets" remain always in order
+            ws[i..=j].rotate_right(1);
+            // inversion are equal to all item between i and j
+            inv_count += j - i;
+            // pick next element from upper slice
+            j += 1;
+            // print!("r:");
         }
         // move sorted partition by 1 and ready to pick the next element for sorting
         i += 1;
-        // println!("{:?} ({},{})({})",v, i, j, inv);
+        //println!("\t{:?} ({},{})({})",ws, i, j, inv_count);
     }
 
     inv_count as u32

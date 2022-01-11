@@ -197,10 +197,10 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
 /// // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
 /// // idx = 6 (7th position)
 /// assert_eq!(l, &[2,5,6,3,1,4]);
-/// assert_eq!(idx, &7);
+/// assert_eq!(idx, 6);
 /// assert_eq!(r, &[9,12,8,11,10]);
 /// ```
-pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T])
+pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], usize, &mut [T])
     where T: Copy + Clone + Ord + Debug  {
 
     let len = v.len();
@@ -252,9 +252,9 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T]
     // split the array into [left part], [pivot + right partition]
     let (l, r) = v.split_at_mut(i);
     // split further into [pivot], [right partition]
-    let (p, r) = r.split_at_mut(1);
+    let (_, r) = r.split_at_mut(1);
 
-    (&mut l[..], &p[0], &mut r[..])
+    (&mut l[..], i, &mut r[..])
 }
 /// Short a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
@@ -283,10 +283,46 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(right_partition);
 }
 
+pub fn rand_selection<T>(v: &mut [T], order_nth: usize) -> T
+    where T: Copy + Ord + Debug  {
+
+    println!("Input: {:?}::{}th", v, order_nth);
+    if v.len() < 2 {
+        return v[order_nth];
+    }
+
+    // pick an index at random based on a uniform distribution
+    let idx = v.len()>>1; // rand::thread_rng().gen_range(0..(v.len()-1) );
+    // partition the array into to mutable slices for further sorting
+    let (left_partition, order, right_partition) = partition_at_index(v, idx);
+
+    println!("\t{:?} {}th {:?}::{}th : {}", left_partition, order, right_partition, order_nth, idx);
+    match order_nth.cmp(&order) {
+        Ordering::Equal => v[order],
+        Ordering::Less =>
+            rand_selection(left_partition, order - order_nth),
+        Ordering::Greater =>
+            rand_selection(right_partition,  order_nth - order),
+    }
+}
+
 
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn test_random_selection() {
+        let test_data: [(&mut [u32], usize, u32);3] = [
+            (&mut [23,43,8,22,15,11],    0, 8),
+            (&mut [23,43,8,22,15,11],    1, 11),
+            (&mut [23,43,8,22,15,11],    2, 15),
+        ];
+
+        test_data.into_iter()
+            .for_each(|(input, order, position)| {
+                assert_eq!(rand_selection(input, order), position);
+        })
+    }
     #[test]
     fn test_quick_sort() {
         let test_data: [(&mut [u32], &[u32]);6] = [
@@ -298,10 +334,11 @@ mod test {
             (&mut [8,7,6,5,4,3,2,1],    &[1,2,3,4,5,6,7,8])
         ];
 
-        for (input, output) in test_data {
-            quick_sort(input);
-            assert_eq!(input, output);
-        }
+        test_data.into_iter()
+            .for_each( | (input, output) | {
+                quick_sort(input);
+                assert_eq!(input, output);
+        })
     }
     #[test]
     fn test_partition_at_index() {
@@ -311,7 +348,7 @@ mod test {
         // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
         // idx = 6 (7th position)
         assert_eq!(l, &[2,5,6,3,1,4]);
-        assert_eq!(idx, &7);
+        assert_eq!(idx, 6);
         assert_eq!(r, &[9,12,8,11,10]);
     }
     #[test]
@@ -325,10 +362,11 @@ mod test {
             (&mut [8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8]))
         ];
 
-        for (input,(inv_count, output)) in test_data {
-            assert_eq!( merge_sort(input),inv_count );
-            assert_eq!( input, output );
-        }
+        test_data.into_iter()
+            .for_each(|(input,(inv_count, output))| {
+                assert_eq!( merge_sort(input),inv_count );
+                assert_eq!( input, output );
+        })
     }
     #[test]
     fn test_merge() {
@@ -362,11 +400,12 @@ mod test {
             (&mut [2,1], &[1,2]),
             (&mut [1,2], &[1,2]),
         ];
-        for (input, output) in arr {
-            let len = input.len();
-            let (s1, s2) = input.split_at_mut(len >> 1);
-            merge_mut(s1, s2);
-            assert_eq!(input, output);
-        }
+        arr.into_iter()
+            .for_each(| (input, output) | {
+                let len = input.len();
+                let (s1, s2) = input.split_at_mut(len >> 1);
+                merge_mut(s1, s2);
+                assert_eq!(input, output);
+        })
     }
 }

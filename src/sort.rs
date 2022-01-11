@@ -84,14 +84,17 @@ impl<I> Iterator for MergeIterator<I>
 }
 
 // Neve make this fn public !! as it is unsafe outsize this module/context
+// we cannot pass a &mut of the array since we will violate rust's borrowing rules
+// hence we have to reconstruct the array ourselves here
+// GIVEN the slices are adjacent in memory
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     where T: Ord + Debug
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
 
     // We resort to a trick given that slices are adjacent in memory
-    // we know they are, hence we pull a slice that encompass both
-    // we use the one big slice to do our merging
+    // we know they are, hence we reconstruct the parent slice that contains both S1 and S2
+    // therefore we operate on the reconstructed slice 
     // Working Slice = (*S1) to (*S1 + s1.len + s2.len)
     let ws: &mut [T];
     unsafe {
@@ -106,22 +109,23 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
     //println!("Merge:{:?}<>{:?} ({},{})",s1, s2, i, j);
 
 
-    // j == v.len() => no more comparisons required, we exhausted left slice
-    // i == j => no more comparison required, since everything left of j is < j
+    // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
+    // i == j => no more comparison required, since everything in ws[..i] << ws[j]
     while j < len && i != j {
         if let Ordering::Greater = ws[i].cmp(&ws[j]) {
-            // We deploy the rotation trick for now rather swapping which doesn't work always
+            // We deploy the rotation trick for now rather than swapping which doesn't work always
             // with rotation we get
             // ws[i],...ws[j-1],ws[j] --> ws[j],ws[i],...ws[j-1]
-            // hence the "sets" remain always in order
+            // hence the "sets" remain always ordered
             ws[i..=j].rotate_right(1);
-            // inversion are equal to all item between i and j
+            // inversion count is equal to all item between i and j
             inv_count += j - i;
-            // pick next element from upper slice
+            // pick next element from upper slice since ws[j] moved left
             j += 1;
             // print!("r:");
         }
-        // move sorted partition by 1 and ready to pick the next element for sorting
+        // sorted partition (left) increased by 1,
+        // pick the next element for sorting
         i += 1;
         //println!("\t{:?} ({},{})({})",ws, i, j, inv_count);
     }
@@ -130,7 +134,8 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
 }
 
 /// Sort function based on the merge sort algorithm
-/// returning a sorted vector plus the total count of inversions occurred
+/// Sorts the mutable vector with no additional memory by applying in-place merging
+/// while it returns the total count of inversions occurred
 /// ```
 /// use csx3::sort::merge_sort;
 ///
@@ -182,7 +187,7 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
         }
     }
 }
-/// Splits an array into two mutable slices/partitions around a pivot that is derived by the value at given index
+/// Splits an array into two mutable slices/partitions around a pivot location index
 /// so that *[values in left partition] < [pivot] < [values in right partition]*
 /// ```
 /// use csx3::sort::*;
@@ -224,7 +229,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &T, &mut [T]
                 // would be nice to make a call to v.swap(i, j) but &mut v is now owned by for_each
                 // so we cannot use it in the loop as this increases its borrow counter hence we need another way
                 // We extract a ptr before entering the loop to use for swapping the item
-                // .. and unless we find a better way that doesn't need unsafe
+                // and unless we find a better way that doesn't need unsafe neither use of while or for loops
                 unsafe {
                     std::ptr::swap::<T>(
                         ptr.wrapping_offset(i as isize),

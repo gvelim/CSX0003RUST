@@ -23,10 +23,15 @@ fn main() {
     let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
 
     println!("List      : {:?}", v );
+    println!("1st order = {}", rand_selection(v.as_mut_slice(), 1));
+    println!("2nd order = {}", rand_selection(v.as_mut_slice(), 1));
+    println!("3rd order = {}", rand_selection(v.as_mut_slice(), 1));
+    println!("List      : {:?}", v );
     merge_sort(&mut v);
     println!("Merge Sort: {:?}", v);
     quick_sort(&mut v);
     println!("Quick Sort: {:?}", v);
     println!("bTree Sort: {:?}", bt.iter().collect::<Vec<_>>());
     println!("List Sort : {:?}", list.sort_with_count() );
+
 }

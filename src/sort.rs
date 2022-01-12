@@ -417,7 +417,7 @@ mod test {
         let (l, idx, r) = partition_at_index(&mut v[..], 4);
 
         // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
-        // idx = 6 (7th position)
+        // idx = &7 (7th position)
         assert_eq!(l, &[2,5,6,3,1,4]);
         assert_eq!(idx, &7);
         assert_eq!(r, &[9,12,8,11,10]);

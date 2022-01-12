@@ -87,7 +87,7 @@ impl<I> Iterator for MergeIterator<I>
 // we cannot pass a &mut of the array since we will violate rust's borrowing rules
 // hence we have to reconstruct the array ourselves here
 // GIVEN the slices are adjacent in memory
-fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
+fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
@@ -130,21 +130,21 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
         //println!("\t{:?} ({},{})({})",ws, i, j, inv_count);
     }
 
-    inv_count as u32
+    inv_count
 }
 
 /// Sort function based on the merge sort algorithm
 /// Sorts the mutable vector with no additional memory by applying in-place merging
 /// while it returns the total count of inversions occurred
 /// ```
-/// use csx3::sort::merge_sort;
+/// use csx3::sort::merge_sort_mut;
 ///
 /// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!( merge_sort(input), 6 );
+/// assert_eq!( merge_sort_mut(input), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn merge_sort<T>(v: &mut [T]) -> u32
+pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
     where T: Copy + Clone + Ord {
 
     let len = v.len();
@@ -159,27 +159,18 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
         2 => {
             if v[0] > v[1] {
                 v.swap(0, 1);
-                return 1
+                return 1usize
             }
-            0
+            0usize
         },
         // if slice length longer than 2 then split recursively
         _ => {
             let (left, right) = v.split_at_mut(len >> 1);
-            let left_inv = merge_sort(left);
-            let right_inv = merge_sort(right);
+            let left_inv = merge_sort_mut(left);
+            let right_inv = merge_sort_mut(right);
 
-            // // return a vector of the merged but ordered slices
-            // // plus inversions vector; inversion count per position
-            // let (merge_vec, _ ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
-            // println!("\tInversion Vector: {:?}", &merge_vec);
-
-
-            // // sum up the inversion count vector
-            // let merge_inv: u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
-            //println!("\tInversion Vector: {:?}", &merge_vec);
-
-
+            // merge the two slices taking an in-place merging approach - no additional memory
+            // plus return the total inversions occured
             let merge_inv = merge_mut(left,right);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
@@ -187,6 +178,58 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
         }
     }
 }
+/// Sort function based on the merge sort algorithm
+/// Returns a new sorted vector given an input reference slice - heap allocations
+/// along with the total count of inversions occurred
+/// ```
+/// use csx3::sort::merge_sort;
+///
+/// let input = &[8, 4, 2, 1];
+///
+/// assert_eq!( merge_sort(input), (6, vec![1,2,4,8]) );
+/// ```
+pub fn merge_sort<T>(v: &[T]) -> (usize, Vec<T>)
+    where T: Copy + Clone + Ord {
+
+    let len = v.len();
+
+    //println!("\tInput: ({}){:?} =>", len, v);
+    match len {
+        // unity slice, just return it
+        0..=1 => (0, v.to_vec()),
+        // sort the binary slice and exit
+        // use a local variable to eliminate the need for &mut as input
+        // and given we output a new vector
+        2 => {
+            let mut inv_count = 0usize;
+            let mut output = v.to_vec();
+            if v[0] > v[1] {
+                output.swap(0, 1);
+                inv_count += 1;
+            }
+            (inv_count, output)
+        },
+        // if slice length longer than 2 then split recursively
+        _ => {
+            let (left, right) = v.split_at(len >> 1);
+            let (left_inv, left) = merge_sort(left);
+            let (right_inv, right) = merge_sort(right);
+
+            // return a vector of the merged but ordered slices
+            // plus inversions vector; inversion count per position
+            let (merge_vec, output ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            // println!("\tInversion Vector: {:?}", &merge_vec);
+
+            // sum up the inversion count vector
+            let merge_inv : u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
+            //println!("\tInversion Vector: {:?}", &merge_vec);
+
+            //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
+            (left_inv + right_inv + merge_inv as usize, output)
+        }
+    }
+}
+
 /// Splits an array into two mutable slices/partitions around a pivot location index
 /// so that *[values in left partition] < [pivot] < [values in right partition]*
 /// ```
@@ -370,8 +413,8 @@ mod test {
         assert_eq!(r, &[9,12,8,11,10]);
     }
     #[test]
-    fn test_merge_sort() {
-        let test_data: [(&mut [u32], (u32, &[u32]));6] = [
+    fn test_merge_sort_mut() {
+        let test_data: [(&mut [u32], (usize, &[u32]));6] = [
             (&mut [3,2,1],              (3, &[1,2,3])),
             (&mut [4,1,3,2],            (4, &[1,2,3,4])),
             (&mut [8, 4, 2, 1],         (6, &[1,2,4,8])),
@@ -382,7 +425,7 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(input,(inv_count, output))| {
-                assert_eq!( merge_sort(input),inv_count );
+                assert_eq!(merge_sort_mut(input), inv_count );
                 assert_eq!( input, output );
         })
     }

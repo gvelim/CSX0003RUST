@@ -24,8 +24,8 @@ fn main() {
 
     println!("List      : {:?}", v );
     println!("1st order = {}", rand_selection(v.as_mut_slice(), 1));
-    println!("2nd order = {}", rand_selection(v.as_mut_slice(), 1));
-    println!("3rd order = {}", rand_selection(v.as_mut_slice(), 1));
+    println!("2nd order = {}", rand_selection(v.as_mut_slice(), 2));
+    println!("3rd order = {}", rand_selection(v.as_mut_slice(), 3));
     println!("List      : {:?}", v );
     merge_sort(&mut v);
     println!("Merge Sort: {:?}", v);

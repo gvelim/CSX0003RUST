@@ -83,10 +83,19 @@ impl<I> Iterator for MergeIterator<I>
     }
 }
 
-// Neve make this fn public !! as it is unsafe outsize this module/context
-// we cannot pass a &mut of the array since we will violate rust's borrowing rules
-// hence we have to reconstruct the array ourselves here
-// GIVEN the slices are adjacent in memory
+/// Neve make this fn public !! as it is unsafe outsize this module/context
+/// we cannot pass a &mut of the array since we will violate rust's borrowing rules
+/// hence we have to reconstruct the array ourselves here
+/// GIVEN the slices are adjacent in memory
+///
+/// #[should_panic]
+/// let s1 = &mut [3, 5, 7];
+/// let s2 = &mut [1, 3, 5]; // wedge this between the two
+/// let s3 = &mut [2, 4, 6];
+///
+/// merge_mut(s1,s3);        // this should throw a panic
+///
+
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord
 {
@@ -99,6 +108,8 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     let ws: &mut [T];
     unsafe {
         ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
+        // checking they are aligned and adjacent
+        assert!( &s2[0] == &ws[s1.len()]);
     }
 
     // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
@@ -107,7 +118,6 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     let (mut i,mut j, len, mut inv_count)  = (0usize, s1.len(), ws.len(), 0usize);
 
     //println!("Merge:{:?}<>{:?} ({},{})",s1, s2, i, j);
-
 
     // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -468,5 +478,15 @@ mod test {
                 merge_mut(s1, s2);
                 assert_eq!(input, output);
         })
+    }
+    #[test]
+    #[should_panic]
+    fn test_merge_mut_panic() {
+        let s1 = &mut [3, 5, 7];
+        let s2 = &mut [1, 3, 5];
+        let s3 = &mut [2, 4, 6];
+
+        // non-adjacent slices hence it should panic
+        merge_mut(s1,s3);
     }
 }

@@ -88,7 +88,7 @@ impl<I> Iterator for MergeIterator<I>
 // hence we have to reconstruct the array ourselves here
 // GIVEN the slices are adjacent in memory
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
-    where T: Ord + Debug
+    where T: Ord
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
 
@@ -145,7 +145,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> u32
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn merge_sort<T>(v: &mut [T]) -> u32
-    where T: Copy + Clone + Ord + Debug {
+    where T: Copy + Clone + Ord {
 
     let len = v.len();
 
@@ -197,11 +197,11 @@ pub fn merge_sort<T>(v: &mut [T]) -> u32
 /// // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
 /// // idx = 6 (7th position)
 /// assert_eq!(l, &[2,5,6,3,1,4]);
-/// assert_eq!(idx, 6);
+/// assert_eq!(idx, &7);
 /// assert_eq!(r, &[9,12,8,11,10]);
 /// ```
 pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut [T])
-    where T: Copy + Clone + Ord + Debug  {
+    where T: Copy + Clone + Ord  {
 
     let len = v.len();
     assert!(idx < len);
@@ -283,27 +283,41 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(right_partition);
 }
 
-pub fn rand_selection<T>(v: &mut [T], order_nth: usize) -> &T
+/// Find the nth order item within an unordered set with O(n) performance
+/// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
+/// ```
+/// use csx3::sort::rand_selection;
+///
+/// let v = &mut [23,43,8,22,15,11];
+///
+/// assert_eq!(rand_selection(v, 1), &8);
+/// ```
+pub fn rand_selection<T>(v: &mut [T], nth_min: usize) -> &T
     where T: Copy + Ord + Debug  {
 
-    println!("Input: {:?}::{}th", v, order_nth);
-    // if v.len() < 2 {
-    //     return &v[order_nth];
-    // }
+    // println!("Input: {:?}::{}th", v, order_nth);
+    if v.len() == 1 {
+        return &v[0];
+    }
 
     // pick an index at random based on a uniform distribution
-    let idx = v.len()>>1; // rand::thread_rng().gen_range(0..(v.len()-1) );
-    // partition the array into to mutable slices for further sorting
+    let idx = rand::thread_rng().gen_range(0..(v.len()-1) );
+    // find out the nth order of this sample
     let (left_partition, nth, right_partition) = partition_at_index(v, idx);
 
     let order = left_partition.len()+1;
-    println!("\t{:?} {:?}th {:?}::{}th : {}", left_partition, order, right_partition, order_nth, idx);
-    match order_nth.cmp(&order) {
-        Ordering::Equal => { println!("found it"); nth },
+    // println!("\t{:?} {:?}th {:?}::{}th : {}", left_partition, order, right_partition, order_nth, idx);
+
+    // is nth order sampled over, equal or above the desired nth_min ?
+    match nth_min.cmp(&order) {
+        // we've found the item in nth_min order
+        Ordering::Equal => nth,
+        // the nth_min is below the nth found so recurse on the left partition
         Ordering::Less =>
-            rand_selection(left_partition, order_nth),
+            rand_selection(left_partition, nth_min),
+        // the nth_min is above the nth found so recurse on the right partition with adjusted order
         Ordering::Greater =>
-            rand_selection(right_partition,  order_nth - order),
+            rand_selection(right_partition, nth_min - order),
     }
 }
 

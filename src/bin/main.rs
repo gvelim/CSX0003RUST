@@ -29,9 +29,9 @@ fn main() {
     let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
 
     println!("List           : {:?}", v );
-    println!("1st order min = {:?}", rand_selection(&mut arr, 1));
-    println!("2nd order min = {:?}", rand_selection(&mut arr, 2));
-    println!("3rd order min = {:?}", rand_selection(&mut arr, 3));
+    println!("1st order min = {:?}", random_selection(&mut arr, 1));
+    println!("2nd order min = {:?}", random_selection(&mut arr, 2));
+    println!("3rd order min = {:?}", random_selection(&mut arr, 3));
 
     println!("MergeSort Immut: {:?}", merge_sort(&v));
     println!("MergeSort Mut  : ({}, {:?})", merge_sort_mut(&mut v), v);

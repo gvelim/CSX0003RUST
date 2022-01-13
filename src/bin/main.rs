@@ -2,6 +2,7 @@ use std::iter::from_fn;
 use csx3::sort::*;
 use csx3::trees::*;
 use csx3::linkedlists::*;
+use csx3::select::*;
 use std::env::args;
 use std::str::FromStr;
 
@@ -29,9 +30,14 @@ fn main() {
     let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
 
     println!("List           : {:?}", v );
-    println!("1st order min = {:?}", random_selection(&mut arr, 1));
-    println!("2nd order min = {:?}", random_selection(&mut arr, 2));
-    println!("3rd order min = {:?}", random_selection(&mut arr, 3));
+    println!("Random Selection");
+    println!("1st order stat= {:?}", r_selection(&mut arr, 1));
+    println!("2nd order stat= {:?}", r_selection(&mut arr, 2));
+    println!("3rd order stat= {:?}", r_selection(&mut arr, 3));
+    println!("Deterministic Selection");
+    println!("1st order stat= {:?}", d_selection(&mut arr, 1));
+    println!("2nd order stat= {:?}", d_selection(&mut arr, 2));
+    println!("3rd order stat= {:?}", d_selection(&mut arr, 3));
 
     println!("MergeSort Immut: {:?}", merge_sort(&v));
     println!("MergeSort Mut  : ({}, {:?})", merge_sort_mut(&mut v), v);

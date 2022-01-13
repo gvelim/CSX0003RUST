@@ -2,7 +2,7 @@
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
-- Random Select
+- Select (Random, Deterministic)
 - Merge sort (mutable slices, in-place merging)
 - Quick sort (mutable slices, in-place partitioning)
 - Linked list 

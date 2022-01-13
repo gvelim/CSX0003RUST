@@ -44,7 +44,7 @@ impl<I> Iterator for MergeIterator<I>
           I::Item: Ord,
 {
     // tuple returned = (number of inversions at position, value at position)
-    type Item = (u32, I::Item);
+    type Item = (usize, I::Item);
 
     /// Outputs the next in order value out of the two iterators
     /// in the form of Some( tuple ), where
@@ -64,8 +64,8 @@ impl<I> Iterator for MergeIterator<I>
                     // right is smaller hence move to output
                     // inversions are equal to left items remain to iterate over
                     Ordering::Greater => {
-                        let inv = self.left_len-self.left_count;
-                        Some( (inv, self.right.next().unwrap()) )
+                        let inv = self.left_len - self.left_count;
+                        Some( (inv as usize, self.right.next().unwrap()) )
                     },
                 }
             },
@@ -108,7 +108,8 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     let ws: &mut [T];
     unsafe {
         ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
-        // checking they are aligned and adjacent
+        // checking they are aligned and adjacent,
+        // if not panic! so we prevent unpredictable behaviour
         assert!( &s2[0] == &ws[s1.len()]);
     }
 
@@ -227,15 +228,15 @@ pub fn merge_sort<T>(v: &[T]) -> (usize, Vec<T>)
 
             // return a vector of the merged but ordered slices
             // plus inversions vector; inversion count per position
-            let (merge_vec, output ):( Vec<u32>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
+            let (merge_vec, output ):( Vec<_>, Vec<T>) = MergeIterator::new(left.iter(),right.iter()).unzip();
             // println!("\tInversion Vector: {:?}", &merge_vec);
 
             // sum up the inversion count vector
-            let merge_inv : u32 = merge_vec.into_iter().filter(|x| *x > 0).sum();
+            let merge_inv : usize = merge_vec.into_iter().filter(|x| *x > 0).sum();
             //println!("\tInversion Vector: {:?}", &merge_vec);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
-            (left_inv + right_inv + merge_inv as usize, output)
+            (left_inv + right_inv + merge_inv, output)
         }
     }
 }
@@ -245,10 +246,10 @@ pub fn merge_sort<T>(v: &[T]) -> (usize, Vec<T>)
 /// ```
 /// use csx3::sort::*;
 /// let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
-/// let (l, idx, r) = partition_at_index(&mut v[..], 4);
+/// let (l, idx, r) = partition_at_index(&mut v, 4);
 ///
 /// // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
-/// // idx = 6 (7th position)
+/// // idx = &7 (6th position using zero based index)
 /// assert_eq!(l, &[2,5,6,3,1,4]);
 /// assert_eq!(idx, &7);
 /// assert_eq!(r, &[9,12,8,11,10]);
@@ -307,7 +308,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
     // split further into [pivot], [right partition]
     let (p, r) = r.split_at_mut(1);
 
-    (&mut l[..], &mut p[0], &mut r[..])
+    (l, &mut p[0], r)
 }
 /// Short a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
@@ -338,12 +339,15 @@ pub fn quick_sort<T>(v: &mut [T])
 
 /// Find the nth order item within an unordered set with O(n) performance
 /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
+/// When function returns, the input array has been rearranged so that ```item == array[ nth order ]```
 /// ```
 /// use csx3::sort::rand_selection;
 ///
-/// let v = &mut [23,43,8,22,15,11];
+/// let (arr, nth_order) = (&mut [23,43,8,22,15,11], 1usize);
 ///
-/// assert_eq!(rand_selection(v, 1), &8);
+/// let ret_val = rand_selection(arr, nth_order);
+/// assert_eq!(ret_val, &8);
+/// assert_eq!(&arr[nth_order-1], &8);
 /// ```
 pub fn rand_selection<T>(v: &mut [T], nth_min: usize) -> &T
     where T: Copy + Ord + Debug  {
@@ -359,7 +363,7 @@ pub fn rand_selection<T>(v: &mut [T], nth_min: usize) -> &T
     let (left_partition, nth, right_partition) = partition_at_index(v, idx);
 
     let order = left_partition.len()+1;
-    // println!("\t{:?} {:?}th {:?}::{}th : {}", left_partition, order, right_partition, order_nth, idx);
+    // println!("\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?}", nth_min, idx, left_partition, order, right_partition);
 
     // is nth order sampled over, equal or above the desired nth_min ?
     match nth_min.cmp(&order) {
@@ -381,17 +385,19 @@ mod test {
     #[test]
     fn test_random_selection() {
         let test_data: [(&mut [u32], usize, &u32);6] = [
-            (&mut [23,43,8,22,15,11],    1, &8),
-            (&mut [23,43,8,22,15,11],    2, &11),
-            (&mut [23,43,8,22,15,11],    3, &15),
-            (&mut [23,43,8,22,15,11],    4, &22),
-            (&mut [23,43,8,22,15,11],    5, &23),
-            (&mut [23,43,8,22,15,11],    6, &43),
+            (&mut [23,43,8,22,15,11], 1, &8),
+            (&mut [23,43,8,22,15,11], 2, &11),
+            (&mut [23,43,8,22,15,11], 3, &15),
+            (&mut [23,43,8,22,15,11], 4, &22),
+            (&mut [23,43,8,22,15,11], 5, &23),
+            (&mut [23,43,8,22,15,11], 6, &43),
         ];
 
         test_data.into_iter()
-            .for_each(|(input, order, position)| {
-                assert_eq!(rand_selection(input, order), position);
+            .for_each(|(input, order, item)| {
+                let ret_val = rand_selection(input, order);
+                assert_eq!(item, ret_val);
+                assert_eq!(&input[order-1], item);
         })
     }
     #[test]
@@ -414,7 +420,7 @@ mod test {
     #[test]
     fn test_partition_at_index() {
         let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
-        let (l, idx, r) = partition_at_index(&mut v[..], 4);
+        let (l, idx, r) = partition_at_index(&mut v, 4);
 
         // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
         // idx = 6 (7th position)
@@ -483,7 +489,7 @@ mod test {
     #[should_panic]
     fn test_merge_mut_panic() {
         let s1 = &mut [3, 5, 7];
-        let s2 = &mut [1, 3, 5];
+        let _s2 = &mut [1, 3, 5];
         let s3 = &mut [2, 4, 6];
 
         // non-adjacent slices hence it should panic

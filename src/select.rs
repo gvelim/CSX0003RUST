@@ -62,7 +62,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
     let mut c = medians_of_medians(v);
         // recurse within the vector
         // to zoom into the ultimate median value
-    let idx = c.len()/10;
+    let idx = c.len()>>1;
     let p = d_selection(&mut c, idx );
         // I got the median value,
         // but I need the index for partitioning (argh!!)
@@ -97,7 +97,7 @@ pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
 
     // extract median of medians array
     // split input slice into n/5 groups of 5
-    let medians: Vec<T> = v.chunks_mut(5)
+    v.chunks_mut(5)
         .map(|chunk| {
             // sort each group
             merge_sort_mut(chunk);
@@ -105,8 +105,7 @@ pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
             chunk[ chunk.len() >> 1]
         })
         // return as vector
-        .collect();
-    medians
+        .collect()
 }
 
 /// Finds the median value within an array of N elements

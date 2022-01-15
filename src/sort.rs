@@ -110,7 +110,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
         ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
         // checking they are aligned and adjacent,
         // if not panic! so we prevent unpredictable behaviour
-        assert!( &s2[0] == &ws[s1.len()]);
+        assert!( s2[0] == ws[s1.len()]);
     }
 
     // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
@@ -274,7 +274,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
     // v[0] holds the pivot point hence we start comparing from 2nd item v[1]
     // j : points to last element checked
     // i : position in array so that v[1..i] < v[i] < r[i+1..j]
-    v.into_iter()
+    v.iter_mut()
         .enumerate()
         .skip(1)
         .for_each( |(j, val)| {
@@ -286,8 +286,8 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
                 // and unless we find a better way that doesn't need unsafe neither use of while or for loops
                 unsafe {
                     std::ptr::swap::<T>(
-                        ptr.wrapping_offset(i as isize),
-                        ptr.wrapping_offset(j as isize)
+                        ptr.wrapping_add(i),
+                        ptr.wrapping_add(j)
                     );
                 }
                 //print!("\ts:");

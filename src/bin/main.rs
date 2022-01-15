@@ -25,19 +25,19 @@ fn main() {
     let list: List<MyType> = from_fn(|| { Some(rand::random::<MyType>()) })
         .take(n)
         .collect();
-    let mut v: Vec<MyType> = list.iter().map(|x| *x).collect();
+    let mut v: Vec<MyType> = list.iter().copied().collect();
 
 
     println!("List           : {:?}", v );
 
     println!("Random Selection");
-    let mut arr: Vec<MyType> = list.iter().map(|x| *x).collect();
+    let mut arr: Vec<MyType> = list.iter().copied().collect();
     println!("1st order stat= {:?}", r_selection(&mut arr, 1));
     println!("2nd order stat= {:?}", r_selection(&mut arr, 2));
     println!("3rd order stat= {:?}", r_selection(&mut arr, 3));
 
     println!("Deterministic Selection");
-    let mut arr: Vec<MyType> = list.iter().map(|x| *x).collect();
+    let mut arr: Vec<MyType> = list.iter().copied().collect();
     println!("1st order stat= {:?}", d_selection(&mut arr, 1));
     println!("2nd order stat= {:?}", d_selection(&mut arr, 2));
     println!("3rd order stat= {:?}", d_selection(&mut arr, 3));
@@ -47,7 +47,7 @@ fn main() {
     quick_sort(&mut v);
     println!("Quick Sort     : {:?}", v);
 
-    let bt : BinaryTree<MyType> = list.iter().map(|x| *x).collect();
+    let bt : BinaryTree<MyType> = list.iter().copied().collect();
     println!("bTree Sort     : {:?}", bt.iter().collect::<Vec<_>>());
     println!("List Sort      : {:?}", list.sort_with_count() );
 

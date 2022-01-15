@@ -68,7 +68,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
         // but I need the index for partitioning (argh!!)
         // so searching linearly to find the position (argh^2!!)
     // this is the best pivot we could get
-    let idx = v.into_iter().position(|i| *i == *p).unwrap();
+    let idx = v.iter_mut().position(|i| *i == *p).unwrap();
 
     // find out the nth order of this sample
     let (left_partition, nth, right_partition) = partition_at_index(v, idx);

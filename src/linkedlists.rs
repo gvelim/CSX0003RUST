@@ -4,14 +4,21 @@ use std::fmt::Debug;
 /// but I wanted to see how far I could go with this simple enum structure
 #[derive(Debug, PartialEq)]
 pub enum List<T>
-    where T: Copy + Clone  {
+    where T: Copy + Clone + Ord {
     Empty,
     NotEmpty(T, Box<List<T>>),
 }
 
+impl<T> Default for List<T>
+    where T: Copy + Clone + Ord {
+    fn default() -> Self {
+      Self::new()
+    }
+}
+
 /// List related methods
 impl<T> List<T>
-    where T: Copy + Clone + Ord + Debug {
+    where T: Copy + Clone + Ord {
 
     /// Construct an empty list
     pub fn new() -> List<T> {
@@ -100,7 +107,7 @@ impl<T> List<T>
     }
     pub fn sort_with_count(&self) -> (usize, Vec<T>){
         use super::sort::merge_sort_mut;
-        let mut s  = self.iter().map(|x| *x).collect::<Vec<T>>();
+        let mut s  = self.iter().copied().collect::<Vec<T>>();
         (merge_sort_mut(&mut s[..]), s)
     }
 }
@@ -133,12 +140,12 @@ impl<T> FromIterator<T> for List<T>
 
 /// List by reference iterator
 pub struct ListIterByRef<'a, T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone + Ord {
     cursor: &'a List<T>,
 }
 
 impl<'a, T> Iterator for ListIterByRef<'a, T>
-    where T: Copy + Clone + PartialEq {
+    where T: Copy + Clone + Ord {
 
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {

@@ -62,7 +62,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
     let mut c = medians_of_medians(v);
         // recurse within the vector
         // to zoom into the ultimate median value
-    let idx = c.len()>>1;
+    let idx = c.len()/10;
     let p = d_selection(&mut c, idx );
         // I got the median value,
         // but I need the index for partitioning (argh!!)

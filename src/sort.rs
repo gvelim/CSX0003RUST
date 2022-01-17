@@ -337,6 +337,7 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(right_partition);
 }
 
+
 #[cfg(test)]
 mod test {
     use super::*;

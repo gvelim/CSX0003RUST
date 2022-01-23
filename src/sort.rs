@@ -151,7 +151,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
 {
 
-    // println!("Input: {:?},{:?}", s1, s2);
+    println!("Input: {:?},{:?}", s1, s2);
 
     // create a virtual slice out of the two
     let mut ws = VirtualSlice::new();
@@ -161,10 +161,11 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 
     // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
     // j = position in working slice representing s2[0]
+    // c = position in the index array, of the left slice's so that idx_arr[c] == left nth ordered item in ws[..],
     // len = working slice length
     let (mut i,mut j, mut c, len, mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
 
-    // println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
+    println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
 
     // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -173,9 +174,9 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
             Ordering::Less | Ordering::Equal => {
                 ws.swap(i,idx_arr[c] );
 
-                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
+                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap() + c;
                 idx_arr.swap( idx, c);
-                // print!("l:{}{}",idx,c);
+                print!("l:{}{}",idx,c);
                 c += 1;
             }
             Ordering::Greater => {
@@ -183,15 +184,15 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 
                 ws.swap(i,j);
 
-                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
+                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap() + c;
                 idx_arr.swap( idx, j);
-                // print!("r:{}{}",idx,j);
+                print!("r:{}{}",idx,j);
                 j += 1;
             }
         }
         // pick the next element for sorting
         i += 1;
-        // println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
+        println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
     }
 
     inv_count

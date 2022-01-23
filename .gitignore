@@ -1,2 +1,6 @@
 /target
 /.vscode/
+/.idea/.gitignore
+/.idea/csx0003rust.iml
+/.idea/modules.xml
+/.idea/vcs.xml

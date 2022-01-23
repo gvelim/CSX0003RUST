@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
 use rand::Rng;
+use crate::utils::VirtualSlice;
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -96,7 +97,7 @@ impl<I> Iterator for MergeIterator<I>
 /// merge_mut(s1,s3);        // this should throw a panic
 ///
 
-fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
+fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
@@ -144,6 +145,55 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     inv_count
 }
 
+fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
+    where T: Ord + Debug
+{
+
+    println!("\tInput: {:?},{:?}", s1, s2);
+
+    // create a virtual slice out of the two
+    let mut ws = VirtualSlice::new();
+    ws.chain(s1);
+    ws.chain(s2);
+    let mut idx_arr = (0..ws.len()).into_iter().collect::<Vec<usize>>();
+
+    // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
+    // j = position in working slice representing s2[0]
+    // len = working slice length
+    let (mut i,mut j, mut c, len, mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
+
+    println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
+
+    // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
+    // i == j => no more comparison required, since everything in ws[..i] << ws[j]
+    while j < len && i != j {
+        match ( ws[idx_arr[c]] ).cmp( &ws[idx_arr[j]] ) {
+            Ordering::Less | Ordering::Equal => {
+                ws.swap(i,idx_arr[c] );
+
+                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
+                idx_arr.swap( idx, c);
+                print!("l:{}{}",idx,c);
+                c += 1;
+            }
+            Ordering::Greater => {
+                ws.swap(i,j);
+
+                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
+                idx_arr.swap( idx, j);
+                print!("r:{}{}",idx,j);
+                j += 1;
+            }
+        }
+        // pick the next element for sorting
+        inv_count += j - i;
+        i += 1;
+        println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
+    }
+
+    inv_count
+}
+
 /// Sort function based on the merge sort algorithm
 /// Sorts the mutable vector with no additional memory by applying in-place merging
 /// while it returns the total count of inversions occurred
@@ -182,7 +232,7 @@ pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
 
             // merge the two slices taking an in-place merging approach - no additional memory
             // plus return the total inversions occured
-            let merge_inv = merge_mut(left,right);
+            let merge_inv = merge_mut_adjacent(left, right);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
@@ -404,7 +454,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
     #[test]
-    fn test_merge_mut() {
+    fn test_merge_mut_adjacent() {
         let arr:[(&mut[i32],&[i32]);11] = [
             (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
             (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
@@ -422,7 +472,7 @@ mod test {
             .for_each(| (input, output) | {
                 let len = input.len();
                 let (s1, s2) = input.split_at_mut(len >> 1);
-                merge_mut(s1, s2);
+                merge_mut_adjacent(s1, s2);
                 assert_eq!(input, output);
         })
     }
@@ -434,6 +484,29 @@ mod test {
         let s3 = &mut [2, 4, 6];
 
         // non-adjacent slices hence it should panic
-        merge_mut(s1,s3);
+        merge_mut_adjacent(s1, s3);
+    }
+    #[test]
+    fn test_merge_mut() {
+        let arr:[(&mut[i32],&[i32]);11] = [
+            (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
+            (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
+            (&mut [2,4,1,3,5], &[1,2,3,4,5]),
+            (&mut [1,3,2,4,5], &[1,2,3,4,5]),
+            (&mut [1,2,3,4,5], &[1,2,3,4,5]),
+            (&mut [2,1,4], &[1,2,4]),
+            (&mut [3,1,2], &[1,2,3]),
+            (&mut [1,2,3], &[1,2,3]),
+            (&mut [2,1], &[1,2]),
+            (&mut [1,2], &[1,2]),
+        ];
+        arr.into_iter()
+            .for_each(| (input, output) | {
+                let len = input.len();
+                let (s1, s2) = input.split_at_mut(len >> 1);
+                merge_mut(s1, s2);
+                assert_eq!(input, output);
+            })
     }
 }

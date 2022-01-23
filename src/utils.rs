@@ -1,6 +1,6 @@
+use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut};
 
-#[derive(Debug)]
 pub struct VirtualSlice<T> {
     vv: Vec<*mut T>
 }
@@ -11,6 +11,17 @@ impl<T> Default for VirtualSlice<T> {
     }
 }
 
+impl<T> Debug for VirtualSlice<T> where T : Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        unsafe {
+            f.debug_list()
+                .entries(
+                    self.vv.iter().map( |x| &**x )
+                )
+                .finish()
+        }
+    }
+}
 impl<T> VirtualSlice<T> {
     pub fn new() -> VirtualSlice<T> {
         VirtualSlice {

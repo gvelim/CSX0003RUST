@@ -165,7 +165,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     // len = working slice length
     let (mut i,mut j, mut c, len, mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
 
-    println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
+    println!("-:Merge:{:?} = {:?} ({:?},{:?},{:?})",ws, idx_arr, i, j, c);
 
     // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -182,7 +182,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
             Ordering::Greater => {
                 inv_count += j - i;
 
-                ws.swap(i,j);
+                ws.swap(i,idx_arr[j]);
 
                 let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap() + c;
                 idx_arr.swap( idx, j);
@@ -192,7 +192,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
         }
         // pick the next element for sorting
         i += 1;
-        println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
+        println!("Merge:{:?} = {:?} ({:?},{:?},{:?}) {:?}",ws, idx_arr, i, j, c, inv_count);
     }
 
     inv_count
@@ -492,10 +492,12 @@ mod test {
     }
     #[test]
     fn test_merge_mut() {
-        let arr:[(&mut[i32],&[i32]);11] = [
+        let arr:[(&mut[i32],&[i32]);13] = [
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
             (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
             (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
-            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
+            (&mut [5,6,7,1,2,3,4], &[1,2,3,4,5,6,7]),
+            (&mut [1,2,3,4,5,6,7], &[1,2,3,4,5,6,7]),
             (&mut [2,4,1,3,5], &[1,2,3,4,5]),
             (&mut [1,3,2,4,5], &[1,2,3,4,5]),
             (&mut [1,2,3,4,5], &[1,2,3,4,5]),

@@ -145,11 +145,13 @@ fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     inv_count
 }
 
+/// Merge two non-adjacent slices using in-place memory swaps and without rotations
+///
 fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
 {
 
-    println!("\tInput: {:?},{:?}", s1, s2);
+    // println!("Input: {:?},{:?}", s1, s2);
 
     // create a virtual slice out of the two
     let mut ws = VirtualSlice::new();
@@ -162,7 +164,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     // len = working slice length
     let (mut i,mut j, mut c, len, mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
 
-    println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
+    // println!("-:Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?})",s1, s2, idx_arr, i, j, c);
 
     // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -173,22 +175,23 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 
                 let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
                 idx_arr.swap( idx, c);
-                print!("l:{}{}",idx,c);
+                // print!("l:{}{}",idx,c);
                 c += 1;
             }
             Ordering::Greater => {
+                inv_count += j - i;
+
                 ws.swap(i,j);
 
                 let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap()+c;
                 idx_arr.swap( idx, j);
-                print!("r:{}{}",idx,j);
+                // print!("r:{}{}",idx,j);
                 j += 1;
             }
         }
         // pick the next element for sorting
-        inv_count += j - i;
         i += 1;
-        println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
+        // println!("Merge:{:?}<>{:?} = {:?} ({:?},{:?},{:?}) {:?}",s1, s2, idx_arr, i, j, c, inv_count);
     }
 
     inv_count
@@ -206,7 +209,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
-    where T: Copy + Clone + Ord {
+    where T: Ord + Debug {
 
     let len = v.len();
 
@@ -232,7 +235,7 @@ pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
 
             // merge the two slices taking an in-place merging approach - no additional memory
             // plus return the total inversions occured
-            let merge_inv = merge_mut_adjacent(left, right);
+            let merge_inv = merge_mut(left, right);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv

@@ -10,7 +10,7 @@ pub enum List<T>
 }
 
 impl<T> Default for List<T>
-    where T: Copy + Clone + Ord {
+    where T: Copy + Clone + Ord + Debug {
     fn default() -> Self {
       Self::new()
     }
@@ -18,7 +18,7 @@ impl<T> Default for List<T>
 
 /// List related methods
 impl<T> List<T>
-    where T: Copy + Clone + Ord {
+    where T: Copy + Clone + Ord + Debug {
 
     /// Construct an empty list
     pub fn new() -> List<T> {

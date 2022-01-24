@@ -146,22 +146,10 @@ pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
 }
 
 /// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
-/// For the algorithm to work we need the following components
-/// - Constructing a virtualslice allowing us to operate over the slices segments as a "continous slice"
-/// - Use for slice comparison an "Index Reflector (idx_rfl)" table to "project" (c,j, i') positions upon the "continuous slice" as (c', j', i)
-/// - Swap action at once both (a) continuous slice and (b) Index Reflector
+/// Using a virtualslice allowing us to operate over the slices segments as a "continous slice"
 /// ```
-/// //Slice 1    Slice 2    VirtualSlice                  Index Reflector
-/// //=======    =========  ==========================   ======================
-/// //[5,6,7] <> [1,2,3,4]  [5(c'/i),6,7,1(j'),2,3,4]    [1(c/i'),2,3,4(j),5,6,7]
-/// //[1,6,7] <> [5,2,3,4]  [1,6(i),7,5(c'),2(j'),3,4]   [4(c),2(i'),3,1,5(j),6,7]
-/// //[1,2,7] <> [5,6,3,4]  [1,2,7(i),5(c'),6,3(j'),4]   [4(c),5,3(i'),1,2,6(j),7]
-/// //[1,2,3] <> [5,6,7,4]  [1,2,3,5(c'/i),6,7,4(j')]    [4(c/i'),5,6,1,2,3,7(j)]
-/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,6(i),7,5(c')](j')   [7(c),5(i'),6,1,2,3,4](j) <-- Main merge finished but still i < c'
-/// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j')   [5,7(c),6(i'),1,2,3,4](j)
-/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j')    [5,6,7(c/i'),1,2,3,4](j) <-- finished merging (reflects starting position)
-///
 /// use csx3::sort::merge_mut;
+///
 /// let s1 = &mut [5,6,7];
 /// let _s = &[0,0,0,0,0,0]; // wedge to break adjacency
 /// let s2 = &mut [1,2,3,4];

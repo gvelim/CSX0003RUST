@@ -172,102 +172,14 @@ pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// assert_eq!(s2, &[4,5,6,7]);
 /// ```
 pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
-    where T: Ord + Debug
-{
+    where T: Ord + Debug {
 
     println!("Merge Input: {:?},{:?}", s1, s2);
 
-    // create a virtual slice and append the two slices
     let mut ws = VirtualSlice::new();
-    ws.chain(s1);
-    ws.chain(s2);
-    // build the index reflector using the starting items' sequence
-    let mut idx_rfl = (0..ws.len()).into_iter().collect::<Vec<usize>>();
 
-    // i = partition position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
-    // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
-    // c = s1[c] equivalent position in the index reflector, so that idx_rfl[c] == c' == s1[c] equivalent in ws[c'],
-    // ws_len = working slice's length
-    let (mut i,mut j, mut c, ws_len,  mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
-    // p = index reflector partition bound where i's position is always upper bounded by p
-    // used for optimising finding i pos in index array
-    let p = j;
-
-    println!("-:Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
-
-    // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
-    // i == j => no more comparison required, since everything in ws[..i] << ws[j]
-    while j < ws_len && i != j {
-        match ( ws[idx_rfl[c]] ).cmp( &ws[idx_rfl[j]] ) {
-            Ordering::Less | Ordering::Equal => {
-
-                // swap left slice's item in the working slice with merged partition edge ws[i]
-                // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                ws.swap(i, idx_rfl[c] );
-
-                // swap index_reflect[c] with index_reflector[i']
-                // i' == index_reflector[x]; where x == i;
-                // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
-                // swap( i' with c )
-                idx_rfl.swap(idx, c);
-                print!("l:");
-                // point to the next in order position (left slice)
-                c += 1;
-            }
-            Ordering::Greater => {
-                // count the equivalent inversions
-                inv_count += j - i;
-
-                // swap right slice's item in the working slice with merged partition edge ws[i]
-                // swap( ws[i] with ws[j'] where j' = index_reflector[j]
-                ws.swap(i, idx_rfl[j]);
-
-                // swap index_reflect[j] with index_reflector[i']
-                // i' == index_reflector[x]; where x == i;
-                // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
-                // swap( i' with j )
-                idx_rfl.swap(idx, j);
-                print!("r:");
-                // point to the next in order position (right slice)
-                j += 1;
-            }
-        }
-        // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
-        i += 1;
-        println!("Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
-    }
-
-    // Edge cases: sorting completed with [merged] < ith pos < [unmerged]
-    // however [unmerged] are likely not ordered due to swapping
-    // example:
-    // [5(i/c),6,7] <> [1(j),2,3,4]
-    // [1,6(i),7] <> [5(c),2(j),3,4]
-    // [1,2,7(i)] <> [5(c),6,3(j),4]
-    // [1,2,3] <> [5(c/i),6,7,4(j)]
-    // [1,2,3] <> [5(c/i),6,7,4(j)]
-    // [1,2,3] <> [4,6(i),7,5(c)] (j) <-- Finished merge however we are left with an unordered rightmost part
-    // since i pos << c pos, hence we need to address this segment
-    while i < idx_rfl[c] {
-        if let Ordering::Less = (ws[idx_rfl[c]]).cmp( &ws[i] ) {
-            // swap i with c' in working slice
-            ws.swap(i, idx_rfl[c] );
-
-            // extract i' from index_reflector[]
-            let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
-
-            // swap i' with c
-            idx_rfl.swap(idx, c);
-
-            // point to the next in order position
-            c += 1;
-        }
-        // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
-        i += 1;
-        println!("f:Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
-    }
-    inv_count
+    ws.merge(s1);
+    ws.merge(s2)
 }
 
 /// Sort function based on the merge sort algorithm

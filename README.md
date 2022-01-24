@@ -8,9 +8,11 @@ Rust playground; familiarising with ownership, generics, trait objects, etc
 - Linked list 
 - Binary tree
 
-No performance and/or optimisation warranties :-)
+Merge Sort performance considerations, when using:
+- fn merge_mut() : < n iterations with 2*0(n) memory impact (VirtualSlice + Index Reflector)  
+- fn merge_mut_adjacent() : < n * (n/2) iterations with zero memory impact
 
-sample output:
+Sample output:
 ```
 List           : [-104, 104, 123, 107, 89, 63, 5, -28]
 

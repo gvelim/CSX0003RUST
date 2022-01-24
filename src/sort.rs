@@ -145,56 +145,105 @@ fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     inv_count
 }
 
-/// Merge two non-adjacent slices using in-place memory swaps and without rotations
+/// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
+/// For the algorithm to work we need the following components
+/// - Constructing a virtualslice allowing us to operate over the slices segments as a "continous slice"
+/// - Use an "Index Reflector (idx_rfl)" table to "project" (c,j, i') positions upon the "continuous slice" as (c', j', i)
+/// - Swap takes place both in (a) continuous slice and (b) Index Reflector
+/// ```
+/// //Slice 1    Slice 2    VirtualSlice                  Index Reflector
+/// //=======    =========  ==========================   ======================
+/// //[5,6,7] <> [1,2,3,4]  [5(c'/i),6,7,1(j'),2,3,4]    [1(c/i'),2,3,4(j),5,6,7]
+/// //[1,6,7] <> [5,2,3,4]  [1,6(i),7,5(c'),2(j'),3,4]   [4(c),2(i'),3,1,5(j),6,7]
+/// //[1,2,7] <> [5,6,3,4]  [1,2,7(i),5(c'),6,3(j'),4]   [4(c),5,3(i'),1,2,6(j),7]
+/// //[1,2,3] <> [5,6,7,4]  [1,2,3,5(c'/i),6,7,4(j')]    [4(c/i'),5,6,1,2,3,7(j)]
+/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,6(i),7,5(c')](j')   [7(c),5(i'),6,1,2,3,4](j) <-- Main merge finished but still i < c'
+/// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j')   [7(c),5,6(i'),1,2,3,4](j)
+/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j')    [6,5,7(c/i'),1,2,3,4](j) <-- finished merging (reflects starting position)
 ///
-fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
+/// use csx3::sort::merge_mut;
+/// let s1 = &mut [5,6,7];
+/// let _s = &[0,0,0,0,0,0]; // wedge to break adjacency
+/// let s2 = &mut [1,2,3,4];
+///
+/// let inv = merge_mut(s1,s2);
+///
+/// assert_eq!(s1, &[1,2,3]);
+/// assert_eq!(s2, &[4,5,6,7]);
+/// ```
+pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
 {
 
-    println!("Input: {:?},{:?}", s1, s2);
+    // println!("Input: {:?},{:?}", s1, s2);
 
     // create a virtual slice out of the two
     let mut ws = VirtualSlice::new();
     ws.chain(s1);
     ws.chain(s2);
-    let mut idx_arr = (0..ws.len()).into_iter().collect::<Vec<usize>>();
+    let mut idx_rfl = (0..ws.len()).into_iter().collect::<Vec<usize>>();
 
-    // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
-    // j = position in working slice representing s2[0]
-    // c = position in the index array, of the left slice's so that idx_arr[c] == left nth ordered item in ws[..],
-    // len = working slice length
-    let (mut i,mut j, mut c, len, mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
+    // i = position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
+    // j = position in working slice representing s2[0..]
+    // c = position in the index reflector, of the left slice's so that idx_arr[c] == left nth ordered item in ws[..],
+    // ws_len = working slice length
+    let (mut i,mut j, mut c, ws_len,  mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
+    // p = index reflector partition bound where i's position is always upper bounded by p
+    // used for optimising finding i pos in index array
+    let p = j;
 
-    println!("-:Merge:{:?} = {:?} ({:?},{:?},{:?})",ws, idx_arr, i, j, c);
+    // println!("-:Merge:{:?} = {:?} ({:?},{:?},{:?})",ws, idx_arr, i, j, c);
 
-    // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
+    // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
-    while j < len && i != j {
-        match ( ws[idx_arr[c]] ).cmp( &ws[idx_arr[j]] ) {
+    while j < ws_len && i != j {
+        match ( ws[idx_rfl[c]] ).cmp( &ws[idx_rfl[j]] ) {
             Ordering::Less | Ordering::Equal => {
-                ws.swap(i,idx_arr[c] );
+                ws.swap(i, idx_rfl[c] );
 
-                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap() + c;
-                idx_arr.swap( idx, c);
-                print!("l:{}{}",idx,c);
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, c);
+                // print!("l:");
                 c += 1;
             }
             Ordering::Greater => {
                 inv_count += j - i;
 
-                ws.swap(i,idx_arr[j]);
+                ws.swap(i, idx_rfl[j]);
 
-                let idx = idx_arr[c..j].iter().position(|x| *x == i).unwrap() + c;
-                idx_arr.swap( idx, j);
-                print!("r:{}{}",idx,j);
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, j);
+                // print!("r:");
                 j += 1;
             }
         }
         // pick the next element for sorting
         i += 1;
-        println!("Merge:{:?} = {:?} ({:?},{:?},{:?}) {:?}",ws, idx_arr, i, j, c, inv_count);
+        // println!("Merge:{:?} = {:?} ({:?},{:?},{:?}) {:?}",ws, idx_arr, i, j, c, inv_count);
     }
 
+    // Edge cases: sorting completed with [smaller] < ith pos < [bigger]
+    // however [bigger] likely not ordered due to swapping
+    // example:
+    // [5(i/c),6,7] <> [1(j),2,3,4]
+    // [1,6(i),7] <> [5(c),2(j),3,4]
+    // [1,2,7(i)] <> [5(c),6,3(j),4]
+    // [1,2,3] <> [5(c/i),6,7,4(j)]
+    // [1,2,3] <> [5(c/i),6,7,4(j)]
+    // [1,2,3] <> [4,6(i),7,5(c)] (j) <-- Finished merge however we are left with an unordered rightmost part
+    // since i pos << c pos, hence we need to address this segment
+    while i < idx_rfl[c] {
+        if let Ordering::Less = (ws[idx_rfl[c]]).cmp( &ws[i] ) {
+                ws.swap(i, idx_rfl[c] );
+
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, c);
+                // print!("f:");
+                c += 1;
+        }
+        i += 1;
+        //println!("Adj:{:?} = {:?} ({:?},{:?},{:?}) {:?}", ws, idx_rfl, i, j, c, inv_count);
+    }
     inv_count
 }
 

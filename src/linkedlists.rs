@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use crate::sort::merge_mut_adjacent;
 
 /// I could have done it differently
 /// but I wanted to see how far I could go with this simple enum structure
@@ -108,7 +109,7 @@ impl<T> List<T>
     pub fn sort_with_count(&self) -> (usize, Vec<T>){
         use super::sort::merge_sort_mut;
         let mut s  = self.iter().copied().collect::<Vec<T>>();
-        (merge_sort_mut(&mut s[..]), s)
+        (merge_sort_mut(&mut s[..], &mut merge_mut_adjacent), s)
     }
 }
 

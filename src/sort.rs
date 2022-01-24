@@ -97,7 +97,7 @@ impl<I> Iterator for MergeIterator<I>
 /// merge_mut(s1,s3);        // this should throw a panic
 ///
 
-fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
+pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
@@ -251,20 +251,26 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// Sort function based on the merge sort algorithm
 /// Sorts the mutable vector with no additional memory by applying in-place merging
 /// while it returns the total count of inversions occurred
+///
+/// The following functions are available to use as passing parameter
+/// - merge_mut : safe to use with non-adjacent (CPU: O(n), Memory: 2O(n))
+/// - merge_mut_adjacent : only to be used when slices are memory adjacent (CPU: O(n log n), Memory: 0)
+///
 /// ```
-/// use csx3::sort::merge_sort_mut;
+/// use csx3::sort::{merge_mut, merge_sort_mut};
 ///
 /// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!( merge_sort_mut(input), 6 );
+/// assert_eq!( merge_sort_mut(input, &mut merge_mut), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
-    where T: Ord + Debug {
+pub fn merge_sort_mut<T, F>(v: &mut [T], fn_merge: &mut F ) -> usize
+    where T: Ord + Debug,
+          F : FnMut(&mut[T], &mut[T]) -> usize {
 
     let len = v.len();
 
-    println!("\tInput: ({}){:?} =>", len, v);
+    //println!("\tInput: ({}){:?} =>", len, v);
     match len {
         // unity slice, just return it
         0..=1 => (0),
@@ -281,12 +287,12 @@ pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
         // if slice length longer than 2 then split recursively
         _ => {
             let (left, right) = v.split_at_mut(len >> 1);
-            let left_inv = merge_sort_mut(left);
-            let right_inv = merge_sort_mut(right);
+            let left_inv = merge_sort_mut(left, fn_merge);
+            let right_inv = merge_sort_mut(right, fn_merge);
 
             // merge the two slices taking an in-place merging approach - no additional memory
             // plus return the total inversions occured
-            let merge_inv = merge_mut(left, right);
+            let merge_inv = fn_merge(left, right);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
@@ -486,7 +492,24 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(input,(inv_count, output))| {
-                assert_eq!(merge_sort_mut(input), inv_count );
+                assert_eq!(merge_sort_mut(input, &mut merge_mut), inv_count );
+                assert_eq!( input, output );
+            })
+    }
+    #[test]
+    fn test_merge_sort_mut_adjacent() {
+        let test_data: [(&mut [u32], (usize, &[u32]));6] = [
+            (&mut [3,2,1],              (3, &[1,2,3])),
+            (&mut [4,1,3,2],            (4, &[1,2,3,4])),
+            (&mut [8, 4, 2, 1],         (6, &[1,2,4,8])),
+            (&mut [6,2,4,3,5,1],        (10,&[1,2,3,4,5,6])),
+            (&mut [7,6,5,4,3,2,1],      (21,&[1,2,3,4,5,6,7])),
+            (&mut [8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8]))
+        ];
+
+        test_data.into_iter()
+            .for_each(|(input,(inv_count, output))| {
+                assert_eq!(merge_sort_mut(input, &mut merge_mut_adjacent), inv_count );
                 assert_eq!( input, output );
         })
     }

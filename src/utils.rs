@@ -31,6 +31,9 @@ impl<T> VirtualSlice<T> {
     pub fn len(&self) -> usize {
         self.vv.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.vv.is_empty()
+    }
     pub fn chain(&mut self, s1: &mut [T]) {
          s1.iter_mut()
             .for_each(|item| {

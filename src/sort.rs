@@ -175,12 +175,13 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
 {
 
-    // println!("Input: {:?},{:?}", s1, s2);
+    println!("Merge Input: {:?},{:?}", s1, s2);
 
-    // create a virtual slice out of the two
+    // create a virtual slice and append the two slices
     let mut ws = VirtualSlice::new();
     ws.chain(s1);
     ws.chain(s2);
+    // build the index reflector using the starting items' sequence
     let mut idx_rfl = (0..ws.len()).into_iter().collect::<Vec<usize>>();
 
     // i = position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
@@ -192,7 +193,7 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     // used for optimising finding i pos in index array
     let p = j;
 
-    // println!("-:Merge:{:?} = {:?} ({:?},{:?},{:?})",ws, idx_arr, i, j, c);
+    println!("-:Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
 
     // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
     // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -203,7 +204,7 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 
                 let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
                 idx_rfl.swap(idx, c);
-                // print!("l:");
+                print!("l:");
                 c += 1;
             }
             Ordering::Greater => {
@@ -213,13 +214,13 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 
                 let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
                 idx_rfl.swap(idx, j);
-                // print!("r:");
+                print!("r:");
                 j += 1;
             }
         }
         // pick the next element for sorting
         i += 1;
-        // println!("Merge:{:?} = {:?} ({:?},{:?},{:?}) {:?}",ws, idx_arr, i, j, c, inv_count);
+        println!("Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
     }
 
     // Edge cases: sorting completed with [smaller] < ith pos < [bigger]
@@ -242,7 +243,7 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
                 c += 1;
         }
         i += 1;
-        //println!("Adj:{:?} = {:?} ({:?},{:?},{:?}) {:?}", ws, idx_rfl, i, j, c, inv_count);
+        println!("f:Merge:{:?}<>{:?} => {:?} :: {:?} ({:?},{:?},{:?})",s1, s2, ws, idx_rfl, i, j, c);
     }
     inv_count
 }
@@ -263,7 +264,7 @@ pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
 
     let len = v.len();
 
-    //println!("\tInput: ({}){:?} =>", len, v);
+    println!("\tInput: ({}){:?} =>", len, v);
     match len {
         // unity slice, just return it
         0..=1 => (0),

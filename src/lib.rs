@@ -9,3 +9,5 @@ pub mod sort;
 pub mod select;
 
 pub mod linkedlists;
+
+pub mod utils;

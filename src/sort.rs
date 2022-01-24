@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::iter::Peekable;
 use std::cmp::Ordering;
 use rand::Rng;
+use crate::utils::VirtualSlice;
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -96,7 +97,7 @@ impl<I> Iterator for MergeIterator<I>
 /// merge_mut(s1,s3);        // this should throw a panic
 ///
 
-fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
+fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
@@ -144,6 +145,108 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     inv_count
 }
 
+/// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
+/// For the algorithm to work we need the following components
+/// - Constructing a virtualslice allowing us to operate over the slices segments as a "continous slice"
+/// - Use an "Index Reflector (idx_rfl)" table to "project" (c,j, i') positions upon the "continuous slice" as (c', j', i)
+/// - Swap takes place both in (a) continuous slice and (b) Index Reflector
+/// ```
+/// //Slice 1    Slice 2    VirtualSlice                  Index Reflector
+/// //=======    =========  ==========================   ======================
+/// //[5,6,7] <> [1,2,3,4]  [5(c'/i),6,7,1(j'),2,3,4]    [1(c/i'),2,3,4(j),5,6,7]
+/// //[1,6,7] <> [5,2,3,4]  [1,6(i),7,5(c'),2(j'),3,4]   [4(c),2(i'),3,1,5(j),6,7]
+/// //[1,2,7] <> [5,6,3,4]  [1,2,7(i),5(c'),6,3(j'),4]   [4(c),5,3(i'),1,2,6(j),7]
+/// //[1,2,3] <> [5,6,7,4]  [1,2,3,5(c'/i),6,7,4(j')]    [4(c/i'),5,6,1,2,3,7(j)]
+/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,6(i),7,5(c')](j')   [7(c),5(i'),6,1,2,3,4](j) <-- Main merge finished but still i < c'
+/// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j')   [7(c),5,6(i'),1,2,3,4](j)
+/// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j')    [6,5,7(c/i'),1,2,3,4](j) <-- finished merging (reflects starting position)
+///
+/// use csx3::sort::merge_mut;
+/// let s1 = &mut [5,6,7];
+/// let _s = &[0,0,0,0,0,0]; // wedge to break adjacency
+/// let s2 = &mut [1,2,3,4];
+///
+/// let inv = merge_mut(s1,s2);
+///
+/// assert_eq!(s1, &[1,2,3]);
+/// assert_eq!(s2, &[4,5,6,7]);
+/// ```
+pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
+    where T: Ord + Debug
+{
+
+    // println!("Input: {:?},{:?}", s1, s2);
+
+    // create a virtual slice out of the two
+    let mut ws = VirtualSlice::new();
+    ws.chain(s1);
+    ws.chain(s2);
+    let mut idx_rfl = (0..ws.len()).into_iter().collect::<Vec<usize>>();
+
+    // i = position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
+    // j = position in working slice representing s2[0..]
+    // c = position in the index reflector, of the left slice's so that idx_arr[c] == left nth ordered item in ws[..],
+    // ws_len = working slice length
+    let (mut i,mut j, mut c, ws_len,  mut inv_count)  = (0usize, s1.len(), 0usize, ws.len(), 0usize);
+    // p = index reflector partition bound where i's position is always upper bounded by p
+    // used for optimising finding i pos in index array
+    let p = j;
+
+    // println!("-:Merge:{:?} = {:?} ({:?},{:?},{:?})",ws, idx_arr, i, j, c);
+
+    // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
+    // i == j => no more comparison required, since everything in ws[..i] << ws[j]
+    while j < ws_len && i != j {
+        match ( ws[idx_rfl[c]] ).cmp( &ws[idx_rfl[j]] ) {
+            Ordering::Less | Ordering::Equal => {
+                ws.swap(i, idx_rfl[c] );
+
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, c);
+                // print!("l:");
+                c += 1;
+            }
+            Ordering::Greater => {
+                inv_count += j - i;
+
+                ws.swap(i, idx_rfl[j]);
+
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, j);
+                // print!("r:");
+                j += 1;
+            }
+        }
+        // pick the next element for sorting
+        i += 1;
+        // println!("Merge:{:?} = {:?} ({:?},{:?},{:?}) {:?}",ws, idx_arr, i, j, c, inv_count);
+    }
+
+    // Edge cases: sorting completed with [smaller] < ith pos < [bigger]
+    // however [bigger] likely not ordered due to swapping
+    // example:
+    // [5(i/c),6,7] <> [1(j),2,3,4]
+    // [1,6(i),7] <> [5(c),2(j),3,4]
+    // [1,2,7(i)] <> [5(c),6,3(j),4]
+    // [1,2,3] <> [5(c/i),6,7,4(j)]
+    // [1,2,3] <> [5(c/i),6,7,4(j)]
+    // [1,2,3] <> [4,6(i),7,5(c)] (j) <-- Finished merge however we are left with an unordered rightmost part
+    // since i pos << c pos, hence we need to address this segment
+    while i < idx_rfl[c] {
+        if let Ordering::Less = (ws[idx_rfl[c]]).cmp( &ws[i] ) {
+                ws.swap(i, idx_rfl[c] );
+
+                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                idx_rfl.swap(idx, c);
+                // print!("f:");
+                c += 1;
+        }
+        i += 1;
+        //println!("Adj:{:?} = {:?} ({:?},{:?},{:?}) {:?}", ws, idx_rfl, i, j, c, inv_count);
+    }
+    inv_count
+}
+
 /// Sort function based on the merge sort algorithm
 /// Sorts the mutable vector with no additional memory by applying in-place merging
 /// while it returns the total count of inversions occurred
@@ -156,7 +259,7 @@ fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
-    where T: Copy + Clone + Ord {
+    where T: Ord + Debug {
 
     let len = v.len();
 
@@ -182,7 +285,7 @@ pub fn merge_sort_mut<T>(v: &mut [T]) -> usize
 
             // merge the two slices taking an in-place merging approach - no additional memory
             // plus return the total inversions occured
-            let merge_inv = merge_mut(left,right);
+            let merge_inv = merge_mut(left, right);
 
             //println!("\tMerged: {:?}{:?} => {}", left, right, left_inv + right_inv + merge_inv);
             left_inv + right_inv + merge_inv
@@ -337,6 +440,7 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(right_partition);
 }
 
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -403,7 +507,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
     #[test]
-    fn test_merge_mut() {
+    fn test_merge_mut_adjacent() {
         let arr:[(&mut[i32],&[i32]);11] = [
             (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
             (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
@@ -421,7 +525,7 @@ mod test {
             .for_each(| (input, output) | {
                 let len = input.len();
                 let (s1, s2) = input.split_at_mut(len >> 1);
-                merge_mut(s1, s2);
+                merge_mut_adjacent(s1, s2);
                 assert_eq!(input, output);
         })
     }
@@ -433,6 +537,31 @@ mod test {
         let s3 = &mut [2, 4, 6];
 
         // non-adjacent slices hence it should panic
-        merge_mut(s1,s3);
+        merge_mut_adjacent(s1, s3);
+    }
+    #[test]
+    fn test_merge_mut() {
+        let arr:[(&mut[i32],&[i32]);13] = [
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
+            (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
+            (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
+            (&mut [5,6,7,1,2,3,4], &[1,2,3,4,5,6,7]),
+            (&mut [1,2,3,4,5,6,7], &[1,2,3,4,5,6,7]),
+            (&mut [2,4,1,3,5], &[1,2,3,4,5]),
+            (&mut [1,3,2,4,5], &[1,2,3,4,5]),
+            (&mut [1,2,3,4,5], &[1,2,3,4,5]),
+            (&mut [2,1,4], &[1,2,4]),
+            (&mut [3,1,2], &[1,2,3]),
+            (&mut [1,2,3], &[1,2,3]),
+            (&mut [2,1], &[1,2]),
+            (&mut [1,2], &[1,2]),
+        ];
+        arr.into_iter()
+            .for_each(| (input, output) | {
+                let len = input.len();
+                let (s1, s2) = input.split_at_mut(len >> 1);
+                merge_mut(s1, s2);
+                assert_eq!(input, output);
+            })
     }
 }

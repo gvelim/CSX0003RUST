@@ -117,6 +117,23 @@ impl<'a, T> VirtualSlice<'a, T> {
     /// - S1{ordered subslice} -> j -> S2{ordered subslice}
     /// - S1 overlaps S2 or not
     /// at completion the virtualslice will be ordered
+    /// ```
+    /// use csx3::utils::VirtualSlice;
+    ///
+    /// let s1 = &mut [5,6,7];
+    /// let _x = &[0,0,0,0,0,0]; // wedge to break adjacency
+    /// let s2 = &mut [1,2,3,4];
+    ///
+    /// {
+    ///     let mut vs = VirtualSlice::new();
+    ///     vs.chain(s1);
+    ///     vs.chain(s2);
+    ///     // pivot corresponds to s2[0] == 1
+    ///     vs.reorder_around_pivot(3);
+    /// }
+    /// assert_eq!(s1, &mut [1,2,3]);
+    /// assert_eq!(s2, &mut [4,5,6,7]);
+    /// ```
     pub fn reorder_around_pivot(&mut self, mut j: usize) -> usize
         where T: Ord + Debug
     {
@@ -130,7 +147,7 @@ impl<'a, T> VirtualSlice<'a, T> {
         let ws_len = self.len();
         let mut idx_rfl = (0..self.len()).into_iter().collect::<Vec<usize>>();
 
-        println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
+        //println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
         // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
         // i == j => no more comparison required, since everything in ws[..i] << ws[j]
@@ -148,7 +165,7 @@ impl<'a, T> VirtualSlice<'a, T> {
                     let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
                     // swap( i' with c )
                     idx_rfl.swap(idx, c);
-                    print!("l:");
+                    //print!("l:");
                     // point to the next in order position (left slice)
                     c += 1;
                 }
@@ -166,14 +183,14 @@ impl<'a, T> VirtualSlice<'a, T> {
                     let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
                     // swap( i' with j )
                     idx_rfl.swap(idx, j);
-                    print!("r:");
+                    //print!("r:");
                     // point to the next in order position (right slice)
                     j += 1;
                 }
             }
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
-            println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})",self, idx_rfl, i, j, c);
+            //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})",self, idx_rfl, i, j, c);
         }
 
         // Edge cases: sorting completed with [merged] < ith pos < [unmerged]
@@ -202,7 +219,7 @@ impl<'a, T> VirtualSlice<'a, T> {
             }
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
-            println!("f:Merge:{:?} :: {:?} ({:?},{:?},{:?})",self, idx_rfl, i, j, c);
+            //println!("f:Merge:{:?} :: {:?} ({:?},{:?},{:?})",self, idx_rfl, i, j, c);
         }
         inv_count
     }}
@@ -214,10 +231,15 @@ impl<T> Default for VirtualSlice<'_, T> {
     }
 }
 
+
 impl<T> Debug for VirtualSlice<'_, T> where T : Debug {
+
+    /// extract and display the slice subsegments attached to the virtualslice
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_list()
             .entries(
+                // get to the actual element referenced
+                // since we got a *pointer -> virtual slice *pointer -> slice segment item
                 self.vv.iter().map( |x| &**x )
             )
             .finish()
@@ -228,13 +250,17 @@ impl<T> Index<usize> for VirtualSlice<'_, T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        self.vv[index]
+        // syntactic overkill as rust will automatically dereference the chain of references
+        // but it feels good to be explicit!!
+        &(*self.vv[index])
     }
 }
 
 impl<T> IndexMut<usize> for VirtualSlice<'_, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        self.vv[index]
+        // syntactic overkill as rust will automatically dereference the chain of references
+        // but it feels good to be explicit!!
+        &mut (*self.vv[index])
     }
 }
 
@@ -275,15 +301,13 @@ mod test {
             vs.merge(s3);
             vs.merge(s4);
         }
-
-
         assert_eq!(s1, &mut [1,2,3]);
         assert_eq!(s2, &mut [4,5,6,7]);
         assert_eq!(s3, &mut [8,9,10]);
         assert_eq!(s4, &mut [12,14,15,16]);
     }
     #[test]
-    fn test_virtual_slice_new_and_iter() {
+    fn test_virtual_slice_new_iter_swap() {
         let s1 = &mut [1, 3, 5, 7, 9];
         let _s3 = &mut [0, 0, 0];
         let s2 = &mut [2, 4, 6, 8 , 10];
@@ -292,14 +316,13 @@ mod test {
             let mut v = VirtualSlice::new();
             v.chain(s1);
             v.chain(s2);
-            println!("{:?}", v);
+
             v.iter_mut()
                 .for_each(|ptr| {
                     **ptr = 12;
                 });
             v[0] = 11;
             v[5] = 9;
-            println!("{:?}", v);
         }
         assert_eq!(s1, &mut [11, 12, 12, 12, 12]);
         assert_eq!(s2, &mut [9, 12, 12, 12, 12]);

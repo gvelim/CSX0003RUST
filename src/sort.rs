@@ -162,7 +162,7 @@ pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
 pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug {
 
-    println!("Merge Input: {:?},{:?}", s1, s2);
+    //println!("Merge Input: {:?},{:?}", s1, s2);
 
     let mut ws = VirtualSlice::new();
 

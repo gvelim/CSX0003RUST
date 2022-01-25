@@ -179,16 +179,15 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// - merge_mut_adjacent : only to be used when slices are memory adjacent (CPU: O(n log n), Memory: 0)
 ///
 /// ```
-/// use csx3::sort::{merge_mut, merge_sort_mut};
+/// use csx3::sort::{merge_mut, mergesort_mut};
 ///
 /// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!( merge_sort_mut(input, &mut merge_mut), 6 );
+/// assert_eq!( mergesort_mut(input, merge_mut), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn merge_sort_mut<T, F>(v: &mut [T], fn_merge: &mut F ) -> usize
-    where T: Ord + Debug,
-          F : FnMut(&mut[T], &mut[T]) -> usize {
+pub fn mergesort_mut<T>(v: &mut [T], fn_merge: fn(&mut[T], &mut[T]) -> usize ) -> usize
+    where T: Ord + Debug {
 
     let len = v.len();
 
@@ -209,8 +208,8 @@ pub fn merge_sort_mut<T, F>(v: &mut [T], fn_merge: &mut F ) -> usize
         // if slice length longer than 2 then split recursively
         _ => {
             let (left, right) = v.split_at_mut(len >> 1);
-            let left_inv = merge_sort_mut(left, fn_merge);
-            let right_inv = merge_sort_mut(right, fn_merge);
+            let left_inv = mergesort_mut(left, fn_merge);
+            let right_inv = mergesort_mut(right, fn_merge);
 
             // merge the two slices taking an in-place merging approach - no additional memory
             // plus return the total inversions occured
@@ -225,13 +224,13 @@ pub fn merge_sort_mut<T, F>(v: &mut [T], fn_merge: &mut F ) -> usize
 /// Returns a new sorted vector given an input reference slice - heap allocations
 /// along with the total count of inversions occurred
 /// ```
-/// use csx3::sort::merge_sort;
+/// use csx3::sort::mergesort;
 ///
 /// let input = &[8, 4, 2, 1];
 ///
-/// assert_eq!( merge_sort(input), (6, vec![1,2,4,8]) );
+/// assert_eq!( mergesort(input), (6, vec![1,2,4,8]) );
 /// ```
-pub fn merge_sort<T>(v: &[T]) -> (usize, Vec<T>)
+pub fn mergesort<T>(v: &[T]) -> (usize, Vec<T>)
     where T: Copy + Clone + Ord {
 
     let len = v.len();
@@ -255,8 +254,8 @@ pub fn merge_sort<T>(v: &[T]) -> (usize, Vec<T>)
         // if slice length longer than 2 then split recursively
         _ => {
             let (left, right) = v.split_at(len >> 1);
-            let (left_inv, left) = merge_sort(left);
-            let (right_inv, right) = merge_sort(right);
+            let (left_inv, left) = mergesort(left);
+            let (right_inv, right) = mergesort(right);
 
             // return a vector of the merged but ordered slices
             // plus inversions vector; inversion count per position
@@ -414,7 +413,7 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(input,(inv_count, output))| {
-                assert_eq!(merge_sort_mut(input, &mut merge_mut), inv_count );
+                assert_eq!(mergesort_mut(input, merge_mut), inv_count );
                 assert_eq!( input, output );
             })
     }
@@ -431,7 +430,7 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(input,(inv_count, output))| {
-                assert_eq!(merge_sort_mut(input, &mut merge_mut_adjacent), inv_count );
+                assert_eq!(mergesort_mut(input, merge_mut_adjacent), inv_count );
                 assert_eq!( input, output );
         })
     }

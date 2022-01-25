@@ -42,8 +42,8 @@ fn main() {
     println!("2nd order stat= {:?}", d_selection(&mut arr, 2));
     println!("3rd order stat= {:?}", d_selection(&mut arr, 3));
 
-    println!("MergeSort Immut: {:?}", merge_sort(&v));
-    println!("MergeSort Mut  : ({}, {:?})", merge_sort_mut(&mut v, &mut merge_mut), v);
+    println!("MergeSort Immut: {:?}", mergesort(&v));
+    println!("MergeSort Mut  : ({}, {:?})", mergesort_mut(&mut v, merge_mut), v);
     quick_sort(&mut v);
     println!("Quick Sort     : {:?}", v);
 

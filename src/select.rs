@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::cmp::Ordering;
 use rand::Rng;
-use super::sort::{merge_sort_mut, merge_mut_adjacent, partition_at_index};
+use super::sort::{mergesort_mut, merge_mut_adjacent, partition_at_index};
 
 /// Find the nth order statistic within an unordered set with O(n) performance
 /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
@@ -100,7 +100,7 @@ pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
     v.chunks_mut(5)
         .map(|chunk| {
             // sort each group
-            merge_sort_mut(chunk, &mut merge_mut_adjacent);
+            mergesort_mut(chunk, merge_mut_adjacent);
             // pull the median out
             chunk[ chunk.len() >> 1]
         })

@@ -107,9 +107,9 @@ impl<T> List<T>
         }
     }
     pub fn sort_with_count(&self) -> (usize, Vec<T>){
-        use super::sort::merge_sort_mut;
+        use super::sort::mergesort_mut;
         let mut s  = self.iter().copied().collect::<Vec<T>>();
-        (merge_sort_mut(&mut s[..], &mut merge_mut_adjacent), s)
+        (mergesort_mut(&mut s[..], merge_mut_adjacent), s)
     }
 }
 

@@ -11,25 +11,30 @@ use std::ops::{Index, IndexMut};
 /// let _s3 = &mut [0, 0, 0];
 /// let s2 = &mut [2, 4, 6, 8 , 10];
 ///
-/// let mut v = VirtualSlice::new();
-/// v.chain(s1);
-/// v.chain(s2);
-///
-/// v[0] = 11;
-/// v[5] = 9;
+/// {
+///     let mut v = VirtualSlice::new();
+///     v.chain(s1);
+///     v.chain(s2);
+///     v[0] = 11;
+///     v[5] = 9;
+/// }
 /// assert_eq!(s1, &mut [11, 3, 5, 7, 9]);
 /// assert_eq!(s2, &mut [9, 4, 6, 8 , 10]);
-///
-/// v.swap(0, 5);
+/// {
+///     let mut v = VirtualSlice::new();
+///     v.chain(s1);
+///     v.chain(s2);
+///     v.swap(0, 5);
+/// }
 /// assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
 /// assert_eq!(s2, &mut [11, 4, 6, 8 , 10]);
 /// ```
-pub struct VirtualSlice<T> {
-    vv: Vec<*mut T>
+pub struct VirtualSlice<'a, T> {
+    vv: Vec<&'a mut T>
 }
 
-impl<T> VirtualSlice<T> {
-    pub fn new() -> VirtualSlice<T> {
+impl<'a, T> VirtualSlice<'a, T> {
+    pub fn new() -> VirtualSlice<'a, T> {
         VirtualSlice {
             vv : Vec::new(),
         }
@@ -41,25 +46,27 @@ impl<T> VirtualSlice<T> {
         self.vv.is_empty()
     }
     /// Append a slice segment onto the VirtualSlice
-    pub fn chain(&mut self, s1: &mut [T]) {
+    pub fn chain(&mut self, s1: &'a mut [T]) {
          s1.iter_mut()
             .for_each(|item| {
-                self.vv.push(item as *mut T);
+                self.vv.push(item);
             });
     }
     /// Get a mutable iterator over the VirtualSlice that return mutable pointers *mut T
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<*mut T> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, &'a mut T> {
         self.vv.iter_mut()
     }
     /// Swap two virtual positions that could correspond to between or within underlying slice segments
-    pub fn swap(&self, a: usize, b:usize) {
+    pub fn swap(&mut self, a: usize, b:usize) {
         if a == b {
             return;
         }
+        // we cannot use vv.swap as this will simply swap the position of the references
+        // rather the referred values. Hence we use the pointers to swap the memory contents
         unsafe {
             std::ptr::swap::<T>(
-                self.vv[a],
-                self.vv[b]
+                &mut self[a] as *mut T,
+                &mut self[b] as *mut T
             )
         }
     }
@@ -92,29 +99,36 @@ impl<T> VirtualSlice<T> {
     /// assert_eq!(s1, &[1,2,3]);
     /// assert_eq!(s2, &[4,5,6,7]);
     /// ```
-    pub fn merge(&mut self, s: &mut [T]) -> usize
+    pub fn merge(&mut self, s: &'a mut [T]) -> usize
         where T: Ord + Debug {
-
-        let mut inv_count = 0usize;
 
         if self.is_empty() {
             self.chain(s);
-            return inv_count
+            return 0
         }
 
-        // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
-        let mut j = self.len();
+        let j = self.len();
 
         self.chain(s);
-        let mut idx_rfl = (0..self.len()).into_iter().collect::<Vec<usize>>();
 
+        self.reorder_around_pivot(j)
+    }
+    /// Reorders a slice around a partition point j and given that
+    /// - S1{ordered subslice} -> j -> S2{ordered subslice}
+    /// - S1 overlaps S2 or not
+    /// at completion the virtualslice will be ordered
+    pub fn reorder_around_pivot(&mut self, mut j: usize) -> usize
+        where T: Ord + Debug
+    {
+        // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
         // i = partition position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
-        // c = s1[c] equivalent position in the index reflector, so that idx_rfl[c] == c' == s1[c] equivalent in ws[c'],
-        // ws_len = working slice's length
-        let (mut i, mut c, ws_len)  = (0usize, 0usize, self.len());
         // p = index reflector partition bound where i's position is always upper bounded by p
+        // c = s1[c] equivalent position in the index reflector, so that idx_rfl[c] == c' == s1[c] equivalent in ws[c'],
         // used for optimising finding i pos in index array
-        let p = j;
+        let (mut inv_count, mut c, mut i, p) = (0usize, 0usize, 0usize, j);
+        // ws_len = working slice's length
+        let ws_len = self.len();
+        let mut idx_rfl = (0..self.len()).into_iter().collect::<Vec<usize>>();
 
         println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
@@ -191,42 +205,36 @@ impl<T> VirtualSlice<T> {
             println!("f:Merge:{:?} :: {:?} ({:?},{:?},{:?})",self, idx_rfl, i, j, c);
         }
         inv_count
-    }
-}
+    }}
 
-impl<T> Default for VirtualSlice<T> {
+
+impl<T> Default for VirtualSlice<'_, T> {
     fn default() -> Self {
         VirtualSlice::new()
     }
 }
 
-impl<T> Debug for VirtualSlice<T> where T : Debug {
+impl<T> Debug for VirtualSlice<'_, T> where T : Debug {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        unsafe {
-            f.debug_list()
-                .entries(
-                    self.vv.iter().map( |x| &**x )
-                )
-                .finish()
-        }
+        f.debug_list()
+            .entries(
+                self.vv.iter().map( |x| &**x )
+            )
+            .finish()
     }
 }
 
-impl<T> Index<usize> for VirtualSlice<T> {
+impl<T> Index<usize> for VirtualSlice<'_, T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        unsafe {
-            & *self.vv[index]
-        }
+        self.vv[index]
     }
 }
 
-impl<T> IndexMut<usize> for VirtualSlice<T> {
+impl<T> IndexMut<usize> for VirtualSlice<'_, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        unsafe {
-            &mut *self.vv[index]
-        }
+        self.vv[index]
     }
 }
 
@@ -244,12 +252,14 @@ mod test {
         let _z = &[0,0,0,0,0,0]; // wedge to break adjacency
         let s4 = &mut [8,9,15,16];
 
-        let mut vs = VirtualSlice::new();
+        {
+            let mut vs = VirtualSlice::new();
+            vs.merge(s1);
+            vs.merge(s2);
+            vs.merge(s3);
+            vs.merge(s4);
+        }
 
-        vs.merge(s1);
-        vs.merge(s2);
-        vs.merge(s3);
-        vs.merge(s4);
 
         assert_eq!(s1, &mut [1,2,3]);
         assert_eq!(s2, &mut [4,5,6,7]);
@@ -262,20 +272,27 @@ mod test {
         let _s3 = &mut [0, 0, 0];
         let s2 = &mut [2, 4, 6, 8 , 10];
 
-        let mut v = VirtualSlice::new();
-        v.chain(s1);
-        v.chain(s2);
-        println!("{:?}", v);
-        v.iter_mut()
-            .for_each(|ptr| {
-                unsafe {
+        {
+            let mut v = VirtualSlice::new();
+            v.chain(s1);
+            v.chain(s2);
+            println!("{:?}", v);
+            v.iter_mut()
+                .for_each(|ptr| {
                     **ptr = 12;
-                }
-            });
-        v[0] = 11;
-        v[s1.len()] = 9;
-        v.swap(0, s1.len());
-        println!("{:?}{:?}", s1, s2);
+                });
+            v[0] = 11;
+            v[5] = 9;
+            println!("{:?}", v);
+        }
+        assert_eq!(s1, &mut [11, 12, 12, 12, 12]);
+        assert_eq!(s2, &mut [9, 12, 12, 12, 12]);
+        {
+            let mut v = VirtualSlice::new();
+            v.chain(s1);
+            v.chain(s2);
+            v.swap(0, 5);
+        }
         assert_eq!(s1, &mut [9, 12, 12, 12, 12]);
         assert_eq!(s2, &mut [11, 12, 12, 12, 12]);
     }

@@ -46,8 +46,8 @@ impl<'a, T> VirtualSlice<'a, T> {
         self.vv.is_empty()
     }
     /// Append a slice segment onto the VirtualSlice
-    pub fn chain(&mut self, s1: &'a mut [T]) {
-         s1.iter_mut()
+    pub fn chain(&mut self, s: &'a mut [T]) {
+         s.iter_mut()
             .for_each(|item| {
                 self.vv.push(item);
             });
@@ -61,8 +61,8 @@ impl<'a, T> VirtualSlice<'a, T> {
         if a == b {
             return;
         }
-        // we cannot use vv.swap as this will simply swap the position of the references
-        // rather the referred values. Hence we use the pointers to swap the memory contents
+        // we cannot use vv.swap as this will simply swap the position of the pointers
+        // rather where the pointers point to. Hence we use the pointers to swap the memory contents
         unsafe {
             std::ptr::swap::<T>(
                 &mut self[a] as *mut T,
@@ -241,6 +241,22 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn test_reorder_around_pivot() {
+        let s1 = &mut [5,6,7];
+        let _x = &[0,0,0,0,0,0]; // wedge to break adjacency
+        let s2 = &mut [1,2,3,4];
+
+        {
+            let mut vs = VirtualSlice::new();
+            vs.chain(s1);
+            vs.chain(s2);
+            // pivot coresponds to s2[0]
+            vs.reorder_around_pivot(3);
+        }
+        assert_eq!(s1, &mut [1,2,3]);
+        assert_eq!(s2, &mut [4,5,6,7]);
+    }
     #[test]
     fn test_virtual_slice_merge()
     {

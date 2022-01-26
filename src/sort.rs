@@ -515,13 +515,12 @@ mod test {
     {
         for _ in 0..128 {
             let v1: Vec<i8> = random_sequence(16);
-            let mut v2: Vec<i8> = v1.iter().copied().collect();
+            let mut v2 = v1.to_vec();
 
             assert_eq!(
                 mergesort(&v1),
                 (mergesort_mut(&mut v2, merge_mut_adjacent), v2)
             );
         }
-
     }
 }

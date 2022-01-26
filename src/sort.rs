@@ -403,13 +403,14 @@ mod test {
     }
     #[test]
     fn test_merge_sort_mut() {
-        let test_data: [(&mut [u32], (usize, &[u32]));6] = [
+        let test_data: [(&mut [i32], (usize, &[i32]));7] = [
             (&mut [3,2,1],              (3, &[1,2,3])),
             (&mut [4,1,3,2],            (4, &[1,2,3,4])),
             (&mut [8, 4, 2, 1],         (6, &[1,2,4,8])),
             (&mut [6,2,4,3,5,1],        (10,&[1,2,3,4,5,6])),
             (&mut [7,6,5,4,3,2,1],      (21,&[1,2,3,4,5,6,7])),
-            (&mut [8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8]))
+            (&mut [8,7,6,5,4,3,2,1],    (28,&[1,2,3,4,5,6,7,8])),
+            (&mut [-111, -52, -38, -13, 16, 26, 73, 103], (0,&[-111,-52,-38,-13,16,26,73,103]))
         ];
 
         test_data.into_iter()
@@ -513,13 +514,11 @@ mod test {
     #[test]
     fn test_mergesort_head_to_head()
     {
-        for _ in 0..128 {
-            let v1: Vec<i8> = random_sequence(16);
-            let mut v2 = v1.to_vec();
-
+        for _ in 0..32 {
+            let mut v1: Vec<i8> = random_sequence(64);
             assert_eq!(
-                mergesort(&v1),
-                (mergesort_mut(&mut v2, merge_mut_adjacent), v2)
+                mergesort(&v1.to_vec()),
+                (mergesort_mut(&mut v1, merge_mut), v1)
             );
         }
     }

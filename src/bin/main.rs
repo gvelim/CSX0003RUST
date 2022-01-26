@@ -1,10 +1,10 @@
-use std::iter::from_fn;
 use csx3::sort::*;
 use csx3::trees::*;
 use csx3::linkedlists::*;
 use csx3::select::*;
 use std::env::args;
 use std::str::FromStr;
+use csx3::utils::random_sequence;
 
 type MyType = i8;
 
@@ -22,9 +22,7 @@ fn main() {
              }
     };
 
-    let list: List<MyType> = from_fn(|| { Some(rand::random::<MyType>()) })
-        .take(n)
-        .collect();
+    let list : List<MyType> = random_sequence(n);
     let mut v: Vec<MyType> = list.iter().copied().collect();
 
 

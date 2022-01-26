@@ -111,7 +111,7 @@ pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
         ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
         // checking they are aligned and adjacent,
         // if not panic! so we prevent unpredictable behaviour
-        assert!( s2[0] == ws[s1.len()]);
+        assert!( &s2[0] == &ws[s1.len()]);
     }
 
     // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
@@ -371,6 +371,7 @@ pub fn quick_sort<T>(v: &mut [T])
 
 #[cfg(test)]
 mod test {
+    use crate::utils::random_sequence;
     use super::*;
     #[test]
     fn test_quick_sort() {
@@ -508,5 +509,19 @@ mod test {
                 merge_mut(s1, s2);
                 assert_eq!(input, output);
             })
+    }
+    #[test]
+    fn test_mergesort_head_to_head()
+    {
+        for _ in 0..128 {
+            let v1: Vec<i8> = random_sequence(16);
+            let mut v2: Vec<i8> = v1.iter().copied().collect();
+
+            assert_eq!(
+                mergesort(&v1),
+                (mergesort_mut(&mut v2, merge_mut_adjacent), v2)
+            );
+        }
+
     }
 }

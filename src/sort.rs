@@ -514,12 +514,12 @@ mod test {
     #[test]
     fn test_mergesort_head_to_head()
     {
-        for _ in 0..32 {
-            let mut v1: Vec<i8> = random_sequence(64);
-            assert_eq!(
-                mergesort(&v1.to_vec()),
-                (mergesort_mut(&mut v1, merge_mut), v1)
-            );
+        for _ in 0..64 {
+            let v1: Vec<i8> = random_sequence(127);
+            let mut v2 = v1.clone();
+
+            let inv = mergesort_mut(&mut v2, merge_mut);
+            assert_eq!( mergesort(&v1), (inv, v2) );
         }
     }
 }

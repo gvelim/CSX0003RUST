@@ -119,45 +119,24 @@ impl<'a, T> VirtualSlice<'a, T> {
             return 0
         }
 
-        let j = self.len();
+        // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
+        let mut j = self.len();
 
         self.chain(s);
 
-        self.reorder_around_pivot(j)
-    }
-    /// Reorders a slice around a partition point j and given that
-    /// - S1{ordered subslice} -> j -> S2{ordered subslice}
-    /// - S1 overlaps S2 or not
-    /// at completion the virtualslice will be ordered
-    /// ```
-    /// use csx3::utils::VirtualSlice;
-    ///
-    /// let s1 = &mut [5,6,7];
-    /// let _x = &[0,0,0,0,0,0]; // wedge to break adjacency
-    /// let s2 = &mut [1,2,3,4];
-    ///
-    /// {
-    ///     let mut vs = VirtualSlice::new();
-    ///     vs.chain(s1);
-    ///     vs.chain(s2);
-    ///     // pivot corresponds to s2[0] == 1
-    ///     vs.reorder_around_pivot(3);
-    /// }
-    /// assert_eq!(s1, &mut [1,2,3]);
-    /// assert_eq!(s2, &mut [4,5,6,7]);
-    /// ```
-    pub fn reorder_around_pivot(&mut self, mut j: usize) -> usize
-        where T: Ord + Debug
-    {
-        // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
         // i = partition position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
         // p = index reflector partition bound where i's position is always upper bounded by p
         // c = s1[c] equivalent position in the index reflector, so that idx_rfl[c] == c' == s1[c] equivalent in ws[c'],
         // used for optimising finding i pos in index array
         let (mut inv_count, mut c, mut i, p) = (0usize, 0usize, 0usize, j);
+
         // ws_len = working slice's length
         let ws_len = self.len();
-        let mut idx_rfl = (0..self.len()).into_iter().collect::<Vec<usize>>();
+
+        // Build the index reflector of size [ 0 .. size of left slice] since the following properties apply
+        // - c & i' will never exceed size of left slice
+        // - j == j' always be the same position
+        let mut idx_rfl = (0..p).into_iter().collect::<Vec<usize>>();
 
         //println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
@@ -165,7 +144,7 @@ impl<'a, T> VirtualSlice<'a, T> {
         // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
         // i == j => no more comparison required, since everything in ws[..i] << ws[j]
         while j < ws_len && i != j {
-            match ( self[idx_rfl[c]] ).cmp( &self[idx_rfl[j]] ) {
+            match ( self[idx_rfl[c]] ).cmp( &self[j] ) {
                 Ordering::Less | Ordering::Equal => {
 
                     // swap left slice's item in the working slice with merged partition edge ws[i]
@@ -175,7 +154,7 @@ impl<'a, T> VirtualSlice<'a, T> {
                     // swap index_reflect[c] with index_reflector[i']
                     // i' == index_reflector[x]; where x == i;
                     // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                    let idx = idx_rfl[c..].iter().position(|x| *x == i).unwrap() + c;
                     //swap( i' with c )
                     idx_rfl.swap(idx, c);
                     //print!("\tl:");
@@ -188,14 +167,15 @@ impl<'a, T> VirtualSlice<'a, T> {
 
                     // swap right slice's item in the working slice with merged partition edge ws[i]
                     // swap( ws[i] with ws[j'] where j' = index_reflector[j]
-                    self.swap(i, idx_rfl[j]);
+                    self.swap(i, j);
 
                     // swap index_reflect[j] with index_reflector[i']
                     // i' == index_reflector[x]; where x == i;
                     // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                    let idx = idx_rfl[c..].iter().position(|x| *x == i).unwrap() + c;
                     // swap( i' with j )
-                    idx_rfl.swap(idx, j);
+                    // since always j == j' we just copy the value over no need to swap
+                    idx_rfl[idx] = j;
                     //print!("\tr:");
                     // point to the next in order position (right slice)
                     j += 1;
@@ -203,7 +183,7 @@ impl<'a, T> VirtualSlice<'a, T> {
             }
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
-            //println!("Merge:{:?} :: {:?} ({},{},{}={})",self, idx_rfl, i, j, c, idx_rfl[c]);
+            //println!("Phase 1: Merge:{:?} :: {:?} ({},{},{}={})",self, idx_rfl, i, j, c, idx_rfl[c]);
         }
 
         // Phase 2 : Finalise the trailing ends remaining after rightmost part has been exhausted,
@@ -229,7 +209,8 @@ impl<'a, T> VirtualSlice<'a, T> {
 
             // swap i' with c
             idx_rfl.swap(idx, c);
-            // println!("\ts:Merge:{:?} :: {:?} ({i},{j},{c}={},{p})", self, idx_rfl, idx_rfl[c]);
+
+            //println!("\ts:Merge:{:?} :: {:?} ({i},{j},{c}={},{p})", self, idx_rfl, idx_rfl[c]);
 
             // point to the next in order position,
             // so that idx_rfl[c] point to the right ws['c] item to be swapped
@@ -302,7 +283,7 @@ impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> {
 mod test {
     use super::*;
     #[test]
-    fn test_reorder_around_pivot() {
+    fn test_virtual_slice_merge() {
         let test_data: [(&mut[i32], &mut[i32], &[i32],&[i32]); 6] = [
             (&mut[-88,-29,4,84],                             &mut[-127,-113,-71,-54],
                 &[-127,-113,-88,-71],                           &[-54,-29,4,84]),
@@ -320,17 +301,15 @@ mod test {
 
         for (s1,s2, c1, c2) in test_data {
             let mut vs = VirtualSlice::new();
-            let pivot = s1.len();
-            vs.chain(s1);
-            vs.chain(s2);
-            vs.reorder_around_pivot(pivot);
+            vs.merge(s1);
+            vs.merge(s2);
             assert_eq!(s1, c1);
             assert_eq!(s2, c2);
         }
 
     }
     #[test]
-    fn test_virtual_slice_merge()
+    fn test_virtual_slice_merge_multiple()
     {
         let s1 = &mut [5,6,7];
         let _x = &[0,0,0,0,0,0]; // wedge to break adjacency

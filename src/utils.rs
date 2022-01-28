@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Range};
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 
@@ -276,11 +276,25 @@ impl<T> Index<usize> for VirtualSlice<'_, T> {
     }
 }
 
+impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> {
+    type Output = [&'a mut T];
+
+    fn index(&self, index: Range<usize>) -> &Self::Output {
+        &self.vv[index]
+    }
+}
+
 impl<T> IndexMut<usize> for VirtualSlice<'_, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!
         &mut (*self.vv[index])
+    }
+}
+
+impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> {
+    fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
+        &mut self.vv[index]
     }
 }
 

@@ -128,7 +128,7 @@ impl<'a, T> VirtualSlice<'a, T> {
         // p = index reflector partition bound where i's position is always upper bounded by p
         // c = s1[c] equivalent position in the index reflector, so that idx_rfl[c] == c' == s1[c] equivalent in ws[c'],
         // used for optimising finding i pos in index array
-        let (mut inv_count, mut c, mut i, p) = (0usize, 0usize, 0usize, j);
+        let (mut inv_count, mut c, mut i) = (0usize, 0usize, 0usize);
 
         // ws_len = working slice's length
         let ws_len = self.len();
@@ -136,7 +136,7 @@ impl<'a, T> VirtualSlice<'a, T> {
         // Build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl = (0..p).into_iter().collect::<Vec<usize>>();
+        let mut idx_rfl = (0..j).into_iter().collect::<Vec<usize>>();
 
         //println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
@@ -199,13 +199,15 @@ impl<'a, T> VirtualSlice<'a, T> {
         //                                    [1,2,3,4,6(i),7,5(c')] = VirtualSlice needs to be ordered between i..c'
         // Tip: the index_reflector already stores the correct order of the trailing items
         // all we have to do is to let it guide the remaining swapping
-        while i < ws_len-1 && c < p-1 {
+        let c_bound = idx_rfl.len()-1;
+        let i_bound = ws_len-1;
+        while i < i_bound && c < c_bound {
 
             // swap i with c' in working slice
             self.swap(i, idx_rfl[c]);
 
             // extract i' from index_reflector[]
-            let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+            let idx = idx_rfl[c..].iter().position(|x| *x == i).unwrap() + c;
 
             // swap i' with c
             idx_rfl.swap(idx, c);

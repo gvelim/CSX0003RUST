@@ -88,15 +88,15 @@ impl<'a, T> VirtualSlice<'a, T> {
     /// - Use for slice comparison an "Index Reflector (idx_rfl)" table to "project" (c,j, i') positions upon the "continuous slice" as (c', j', i)
     /// - Swap action at once both (a) continuous slice and (b) Index Reflector
     /// ```
-    /// //Slice 1    Slice 2    VirtualSlice                  Index Reflector
-    /// //=======    =========  ==========================   ======================
-    /// //[5,6,7] <> [1,2,3,4]  [5(c'/i),6,7,1(j'),2,3,4]    [1(c/i'),2,3,4(j),5,6,7]
-    /// //[1,6,7] <> [5,2,3,4]  [1,6(i),7,5(c'),2(j'),3,4]   [4(c),2(i'),3,1,5(j),6,7]
-    /// //[1,2,7] <> [5,6,3,4]  [1,2,7(i),5(c'),6,3(j'),4]   [4(c),5,3(i'),1,2,6(j),7]
-    /// //[1,2,3] <> [5,6,7,4]  [1,2,3,5(c'/i),6,7,4(j')]    [4(c/i'),5,6,1,2,3,7(j)]
-    /// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,6(i),7,5(c')](j')   [7(c),5(i'),6,1,2,3,4](j) <-- Phase 1: Main merge finished but still i < c'
-    /// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j')   [5,7(c),6(i'),1,2,3,4](j)     Trick: reflector knows the right order remaining
-    /// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j')    [5,6,7(c/i'),1,2,3,4](j) <-- Phase 2: finished merging (reflects starting position)
+    /// //Slice 1    Slice 2    VirtualSlice                Index Reflector
+    /// //=======    =========  =========================   =============
+    /// //[5,6,7] <> [1,2,3,4]  [5(c'/i),6,7,1(j),2,3,4]    [1(c/i'),2,3,]
+    /// //[1,6,7] <> [5,2,3,4]  [1,6(i),7,5(c'),2(j),3,4]   [4(c),2(i'),3]
+    /// //[1,2,7] <> [5,6,3,4]  [1,2,7(i),5(c'),6,3(j),4]   [4(c),5,3(i')]
+    /// //[1,2,3] <> [5,6,7,4]  [1,2,3,5(c'/i),6,7,4(j)]    [4(c/i'),5,6,]
+    /// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,6(i),7,5(c')](j)   [7(c),5(i'),6] <-- Phase 1: Main merge finished but still i < c'
+    /// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j)   [5,7(c),6(i')]     Trick: reflector knows the right order remaining
+    /// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j)    [5,6,7(c/i') ] <-- Phase 2: finished merging (reflects starting position)
     ///
     /// use csx3::utils::VirtualSlice;
     /// let s1 = &mut [5,6,7];

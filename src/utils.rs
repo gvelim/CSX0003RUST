@@ -84,8 +84,8 @@ impl<'a, T> VirtualSlice<'a, T> {
     }
     /// Merge Self with another non-adjacent slice using in-place memory swaps
     /// For the algorithm to work we need the following components
-    /// - Append virtualslice with given &mut slice so to form a "continous slice"
-    /// - Use for slice comparison an "Index Reflector (idx_rfl)" table to "project" (c,j, i') positions upon the "continuous slice" as (c', j', i)
+    /// - Append VirtualSlice with given &mut slice so to form a "continuous slice"
+    /// - Use for slice comparison an "Index Reflector (idx_rfl)" table to "project" (c,i') positions upon the "continuous slice" as (c', i)
     /// - Swap action at once both (a) continuous slice and (b) Index Reflector
     /// ```
     /// //Slice 1    Slice 2    VirtualSlice                Index Reflector

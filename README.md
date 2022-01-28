@@ -9,7 +9,7 @@ Rust playground; familiarising with ownership, generics, trait objects, etc
 - Binary tree
 
 Merge Sort performance considerations, when using:
-- fn merge_mut() : < n iterations with 2*0(n) memory impact (VirtualSlice + Index Reflector)  
+- fn merge_mut() : < n iterations with 1.5*0(n pointers)  memory impact (VirtualSlice + Index Reflector)  
 - fn merge_mut_adjacent() : < n * (n/2) iterations with zero memory impact
 
 Sample output:

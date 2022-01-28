@@ -334,6 +334,24 @@ mod test {
         assert_eq!(s4, &mut [12,14,15,16]);
     }
     #[test]
+    fn test_virtual_slice_range() {
+        let s1 = &mut [1, 3, 5, 7, 9];
+        let _s3 = &mut [0, 0, 0];
+        let s2 = &mut [2, 4, 6, 8, 10];
+
+        let mut vs = VirtualSlice::new();
+        vs.chain(s1);
+        vs.chain(s2);
+
+        vs[3..6]
+            .iter_mut()
+            .for_each(|x| **x = 12);
+
+        assert_eq!( &vs[2..7], &[&5,&12,&12,&12,&4]);
+        assert_eq!( s1, &mut [1, 3, 5, 12, 12] );
+        assert_eq!( s2, &mut [12, 4, 6, 8, 10] );
+    }
+    #[test]
     fn test_virtual_slice_new_iter_swap() {
         let s1 = &mut [1, 3, 5, 7, 9];
         let _s3 = &mut [0, 0, 0];

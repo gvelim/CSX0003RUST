@@ -64,11 +64,11 @@ impl<'a, T> VirtualSlice<'a, T> {
                 self.vv.push(item);
             });
     }
-    /// Get a mutable iterator over the VirtualSlice that return mutable pointers *mut T
+    /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, &'a mut T> {
         self.vv.iter_mut()
     }
-    /// Swap two virtual positions that could correspond to between or within underlying slice segments
+    /// Swap two referenced positions that could correspond to between or within underlying slice segments
     pub fn swap(&mut self, a: usize, b:usize) {
         if a == b {
             return;

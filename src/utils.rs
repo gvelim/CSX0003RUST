@@ -203,21 +203,23 @@ impl<'a, T> VirtualSlice<'a, T> {
         let i_bound = ws_len-1;
         while i < i_bound && c < c_bound {
 
-            // swap i with c' in working slice
-            self.swap(i, idx_rfl[c]);
+            // condition saves cpu-cycles from zero-impact operations when i == c' (no swap)
+            // otherwise it has no algorithmic impact
+            if i != idx_rfl[c] {
+                // swap i with c' in working slice
+                self.swap(i, idx_rfl[c]);
 
-            // extract i' from index_reflector[]
-            let idx = idx_rfl[c..].iter().position(|x| *x == i).unwrap() + c;
+                // extract i' from index_reflector[]
+                let idx = idx_rfl[c..].iter().position(|x| *x == i).unwrap() + c;
 
-            // swap i' with c
-            idx_rfl.swap(idx, c);
+                // swap i' with c
+                idx_rfl.swap(idx, c);
 
-            //println!("\ts:Merge:{:?} :: {:?} ({i},{j},{c}={},{p})", self, idx_rfl, idx_rfl[c]);
-
+                //println!("\ts:Merge:{:?} :: {:?} ({i},{j},{c}={},{p})", self, idx_rfl, idx_rfl[c]);
+            }
             // point to the next in order position,
             // so that idx_rfl[c] point to the right ws['c] item to be swapped
             c += 1;
-
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
         }

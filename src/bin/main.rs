@@ -4,7 +4,7 @@ use csx3::linkedlists::*;
 use csx3::select::*;
 use std::env::args;
 use std::str::FromStr;
-use csx3::utils::random_sequence;
+use csx3::random_sequence;
 
 type MyType = i8;
 

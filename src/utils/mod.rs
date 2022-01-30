@@ -1,19 +1,8 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut, Range};
-use rand::distributions::Standard;
-use rand::prelude::Distribution;
 
-pub fn random_sequence<T, B>(n: usize) -> B
-    where B: FromIterator<T>,
-          Standard: Distribution<T>
-{
-    use std::iter::from_fn;
 
-    from_fn(|| { Some(rand::random::<T>()) })
-        .take(n)
-        .collect::<B>()
-}
 /// Constructing a VirtualSlice allowing us to operate over
 /// multiple non-adjacent slice segments as a "continuous slice"
 /// ```

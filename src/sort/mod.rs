@@ -371,7 +371,7 @@ pub fn quick_sort<T>(v: &mut [T])
 
 #[cfg(test)]
 mod test {
-    use crate::utils::random_sequence;
+    use crate::random_sequence;
     use super::*;
     #[test]
     fn test_quick_sort() {

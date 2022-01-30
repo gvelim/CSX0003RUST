@@ -1,7 +1,7 @@
-#Sorting Algorithms
-##Quick Sort
+# Sorting Algorithms
+## Quick Sort
 * Mutable sorting of input array using randomised pivot for partitioning
-##Merge Sort
+## Merge Sort
 Versions
 1. Immutable sorting returning a sorted copy of the input
    * Performance: O(n log n) 

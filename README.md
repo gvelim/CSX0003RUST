@@ -3,14 +3,11 @@
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
 - Select (Random, Deterministic)
-- Merge sort (mutable slices, in-place merging)
-- Quick sort (mutable slices, in-place partitioning)
+- [Merge sort (mutable slices, in-place merging)](./src/sort/README.md)
+- [Quick sort (mutable slices, in-place partitioning)](./src/sort/README.md)
 - Linked list 
 - Binary tree
 
-Merge Sort performance considerations, when using:
-- fn merge_mut() : < n iterations with 1.5*0(n pointers)  memory impact (VirtualSlice + Index Reflector)  
-- fn merge_mut_adjacent() : < n * (n/2) iterations with zero memory impact
 
 Sample output:
 ```

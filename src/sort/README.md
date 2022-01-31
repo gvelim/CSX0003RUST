@@ -186,6 +186,8 @@ In the above diagram, the index reflector holds the starting position of the Vir
 
 Let see how this is going to work.
 ```
+Phase 1: Merge the two arrays until a comparison index goes out of bounds 
+
 Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
 =========     ===========  ===============================    =============================    ===========    ===================
                              c'/i          j'                  c/i'         j                  [c'] > [j']
@@ -199,8 +201,9 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
                                                i       c'  j'   c       i'                   j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      5      1     swap(j', i), swap(j, i'), incr(i,j)
 ```
-We run-out of right array elements (j is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over.  
-But we cannot complete as we have out-of-order elements hanging in the right unmerged partition. Index Reflector to the rescue!
+We run-out of right array elements (j is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over. But we cannot complete as we have out-of-order elements hanging in the right unmerged partition.
+
+Index Reflector to the rescue!
 
 The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. i']` / `[7,5,6]` in the index reflector, it tells us to 
 1. first get the 7th element from virtual slice, then
@@ -209,25 +212,28 @@ The index reflector tells us exactly what we need to do to complete the work. if
 
 So if we get the remainder from the VirtualSlice `[6,7,5]` and apply the above steps we'll get `[5,6,7]`. Nice !! Let's see it in action.
 ```
+Phase 2: Finishing off the remainder unmerged partition
+
 Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
 =========     ===========  ===============================    =============================    ===========    ===================
                                                i       c'  j'   c   i'                       j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
-                                                   i   c'  j'       c   i'                   j                             
+                                               5    i   c'  j'       c   i'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                       i/c' j'          c/i'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
 ```
-**As if by magic** everything is now in position and ordered.
+**As if by magic** everything is now in position and ordered after O(n) iterations
 
 ### Useful Index Reflector Properties
-1. At completion the Index Reflector "reflects" the final positions given the starting order i.e the 4th element in virtualslice end up in the 1st position and so on
+1. At completion the Index Reflector "reflects" the final position per element and given its starting order i.e the 4th element in virtualslice ends up in the 1st position, the 1st in the 5th, and so on
 2. `[c]` index is bound by `[0 .. left array.len]` range 
 3. `[i']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]` 
 
 ### Index Reflector Optimisations
 1. Given the 4th property we can reduce the Index Reflector to left_array.len() reducing the additional memory required
-2. Given the 1st property we can 
+2. 
+3. Given the 1st property we can 
    1. Develop a "sort mask array" through which we can access the source array segments in order and without the need of permanently mutating them.
    2. Such "sort mask" can be imposed or "played onto" the source segments hence mutating them only when is needed

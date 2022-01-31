@@ -59,7 +59,7 @@ By trying to swap the smallest element of the two arrays with the pivot we quick
      [c] [p]        [j]                  
 [ 1 , 2 , 5 ]  [ 3 , 4 , 6 ]  2  2  3    2!!   4   Fail: We lost control here! 2 isn't part of the left array
 ```
-At this stage our partitioned region is `[1,2]` while the unmerged region is `[5!!,3,4,6]` which is clearly **_out-of-order_** and the result from then on, unpredictable. During the 2nd iteration, left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or 2nd position in the unmerged partition. 
+At this stage our partitioned region is `[1,2]` while the unmerged region is `[(5!!,3),(4,6)]` which is clearly **_out-of-order_** and the result from then on, unpredictable. During the 2nd iteration, left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or 2nd position in the unmerged partition. 
 Therefore, we need to find a way to maintain a solid comparison index reference `[c]` for the left array while we iterate
 
 ### Solution Options
@@ -82,20 +82,27 @@ Moreover, the partition point `[p]` and left index reference `[c]` are more or l
      [c]        [j]                  
 [ 1 , 3 , 5 ]  [ 2 , 4 , 6 ]  2  1     3     2   right swap(j,p), inc c & j by 1
          [c]        [j]
-[ 1 , 2 ,(5 ]  [ 3), 4 , 6 ]  3  2               revert left rotation with swap(c, j-1] (from c to j excluded) 
+[ 1 , 2 ,(5 ]  [ 3), 4 , 6 ]  3  2               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
          [c]        [j]                  
 [ 1 , 2 , 3 ]  [ 5 , 4 , 6 ]  3  2     3     4   No swap, just inc c by 1
                 [c] [j]                  
 [ 1 , 2 , 3 ]  [ 5 , 4 , 6 ]  4  2     5     4   right swap(j,p), inc c & j by 1
                     [c] [j]                  
-[ 1 , 2 , 3 ]  [ 4 ,(5), 6 ]  5  3               revert left rotation with swap(c, j-1) (from c to j excluded) 
+[ 1 , 2 , 3 ]  [ 4 ,(5), 6 ]  5  3               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
                     [c] [j]                  
 [ 1 , 2 , 3 ]  [ 4 ,(5), 6 ]  5  3     5     6   no swap, just inc c by 1 
                        [c/j]                  
-[ 1 , 2 , 3 ]  [ 4 , 5 , 6 ]  6  3               c == j (!) nothing more to compare... we finished !!
+[ 1 , 2 , 3 ]  [ 4 , 5 , 6 ]  6  3               c == j (!) nothing more to compare... we've finished !!
 ```
-Nice! It works, but on paper. Although we overcame the confict between pivot `[p]` and left index reference `[c]` the obvious issue here is that our indexing across the two arrays is broken. Definately `6 == 3` isn't correct, because `[c]` has to operate in both arrays while `[j]` operates solely in the right array. 
-So what if we could operate across both arrays as if they were one and without additional code complexity ? `VirtualSlice` comes to the rescue.
+Nice! It works, but on paper. Although we overcame the confict between pivot `[p]` and left index reference `[c]` the obvious issues here are
+1. Our indexing across the two arrays is broken. Definately `6 == 3` isn't correct, because `[c]` has to operate in both arrays while `[j]` operates solely in the right array. 
+2. Rotation won't work between non-adjacent arrays without much higher code complexity to deal with the gap
+3. Rotation will be computationaly significant against large datasets
+
+However we do know that mergesort, performs merge on memory adjacent arrays hence (2) is somehow mitigated by deriving a continuous array out of the two so that, `working array = pointer to left_array[0] .. pointer to [left_array.len() + right_array.len()]`
+
+
+So what if the left & right arrays aren't adjacent in memory ? `VirtualSlice` comes to the rescue.
 
 ### Virtual Slice - from fragmented to linear access
 VirtualSlice is composed out of one or more array segments, adjacent to memory or not, and enable transparently operating over the array contents.
@@ -114,22 +121,22 @@ Left Array       Right Array
 ```
 Let's repeat the example but through the use of a virtualslice.
 ```
- [c]        [j]           c  j    [c] > [j]  Action
-[ 1 , 3 , 5, 2 , 4 , 6 ]  1  4     1     2   No swap, just inc c by 1
-     [c]    [j]                  
-[ 1 , 3 , 5, 2 , 4 , 6 ]  2  4     3     2   right swap(j,p), inc c & j by 1
+ [c]         [j]           c  j    [c] > [j]  Action
+[ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just inc c by 1
+     [c]     [j]                  
+[ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,p), inc c & j by 1
          [c]    [j]
-[ 1 , 2 ,(5, 3), 4 , 6 ]  3  5               revert left rotation with swap(c, j-1] (from c to j excluded) 
-         [c]    [j]                  
-[ 1 , 2 , 3, 5 , 4 , 6 ]  3  5     3     4   No swap, just inc c by 1
-            [c] [j]                  
-[ 1 , 2 , 3, 5 , 4 , 6 ]  4  6     5     4   right swap(j,p), inc c & j by 1
-                [c] [j]                  
-[ 1 , 2 , 3, 4 ,(5), 6 ]  5  6               revert left rotation with swap(c, j-1) (from c to j excluded) 
-                [c] [j]                  
-[ 1 , 2 , 3, 4 ,(5), 6 ]  5  6     5     6   no swap, just inc c by 1 
-                   [c/j]                  
-[ 1 , 2 , 3, 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we finished !!
+[ 1 , 2 ,(5, 3), 4 , 6 ]  3  5                revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+         [c]     [j]                  
+[ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just inc c by 1
+             [c] [j]                  
+[ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,p), inc c & j by 1
+                 [c] [j]                  
+[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+                 [c] [j]                  
+[ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just inc c by 1 
+                    [c/j]                  
+[ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we finished !!
 ```
 
 

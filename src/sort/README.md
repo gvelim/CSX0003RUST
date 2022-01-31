@@ -214,9 +214,9 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
                                                i       c'  j'   c   i'                       j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                    i   c'  j'       c   i'                   j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                       i/c' j'          c/i'                   j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
 ```
 **As if by magic** everything is now in position and ordered.
 

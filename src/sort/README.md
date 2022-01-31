@@ -227,6 +227,16 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
 
 ### Useful Index Reflector Properties
 1. At completion the Index Reflector "reflects" the final position per element and given its starting order i.e the 4th element in virtualslice ends up in the 1st position, the 1st in the 5th, and so on
+```
+  Slice 1       Slice 2      VirtualSlice                       Index Reflector                  
+  =========     ===========  ===============================    =============================    
+                               c'/i          j'                  c/i'         j                  
+  [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      
+  ...
+  ...
+                                                        i/c' j'          c/i'                   j                             
+  [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      
+```
 2. `[c]` index is bound by `[0 .. left array.len]` range 
 3. `[i']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]` 

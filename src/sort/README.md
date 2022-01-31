@@ -190,21 +190,38 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
 =========     ===========  ===============================    =============================    ===========    ===================
                              c'/i          j'                  c/i'         j                  [c'] > [j']
 [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', i), swap(j, i'), incr(i,j)
-                             c'/i          j'                  c/i'         j  
-[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1,6(i),7,5(c'),2(j),3,4]   [4(c),2(i'),3] 
-[ 1, 2, 7] <> [ 5, 6, 3, 4]  [1,2,7(i),5(c'),6,3(j),4]   [4(c),5,3(i')]
-[ 1, 2, 3] <> [ 5, 6, 7, 4]  [1,2,3,5(c'/i),6,7,4(j)]    [4(c/i'),5,6,]
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [1,2,3,4,6(i),7,5(c')](j)   [7(c),5(i'),6] <-- Phase 1: Main merge finished but still i < c'
-[ 1, 2, 3] <> [ 4, 5, 7, 6]  [1,2,3,4,5,7(i),6(c')](j)   [5,7(c),6(i')]     Trick: reflector knows the right order remaining
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [1,2,3,4,5,6,7(i/c')](j)    [5,6,7(c/i') ] <-- Phase 2: finished merging (reflects starting position)
-
+                                   i       c'  j'               c   i'          j                             
+[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 2 , 6 , 7 ]      5      2     swap(j', i), swap(j, i'), incr(i,j) 
+                                       i   c'      j'           c       i'          j                             
+[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 3 , 7 ]      5      3     swap(j', i), swap(j, i'), incr(i,j)
+                                          c'/i         j'     c/i'                      j                             
+[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      5      4     swap(j', i), swap(j, i'), incr(i,j)
+                                               i       c'  j'   c       i'                   j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      5      1     swap(j', i), swap(j, i'), incr(i,j)
 ```
+We run-out of right array elements (j is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over.  
+But we cannot complete as we have out-of-order elements hanging in the right unmerged partition. Index Reflector to the rescue!
 
+The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. i']` / `[7,5,6]` in the index reflector, it tells us to 
+1. first get the 7th element from virtual slice, then
+2. get the 5th element from virtual slice, and 
+3. finaly get the 6th element from virtual slice
 
+So if we get the remainder from the VirtualSlice `[6,7,5]` and apply the above steps we'll get `[5,6,7]`. Nice !! Let's see it in action.
+```
+Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
+=========     ===========  ===============================    =============================    ===========    ===================
+                                               i       c'  j'   c   i'                       j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+                                                   i   c'  j'       c   i'                   j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+                                                      i/c' j'          c/i'                   j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+```
+**As if by magic** everything is now in position and ordered.
 
-
-### Observations / Properties
-1. At completion the Index Reflector "reflects" the final positions given the starting order
+### Useful Index Reflector Properties
+1. At completion the Index Reflector "reflects" the final positions given the starting order i.e the 4th element in virtualslice end up in the 1st position and so on
 2. `[c]` index is bound by `[0 .. left array.len]` range 
 3. `[i']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]` 

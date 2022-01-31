@@ -28,10 +28,10 @@ Versions
 ```
 Start                               Finish
 ==============================     ==========================
-Left array       Right array       Merged array
-+---+---+---+    +---+---+---+     +---+---+---+---+---+---+
-| 1 | 3 | 5 | <> | 2 | 4 | 6 | =>  | 1 | 2 | 3 | 4 | 5 | 6 |
-+---+---+---+    +---+---+---+     +---+---+---+---+---+---+
+Left array       Right array       Ordered elements across arrays
++---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
+| 1 | 3 | 5 | <> | 2 | 4 | 6 | =>  | 1 | 2 | 3 |  | 4 | 5 | 6 |
++---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
  [c]              [j]
 
 Generic Approach of using a pivot to separate 
@@ -100,15 +100,15 @@ Nice! It works, but only on paper. Although we overcame the confict between pivo
 However we do know that mergesort, performs merge on memory adjacent arrays hence (2) is somehow mitigated by deriving a continuous array out of the two so that, `working array = pointer to left_array[0] .. pointer to [left_array.len() + right_array.len()]`
 
 ```
-Left Array   Right Array
+Left Array    Right Array
++---+---+---+ +---+---+---+     
+| 2 | 4 | 6 | | 1 | 3 | 5 |   Adjacent array segments
++---+---+---+ +---+---+---+     
+  |   |   |    |   |   |
 +---+---+---+---+---+---+     
-| 2 | 4 | 6 | 1 | 3 | 5 |   Adjacent array segments
-+---+---+---+---+---+---+     
-  |   |   |   |   |   |
-+---+---+---+---+---+---+     
-|&2 |&4 |&6 |&1 |&3 |&5 |   Memory reconstracted as one continuous array
-+---+---+---+---+---+---+   
- [c]         [j]
+|&2 |&4 |&6 |&1 |&3 |&5 |   Memory reconstructed and operated as a continuous array i.e.
++---+---+---+---+---+---+   we recast a slice with start pointer left_array[0] 
+ [c]         [j]            and length = left (len + right len)*sizeof()
 
 ```
 Let's repeat the example but through the memory reconstructed array.

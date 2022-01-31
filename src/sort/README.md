@@ -62,7 +62,7 @@ By trying to swap the smallest element of the two arrays with the pivot we quick
 At this stage our partitioned region is `[1,2]` while the unmerged region is `[(5!!,3),(4,6)]` which is clearly **_out-of-order_** and the result from then on, unpredictable. During the 2nd iteration, left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or 2nd position in the unmerged partition. 
 Therefore, we need to find a way to maintain a solid comparison index reference `[c]` for the left array while we iterate
 
-### Solution Options
+### Probelm Solution
 #### Canceling the Rotation during right swaps
 It becomes obvius that during right swap operation our left array is rotated left so if we take a look
 ```
@@ -138,7 +138,7 @@ However, there are something we need to be aware of
 
 So can we do better without need for rotations and non-adjacent to memory arrays ?
 
-It appears that we can. `VirtualSlice` & Index Reflector come to rescue.
+It appears that we can. `Virtual Slice` & `Index Reflector` come to rescue.
 
 ### Virtual Slice - continuous access over array fragments
 VirtualSlice is composed out of one or more array fragments, adjacent to memory or not, and enable transparently operating over the array contents.
@@ -157,10 +157,10 @@ Left Array       Right Array
 ```
 While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle the need for eliminating the costly rotations.
 
-#### Index Reflector - from absolute to derived indexing
-We know that `[c]` and `[p]` indeces are gettig mixed up, as right swaps tend to move '[c]` non-sequencially causing left merge to go **_out-of-order_**. What if we could somehow, become 100% certain of the next in order eleement pointed by `[c]` and irrelevant of its position in the VirtualSlice ? 
+### Index Reflector - from absolute to derived indexing
+We know that `[c]` and `[p]` indices are getting mixed up, as right swaps tend to move `[c]` non-sequencially causing left merge to go **_out-of-order_**. What if we could somehow, become 100% certain of the next in order eleement pointed by `[c]` and irrelevant of its position in the VirtualSlice ? 
 
-This is where the *Index Reflector* comes handy. The *Index Reflector* becomes our solid reference in terms of the **right ordered sequence** and irrelevant the non-sequencial movemenet of `[c]` during each right swap.
+This is where the *Index Reflector* comes handy. The *Index Reflector* becomes our solid reference in terms of the **right ordered sequence** and irrelevant of the non-sequential movement of `[c]` after each right swap.
 
 ```
 Left Array       Right Array
@@ -199,16 +199,16 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
                                           c'/i         j'     c/i'                      j                             
 [ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      5      4     swap(j', i), swap(j, i'), incr(i,j)
                                                i       c'  j'   c       i'                   j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      5      1     swap(j', i), swap(j, i'), incr(i,j)
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(j', i), swap(j, i'), incr(i,j)
 ```
-We run-out of right array elements (j is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over. But we cannot complete as we have out-of-order elements hanging in the right unmerged partition.
+We ran-out of right array elements (`j`is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over. But we cannot complete as we have out-of-order elements hanging in the right unmerged partition.
 
 Index Reflector to the rescue!
 
 The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. i']` / `[7,5,6]` in the index reflector, it tells us to 
 1. first get the 7th element from virtual slice, then
 2. get the 5th element from virtual slice, and 
-3. finaly get the 6th element from virtual slice
+3. finally, get the 6th element from virtual slice
 
 So if we get the remainder from the VirtualSlice `[6,7,5]` and apply the above steps we'll get `[5,6,7]`. Nice !! Let's see it in action.
 ```
@@ -223,7 +223,7 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
                                                       i/c' j'          c/i'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
 ```
-**As if by magic** everything is now in position and ordered after O(n) iterations
+**As if by magic** everything is now in position and ordered after `O(n)` iterations
 
 ### Useful Index Reflector Properties
 1. At completion the Index Reflector "reflects" the final position per element and given its starting order i.e the 4th element in virtualslice ends up in the 1st position, the 1st in the 5th, and so on
@@ -232,8 +232,7 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
 4. Always `[j'] == [j]` 
 
 ### Index Reflector Optimisations
-1. Given the 4th property we can reduce the Index Reflector to left_array.len() reducing the additional memory required
-2. 
-3. Given the 1st property we can 
+1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the additional memory required by half in case of mergesort
+2. Given the 1st property we can 
    1. Develop a "sort mask array" through which we can access the source array segments in order and without the need of permanently mutating them.
    2. Such "sort mask" can be imposed or "played onto" the source segments hence mutating them only when is needed

@@ -52,10 +52,11 @@ region   p: Pivot
 By trying to swap the smallest element of the two arrays with the pivot we quickly realise that things are getting out of control very soon. For example,
 
 ```
- c/p             j            c  j  p   [c] > [j]  Action
-[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p)  <-- move 1:[c] to pivot [p] and increase c & p by one
+                              c  j  p   [c] > [j]  Action
+ c/p             j            =======   =========  ========================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p) incr(c,p)
      c/p         j                  
-[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p)  <-- move 2:[j] to pivot [p] and increase j & p  by one
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p) incr(j,p)
       c   p          j                   
 [ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  2  2  3    2!!   4   Fail: We lost control here! 2 isn't part of the left array
 ```
@@ -66,10 +67,11 @@ Therefore, we need to find a way to maintain a solid comparison index reference 
 #### Canceling the Rotation during right swaps
 It becomes obvious that during the right swap operation our left array is rotated left as seen below
 ```
- c/p             j            c  j  p   [c] > [j]  Action
-[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p), inc c & p by 1
+                              c  j  p   [c] > [j]  Action
+ c/p             j            =======   =========  ========================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p) incr(c,p)
      c/p         j                   
-[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p)  <-- move 2:[j] to pivot [p] and move j & p  by one
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p) incr(j,p)
       c   p          j                  
 [ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  <-- Here instead of [3,5] we have [5,3]
 ```
@@ -77,20 +79,21 @@ Moreover, the partition point `[p]` more or less points to the where the left co
 * reverting the rotation effect after each right swap hence bringing the left unmerged part back to order
 * using `[c]` as both the partition and the left comparison index
 ```
-  c              j            c  j    [c] > [j]  Action
-[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1     1     2   No swap, just inc c by 1
+                              c  j    [c] > [j]  Action
+  c              j            ====    =========  ============================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1     1     2   No swap, just incr(c)
       c          j                   
-[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1     3     2   right swap(j,p), inc c & j by 1
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1     3     2   right swap(j,c), incr(c,j)
           c          j 
-[ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  3  2               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+[ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  3  2               rotate right by 1, from c to j excluded 
           c          j                   
-[ 1 , 2 ,(3 ]  [ 5),(4 , 6)]  3  2     3     4   No swap, just inc c by 1
+[ 1 , 2 ,(3 ]  [ 5),(4 , 6)]  3  2     3     4   No swap, just incr(c)
                  c   j                   
-[ 1 , 2 , 3 ]  [(5),(4 , 6)]  4  2     5     4   right swap(j,p), inc c & j by 1
+[ 1 , 2 , 3 ]  [(5),(4 , 6)]  4  2     5     4   right swap(j,c), incr(c,j)
                      c   j                   
-[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3               rotate right by 1, from c to j excluded 
                      c   j                   
-[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3     5     6   no swap, just inc c by 1 
+[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3     5     6   No swap, just incr(c) 
                         c/j                   
 [ 1 , 2 , 3 ]  [ 4 , 5 ,(6)]  6  3               c == j (!) nothing more to compare... we've finished !!
 ```
@@ -112,7 +115,8 @@ Left Array    Right Array
 ```
 Let's repeat the example but through the memory reconstructed array.
 ```
-  c           j            c  j    [c] > [j]  Action
+                           c  j    [c] > [j]  Action
+  c           j            ====    =========  ============================
 [ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just incr(c)
       c       j                   
 [ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,c), incr(c,j)

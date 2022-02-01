@@ -52,52 +52,51 @@ region   p: Pivot
 By trying to swap the smallest element of the two arrays with the pivot we quickly realise that things are getting out of control very soon. For example,
 
 ```
-[c/p]           [j]           c  j  p   [c] > [j]  Action
+ c/p             j            c  j  p   [c] > [j]  Action
 [(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p)  <-- move 1:[c] to pivot [p] and increase c & p by one
-    [c/p]       [j]                  
+     c/p         j                  
 [ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p)  <-- move 2:[j] to pivot [p] and increase j & p  by one
-     [c] [p]        [j]                  
+      c   p          j                   
 [ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  2  2  3    2!!   4   Fail: We lost control here! 2 isn't part of the left array
 ```
-At this stage our partitioned region is `[1,2]` while the unmerged region is `[(5!!,3),(4,6)]` which is clearly **_out-of-order_** and the result from then on is unpredictable. During the 2nd iteration, the left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or the 2nd position in the unmerged partition. 
+At this stage our partitioned region is left of `p` and equal to `[1,2]` while the unmerged region is `[(5!!,3),(4,6)]` which is clearly **_out-of-order_** and the result from then on is unpredictable. During the 2nd iteration, the left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or the 2nd position in the unmerged partition. 
 Therefore, we need to find a way to maintain a solid comparison index reference `[c]` for the left array while we iterate through
 
-### Probelm Solution
+### Problem Solution
 #### Canceling the Rotation during right swaps
 It becomes obvious that during the right swap operation our left array is rotated left as seen below
 ```
-[c/p]           [j]           c  j  p   [c] > [j]  Action
+ c/p             j            c  j  p   [c] > [j]  Action
 [(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p), inc c & p by 1
-    [c/p]       [j]                  
+     c/p         j                   
 [ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p)  <-- move 2:[j] to pivot [p] and move j & p  by one
-     [c] [p]        [j]                  
+      c   p          j                  
 [ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  <-- Here instead of [3,5] we have [5,3]
 ```
-Moreover, the partition point `[p]` and left index reference `[c]` more or less point to the start of the left array, that is, the unmerged partition. Let's try this time with 
-* reverting the rotation hence bringing the left sub array back to order
+Moreover, the partition point `[p]` more or less points to the where the left comparison index `[c]` should have been, that is, the unmerged partition. Let's try this time with 
+* reverting the rotation effect after each right swap hence bringing the left unmerged part back to order
 * using `[c]` as both the partition and the left comparison index
 ```
- [c]            [j]           c  j    [c] > [j]  Action
+  c              j            c  j    [c] > [j]  Action
 [(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1     1     2   No swap, just inc c by 1
-     [c]        [j]                  
+      c          j                   
 [ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1     3     2   right swap(j,p), inc c & j by 1
-         [c]        [j]
+          c          j 
 [ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  3  2               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
-         [c]        [j]                  
+          c          j                   
 [ 1 , 2 ,(3 ]  [ 5),(4 , 6)]  3  2     3     4   No swap, just inc c by 1
-                [c] [j]                  
+                 c   j                   
 [ 1 , 2 , 3 ]  [(5),(4 , 6)]  4  2     5     4   right swap(j,p), inc c & j by 1
-                    [c] [j]                  
+                     c   j                   
 [ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
-                    [c] [j]                  
+                     c   j                   
 [ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3     5     6   no swap, just inc c by 1 
-                       [c/j]                  
+                        c/j                   
 [ 1 , 2 , 3 ]  [ 4 , 5 ,(6)]  6  3               c == j (!) nothing more to compare... we've finished !!
 ```
-Nice! It works, but only on paper. Although we overcame the confict between pivot `[p]` and left index reference `[c]` the obvious issues here are:
-1. Our indexing across the two arrays is broken. Definitely `6 == 3` isn't correct, because `[c]` has to operate in both arrays while `[j]` operates solely in the right array. 
+Nice! It works, but only on paper. Although we overcame the conflict between pivot `[p]` and left comparison index `[c]` the obvious issues here is that our indexing across the two arrays is broken. Definitely `6 == 3` isn't correct, because `[c]` has to operate in both arrays while `[j]` operates solely in the right array. 
 
-However we do know that mergesort, performs merge on memory adjacent arrays hence (2) is somehow mitigated by deriving a continuous array out of the two so that, `working array = pointer to left_array[0] .. pointer to [left_array.len() + right_array.len()]`
+However, we do know that mergesort, performs merge on memory adjacent arrays hence this can be mitigated by deriving a continuous array out of the two so that, `working array = pointer to left_array[0] .. pointer to [left_array.len() + right_array.len()]`
 
 ```
 Left Array    Right Array
@@ -113,35 +112,35 @@ Left Array    Right Array
 ```
 Let's repeat the example but through the memory reconstructed array.
 ```
- [c]         [j]           c  j    [c] > [j]  Action
+  c           j            c  j    [c] > [j]  Action
 [ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just inc c by 1
-     [c]     [j]                  
+      c       j                   
 [ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,p), inc c & j by 1
-         [c]    [j]
+          c      j 
 [ 1 , 2 ,(5, 3), 4 , 6 ]  3  5                revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
-         [c]     [j]                  
+          c       j                   
 [ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just inc c by 1
-             [c] [j]                  
+              c   j                   
 [ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,p), inc c & j by 1
-                 [c] [j]                  
+                  c   j                   
 [ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
-                 [c] [j]                  
+                  c   j                   
 [ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just inc c by 1 
-                    [c/j]                  
+                     c/j                   
 [ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we finished !!
 ```
 So far so good. We have a working approach that however is dependent on adjacent-to-memory arrays for achieving the rotations
 
 However, there are some things we need to be aware of
 1. Rotations won't work between non-adjacent arrays without additional code complexity to deal with the gap
-2. Rotation will be computationaly significant against large datasets
+2. Rotation will be computationally significant against large datasets
 
 So can we do better without need for rotations and non-adjacent to memory arrays ?
 
 It appears that we can. `Virtual Slice` & `Index Reflector` come to the rescue.
 
 ### Virtual Slice - continuous access over array fragments
-VirtualSlice is composed out of one or more array fragments, adjacent to memory or not, and enables transparently operating over the array contents.
+A `VirtualSlice` is composed out of one or more array fragments, adjacent to memory or not, and enables transparently operating over the **attached** array fragments.
 ```
 Left Array       Right Array
 +---+---+---+    +---+---+---+     
@@ -158,9 +157,10 @@ Left Array       Right Array
 While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle eliminating the costly rotations.
 
 ### Index Reflector - from absolute to derived indexing
-We know that `[c]` and `[p]` indices are getting mixed up, as right swaps tend to move `[c]` non-sequencially causing left merge to go **_out-of-order_**. What if we could somehow, become 100% certain of the next in order eleement pointed by `[c]` and irrelevant of its position in the VirtualSlice ? 
+We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequencially causing left merge to go **_out-of-order_**.
+What if we could somehow, we had an away that incrementing `c` by `1` points to the next in order element 100% of the times and irrelevant where its position is in the VirtualSlice ? 
 
-This is where the *Index Reflector* comes handy. The *Index Reflector* becomes our solid reference in terms of the **right ordered sequence** and irrelevant of the non-sequential movement of `[c]` after each right swap.
+This is where the `IndexReflector` comes handy. The *Index Reflector* becomes our solid reference in terms of the **right ordered sequence** and irrelevant of the non-sequential movement of `[c]` after each right swap.
 
 ```
 Left Array       Right Array

@@ -20,9 +20,9 @@ Versions
 
 ## In-place Merge Algorithm with intelligent swapping
 ### General Approach
-In an "In place" merge of two ordered arrays it is always required to maintain a pivot between merged and unmerged sub-arrays as we 
-1. use indexes `(c,j)` to find the smallest element between (a) the left and (b) right ordered arrays
-2. Swap the next smallest element of the left and right sub-arrays with the pivot (p) position
+In an "In place" merge of two ordered arrays it is always required to maintain a pivot between merged and unmerged sub-arrays as we go over the process of
+1. Use comparison indexes `(c,j)` to find the smallest element between (a) the left and (b) right ordered arrays
+2. Swap the next smallest element of the left and right sub-arrays against a pivot position `(p)`
 3. Repeat until we've exhausted comparing and swapping all elements 
 
 ```

@@ -96,7 +96,7 @@ Moreover, the partition point `[p]` more or less points to the where the left co
 ```
 Nice! It works, but only on paper. Although we overcame the conflict between pivot `[p]` and left comparison index `[c]` the obvious issues here is that our indexing across the two arrays is broken. Definitely `6 == 3` isn't correct, because `[c]` has to operate in both arrays while `[j]` operates solely in the right array. 
 
-However, we do know that mergesort, performs merge on memory adjacent arrays hence this can be mitigated by deriving a continuous array out of the two so that, `working array = pointer to left_array[0] .. pointer to [left_array.len() + right_array.len()]`
+However, we do know that mergesort, performs merge on memory adjacent array segments hence this can be mitigated by reconstructing the parent array out of the two fragments so that, `working array = *left_array[0] .. *left_array[0] + (left_array.len() + right_array.len())`
 
 ```
 Left Array    Right Array
@@ -117,13 +117,13 @@ Let's repeat the example but through the memory reconstructed array.
       c       j                   
 [ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,p), inc c & j by 1
           c      j 
-[ 1 , 2 ,(5, 3), 4 , 6 ]  3  5                revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+[ 1 , 2 ,(5 , 3), 4 , 6 ]  3  5                revert left rotation with rotate_right(c .. j-1) (from c to j excluded) by 1 ) 
           c       j                   
 [ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just inc c by 1
               c   j                   
 [ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,p), inc c & j by 1
                   c   j                   
-[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               revert left rotation with rotate_right(c .. j-1] (from c to j excluded) by 1 ) 
+[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               revert left rotation with rotate_right(c .. j-1) (from c to j excluded) by 1 ) 
                   c   j                   
 [ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just inc c by 1 
                      c/j                   
@@ -157,10 +157,12 @@ Left Array       Right Array
 While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle eliminating the costly rotations.
 
 ### Index Reflector - from absolute to derived indexing
-We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequencially causing left merge to go **_out-of-order_**.
-What if we could somehow, we had an away that incrementing `c` by `1` points to the next in order element 100% of the times and irrelevant where its position is in the VirtualSlice ? 
+We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequentially causing left merge to go **_out-of-order_**.
 
-This is where the `IndexReflector` comes handy. The *Index Reflector* becomes our solid reference in terms of the **right ordered sequence** and irrelevant of the non-sequential movement of `[c]` after each right swap.
+
+What if we could somehow, had a way such that when incrementing `c` by `1`, `c` points to the next in "logical order" element of the left array, 100% of the times and irrelevant of where `[c]` is positioned within the VirtualSlice ? 
+
+This is where the `IndexReflector` comes handy. The *Index Reflector* becomes the **absolute reference** in terms of the **ordered sequence** that `c` & `j` indexes have to follow and irrelevant of the non-sequential movement of `[c]` caused by every right swap.
 
 ```
 Left Array       Right Array
@@ -172,43 +174,45 @@ Left Array       Right Array
        ...  | ...
 +----+----+----+----+----+----+
 | &2 | &4 | &6 | &1 | &3 | &5 |  Virtual Slice with derived indexes
-+----+----+----+----+----+----+  [c'] = Index Reflector[c], [j'] = Index Reflector[j]
-[p][c']      |  [j']   |    |
++----+----+----+----+----+----+  c' = Index Reflector[c], j' = Index Reflector[j]
+ p/c'        |   j'    |    |
          ... | ...     |    |
 +----+----+----+----+----+----+
-| 1  | 2  | 3  | 4  | 5  | 6  |  Index Reflector captures current index positions against inital ordered sequence
-+----+----+----+----+----+----+  i.e. [3] indicates &6 is in 3rd "starting" position, 
-[p'][c]         [j]                   thereafter, `[3]` indicates latest position of &6 within VirtualSlice 
-                                 [p'] such that Index Reflector[x] == p, where x {c..j} 
+| 1  | 2  | 3  | 4  | 5  | 6  |  Index Reflector captures VirtualSlice's elements latest  positions against their starting position
++----+----+----+----+----+----+  i.e. if IndexReflector[3] == 4, it would imply that VirtualSlice[4] was in the 3rd position
+ p'/c            j               [p'] = x, such that Index Reflector[x] == p, where x E {c..j} 
+                                 i.e. if p == 3 given IndexReflector[x] == 3, then p' == 5 if IndexReflector[5] == 3
 
 ```
-In the above diagram, the index reflector holds the starting position of the VirtualSlice elements. Order Comparison indices `[c]` and `[j]` are operated against the index reflector and are **projected** over to VirtualSlice as `[c']` and `[j']`. Reversely, Pivot index `[p]` is operated on the VirtualSlice and is projected over the Index Reflector as `[p']`.
+In the diagram above, the Index Reflector holds the **starting position** of the VirtualSlice elements. Order Comparison indexes `[c]` and `[j]` are operated against the index reflector and are **projected** over to VirtualSlice as `[c']` and `[j']` using the transformations described in the diagram.
 
-Let see how this is going to work.
+Reversely, Pivot index `[p]` is operated on the VirtualSlice and is projected over the Index Reflector as `[p']` using the transformation provided in the diagram.
+
+Let's see how this is going to work; pay attention to the ambidextrous movement of `c'` and `p'`.
 ```
 Phase 1: Merge the two arrays until a comparison index goes out of bounds 
 
-Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
-=========     ===========  ===============================    =============================    ===========    ===================
-                             c'/i          j'                  c/i'         j                  [c'] > [j']
-[ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', i), swap(j, i'), incr(i,j)
-                                   i       c'  j'               c   i'          j                             
-[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 2 , 6 , 7 ]      5      2     swap(j', i), swap(j, i'), incr(i,j) 
-                                       i   c'      j'           c       i'          j                             
-[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 3 , 7 ]      5      3     swap(j', i), swap(j, i'), incr(i,j)
-                                          c'/i         j'     c/i'                      j                             
-[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      5      4     swap(j', i), swap(j, i'), incr(i,j)
-                                               i       c'  j'   c       i'                   j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(j', i), swap(j, i'), incr(i,j)
+Slice 1       Slice 2        VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                             c'/p          j'                  c/p'         j                  [c'] > [j']
+[ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', p), swap(j, p'), incr(p,j)
+                                   p       c'  j'               c   i'          j                             
+[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 2 , 6 , 7 ]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+                                       p   c'      j'           c       p'          j                             
+[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 3 , 7 ]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+                                          c'/p         j'     c/p'                      j                             
+[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+                                               p       c'  j'   c       p'                   j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     <-- j'/j got out of bounds ! Phase 1 completed
 ```
-We ran-out of right array elements (`j`is over bound), which means anything below `[i]` is merged and anything including and above `[i]` just needs to be carried over. But we cannot complete as we have out-of-order elements hanging in the right unmerged partition.
+We ran-out of right array elements (`j`is over bound), which means anything below `[p]` is merged and anything including and above `[p]` just needs to be carried over. But we cannot complete as we have **_out-of-order_** elements in the unmerged partition.
 
 Index Reflector to the rescue!
 
-The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. i']` / `[7,5,6]` in the index reflector, it tells us to 
-1. first get the 7th element from virtual slice, then
-2. get the 5th element from virtual slice, and 
-3. finally, get the 6th element from virtual slice
+The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. p']` / `[7,5,6]` in the index reflector, it tells us  
+1. next comes the 7th element from virtual slice,
+2. then the 5th element from virtual slice, and
+3. finally, the 6th element from virtual slice
 
 So if we get the remainder from the VirtualSlice `[6,7,5]` and apply the above steps we'll get `[5,6,7]`. Nice !! Let's see it in action.
 ```
@@ -216,29 +220,29 @@ Phase 2: Finishing off the remainder unmerged partition
 
 Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
 =========     ===========  ===============================    =============================    ===========    ===================
-                                               i       c'  j'   c   i'                       j                             
+                                               p       c'  j'   c   p'                       j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
-                                               5    i   c'  j'       c   i'                   j                             
+                                                   p   c'  j'       c   p'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
-                                                      i/c' j'          c/i'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+                                                      p/c' j'          c/p'                   j                             
+[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     <-- We finished ! c' and p are both on the last position
 ```
-**As if by magic** everything is now in position and ordered after `O(n)` iterations
+Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n)` iterations
 
 ### Useful Index Reflector Properties
-1. At completion the Index Reflector "reflects" the final position per element and given its starting order i.e the 4th element in virtualslice ends up in the 1st position, the 1st in the 5th, and so on
+1. At completion the Index Reflector **reflects** the final position per element and given its starting order i.e the 4th element in VirtualSlice ends up in the 1st position, the 1st in the 5th, and so on
 ```
   Slice 1       Slice 2      VirtualSlice                       Index Reflector                  
   =========     ===========  ===============================    =============================    
-                               c'/i          j'                  c/i'         j                  
+                               c'/p          j'                  c/p'         j                  
   [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      
   ...
   ...
-                                                        i/c' j'          c/i'                   j                             
+                                                        p/c' j'          c/p'                   j                             
   [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      
 ```
 2. `[c]` index is bound by `[0 .. left array.len]` range 
-3. `[i']` index is bound by `[c .. left array.len]` range
+3. `[p']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]` 
 
 ### Index Reflector Optimisations

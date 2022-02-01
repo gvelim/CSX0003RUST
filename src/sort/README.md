@@ -196,13 +196,13 @@ Slice 1       Slice 2        VirtualSlice                     Index Reflector   
 =========     ===========    =============================    =============================    ===========    ===================
                              c'/p          j'                  c/p'         j                  [c'] > [j']
 [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', p), swap(j, p'), incr(p,j)
-                                   p       c'  j'               c   i'          j                             
-[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 2 , 6 , 7 ]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+                                   p       c'  j'               c   p'          j                             
+[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 5 , 6 , 7 ]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
                                        p   c'      j'           c       p'          j                             
-[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 3 , 7 ]      5      3     swap(j', p), swap(j, p'), incr(p,j)
-                                          c'/p         j'     c/p'                      j                             
-[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      5      4     swap(j', p), swap(j, p'), incr(p,j)
-                                               p       c'  j'   c       p'                   j                             
+[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 6 , 7 ]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+                                          c'/p         j'      c/p'                     j                             
+[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 4 , 5 , 6 , 1 , 2 , 3 , 7 ]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+                                               p       c'  j'   c   p'                       j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     <-- j'/j got out of bounds ! Phase 1 completed
 ```
 We ran-out of right array elements (`j`is over bound), which means anything below `[p]` is merged and anything including and above `[p]` just needs to be carried over. But we cannot complete as we have **_out-of-order_** elements in the unmerged partition.
@@ -221,11 +221,11 @@ Phase 2: Finishing off the remainder unmerged partition
 Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
 =========     ===========  ===============================    =============================    ===========    ===================
                                                p       c'  j'   c   p'                       j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                      c'/p j'          c/p'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     <-- We finished ! c' and p are both on the last position
+[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      x      x     <-- We finished ! c' and p are both on the last position
 ```
 Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n)` iterations
 
@@ -238,8 +238,8 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
   [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      
   ...
   ...
-                                                        p/c' j'          c/p'                   j                             
-  [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      
+                                                        p/c' j'          c/p'                  j                             
+  [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      
 ```
 2. `[c]` index is bound by `[0 .. left array.len]` range 
 3. `[p']` index is bound by `[c .. left array.len]` range

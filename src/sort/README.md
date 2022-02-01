@@ -32,7 +32,7 @@ Left array       Right array       Ordered elements across arrays
 +---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
 | 1 | 3 | 5 | <> | 2 | 4 | 6 | =>  | 1 | 2 | 3 |  | 4 | 5 | 6 |
 +---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
- [c]              [j]
+  c                j
 
 Generic Approach of using a pivot to separate 
 "merged" from "yet to be merged" regions
@@ -107,27 +107,27 @@ Left Array    Right Array
 +---+---+---+---+---+---+     
 |&2 |&4 |&6 |&1 |&3 |&5 |   Memory reconstructed and operated as a continuous array i.e.
 +---+---+---+---+---+---+   we recast a slice with start pointer left_array[0] 
- [c]         [j]            and length = left (len + right len)*sizeof()
+  c           j             and length = left (len + right len)*sizeof()
 
 ```
 Let's repeat the example but through the memory reconstructed array.
 ```
   c           j            c  j    [c] > [j]  Action
-[ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just inc c by 1
+[ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just incr(c)
       c       j                   
-[ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,p), inc c & j by 1
-          c      j 
-[ 1 , 2 ,(5 , 3), 4 , 6 ]  3  5                revert left rotation with rotate_right(c .. j-1) (from c to j excluded) by 1 ) 
+[ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,c), incr(c,j)
+          c       j 
+[ 1 , 2 ,(5 , 3), 4 , 6 ]  3  5               rotate right by 1, from c to j excluded
           c       j                   
-[ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just inc c by 1
+[ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just incr(c)
               c   j                   
-[ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,p), inc c & j by 1
+[ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,c), incr(c,j)
                   c   j                   
-[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               revert left rotation with rotate_right(c .. j-1) (from c to j excluded) by 1 ) 
+[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               rotate right by 1, from c to j excluded 
                   c   j                   
-[ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just inc c by 1 
+[ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just incr(c) 
                      c/j                   
-[ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we finished !!
+[ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we've finished !!
 ```
 So far so good. We have a working approach that however is dependent on adjacent-to-memory arrays for achieving the rotations
 
@@ -146,13 +146,13 @@ Left Array       Right Array
 +---+---+---+    +---+---+---+     
 | 2 | 4 | 6 | <> | 1 | 3 | 5 |   Non-adjacent array segments
 +---+---+---+    +---+---+---+     
- [c]      ^       [j]
+  c       ^        j
           |__
        ...  | ...
 +----+----+----+----+----+----+
 | &2 | &4 | &6 | &1 | &3 | &5 |  Array of mutable references : Virtual Slice
 +----+----+----+----+----+----+  i.e. &2 = pointer/reference to left array[0]
-[p][c]           [j]
+ p/c             j
 ```
 While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle eliminating the costly rotations.
 
@@ -192,7 +192,7 @@ Let's see how this is going to work; pay attention to the ambidextrous movement 
 ```
 Phase 1: Merge the two arrays until a comparison index goes out of bounds 
 
-Slice 1       Slice 2        VirtualSlice                     Index Reflector                  Compare        Action
+Left Arr      Rght Arr       VirtualSlice                     Index Reflector                  Compare        Action
 =========     ===========    =============================    =============================    ===========    ===================
                              c'/p          j'                  c/p'         j                  [c'] > [j']
 [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', p), swap(j, p'), incr(p,j)
@@ -209,7 +209,7 @@ We ran-out of right array elements (`j`is over bound), which means anything belo
 
 Index Reflector to the rescue!
 
-The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. p']` / `[7,5,6]` in the index reflector, it tells us  
+The index reflector tells us exactly what we need to do to complete the work. if you look at `[c .. left_array.len()]` / `[7,5,6]` in the index reflector, it tells us  
 1. next comes the 7th element from virtual slice,
 2. then the 5th element from virtual slice, and
 3. finally, the 6th element from virtual slice
@@ -218,13 +218,13 @@ So if we get the remainder from the VirtualSlice `[6,7,5]` and apply the above s
 ```
 Phase 2: Finishing off the remainder unmerged partition
 
-Slice 1       Slice 2      VirtualSlice                       Index Reflector                  Compare        Action
-=========     ===========  ===============================    =============================    ===========    ===================
+Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
                                                p       c'  j'   c   p'                       j                             
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
-                                                     c'/p j'          c/p'                   j                             
+                                                     c'/p  j'          c/p'                  j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      x      x     <-- We finished ! c' and p are both on the last position
 ```
 Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n)` iterations
@@ -232,8 +232,8 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 ### Useful Index Reflector Properties
 1. At completion the Index Reflector **reflects** the final position per element and given its starting order i.e the 4th element in VirtualSlice ends up in the 1st position, the 1st in the 5th, and so on
 ```
-  Slice 1       Slice 2      VirtualSlice                       Index Reflector                  
-  =========     ===========  ===============================    =============================    
+  Left Arr      Right Arr      VirtualSlice                     Index Reflector                  
+  =========     ===========    =============================    =============================    
                                c'/p          j'                  c/p'         j                  
   [ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      
   ...

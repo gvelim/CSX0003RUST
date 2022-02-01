@@ -224,7 +224,7 @@ Slice 1       Slice 2      VirtualSlice                       Index Reflector   
 [ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 7 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
-                                                      p/c' j'          c/p'                   j                             
+                                                     c'/p j'          c/p'                   j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 7 ]      x      x     <-- We finished ! c' and p are both on the last position
 ```
 Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n)` iterations

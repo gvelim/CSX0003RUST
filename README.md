@@ -3,7 +3,7 @@
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
 - Select (Random, Deterministic)
-- [Merge sort (mutable slices, in-place merging)](./src/sort/README.md)
+- [Merge sort (mutable slices, in-place merging)](./src/sort/README.md#merge-sort)
 - [Quick sort (mutable slices, in-place partitioning)](./src/sort/README.md)
 - Linked list 
 - Binary tree

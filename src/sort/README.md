@@ -11,12 +11,12 @@ Versions
    * Approach to in-place merge operations, 
       * Merge memory adjacent sub-arrays : `fn merge_mut_adjacent()`
         * Use of intelligent swaps 
-        * Performance: O(n), 
-        * Memory impact: 0.5 * O(n) * usize
+        * Performance: O(n+m), 
+        * Memory impact: 0.5 * O(n+m) * usize
       * Merge Non-adjacent sub-arrays : `fn merge_mut()`
         * Use of intelligent Swaps 
-        * Performance: O(n)
-        * Memory: 1.5 * O(n) * usize
+        * Performance: O(n+m)
+        * Memory: 1.5 * O(n+m) * usize
 
 ## In-place Merge Algorithm with intelligent swapping
 ### General Approach
@@ -231,7 +231,7 @@ Left Arr      Right Arr      VirtualSlice                     Index Reflector   
                                                      c'/p  j'          c/p'                  j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      x      x     <-- We finished ! c' and p are both on the last position
 ```
-Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n)` iterations
+Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n+m)` iterations
 
 ### Useful Index Reflector Properties
 1. At completion the Index Reflector **reflects** the final position per element and given its starting order i.e the 4th element in VirtualSlice ends up in the 1st position, the 1st in the 5th, and so on
@@ -250,8 +250,8 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 4. Always `[j'] == [j]` 
 
 ### Index Reflector Optimisations
-1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements by half (1.5*O(n)) in case of mergesort
-2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes 0.5 * O(n) * sizeof(usize)
+1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements by half (1.5*O(n)+m) in case of mergesort
+2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes 0.5 * O(n+m) * sizeof(usize)
 3. Given the 1st property we can 
    1. Develop a "sort mask array" through which we can access the source array segments in order and without the need of permanently mutating them.
    2. Such "sort mask" can be imposed or "played onto" the source segments hence mutating them only when is needed

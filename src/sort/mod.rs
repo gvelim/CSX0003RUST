@@ -84,9 +84,9 @@ impl<I> Iterator for MergeIterator<I>
     }
 }
 
-/// To be used with merge_sort_mut function, otherwise ensure slices are adjacent
-/// We cannot pass a &mut of the array since we will violate rust's borrowing rules
-/// hence we have to reconstruct the array ourselves here
+/// To be used with merge_sort_mut function, and only with slices that are adjacent
+/// Given that we cannot pass a &mut of the parent array without violating rust's borrowing rules
+/// We have to reconstruct the parent array ourselves which is what VirtualSlice takes care of
 /// GIVEN the slices are adjacent in memory
 ///
 /// #[should_panic]
@@ -96,53 +96,13 @@ impl<I> Iterator for MergeIterator<I>
 ///
 /// merge_mut(s1,s3);        // this should throw a panic
 ///
-
 pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
-    where T: Ord
+    where T: Ord + Debug
 {
     // println!("\tInput: {:?},{:?}", s1, s2);
 
-    // We resort to a trick given that slices are adjacent in memory
-    // we know they are, hence we reconstruct the parent slice that contains both S1 and S2
-    // therefore we operate on the reconstructed slice 
-    // Working Slice = (*S1) to (*S1 + s1.len + s2.len)
-    let ws: &mut [T];
-    unsafe {
-        ws = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s1.as_mut_ptr(), s1.len()+s2.len());
-        // checking they are aligned and adjacent,
-        // if not panic! so we prevent unpredictable behaviour
-        assert!( &s2[0] == &ws[s1.len()]);
-    }
-
-    // i = position in working slice so that ... [sorted elements] < ws[i] < [unsorted elements]
-    // j = position in working slice representing s2[0]
-    // len = working slice length
-    let (mut i,mut j, len, mut inv_count)  = (0usize, s1.len(), ws.len(), 0usize);
-
-    //println!("Merge:{:?}<>{:?} ({},{})",s1, s2, i, j);
-
-    // j == v.len() => no more comparisons since v[j] is the rightmost, last and largest of the two slices
-    // i == j => no more comparison required, since everything in ws[..i] << ws[j]
-    while j < len && i != j {
-        if let Ordering::Greater = ws[i].cmp(&ws[j]) {
-            // We deploy the rotation trick for now rather than swapping which doesn't work always
-            // with rotation we get
-            // ws[i],...ws[j-1],ws[j] --> ws[j],ws[i],...ws[j-1]
-            // hence the "sets" remain always ordered
-            ws[i..=j].rotate_right(1);
-            // inversion count is equal to all item between i and j
-            inv_count += j - i;
-            // pick next element from upper slice since ws[j] moved left
-            j += 1;
-            // print!("r:");
-        }
-        // sorted partition (left) increased by 1,
-        // pick the next element for sorting
-        i += 1;
-        //println!("\t{:?} ({},{})({})",ws, i, j, inv_count);
-    }
-
-    inv_count
+    let mut ws = VirtualSlice::new_adjacent(s1);
+    ws.merge(s2)
 }
 
 /// Merge two non-adjacent slices using in-place memory swaps and without use of rotations

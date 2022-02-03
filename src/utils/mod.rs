@@ -146,7 +146,10 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
         let mut j = self.len();
 
-        self.chain(s);
+        match self {
+            NonAdjacent(_) => self.chain(s),
+            Adjacent(_) => self.chain_adjacent(s),
+        };
 
         // i = partition position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
         // p = index reflector partition bound where i's position is always upper bounded by p

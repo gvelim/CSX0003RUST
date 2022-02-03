@@ -30,32 +30,67 @@ use std::ops::{Index, IndexMut, Range};
 /// assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
 /// assert_eq!(s2, &mut [11, 4, 6, 8 , 10]);
 /// ```
-pub struct VirtualSlice<'a, T> {
-    vv: Vec<&'a mut T>
+pub enum VirtualSlice<'a, T> where T: Ord {
+    NonAdjacent( Vec<&'a mut T> ),
+    Adjacent( &'a mut[T] ),
 }
 
-impl<'a, T> VirtualSlice<'a, T> {
+use VirtualSlice::{NonAdjacent, Adjacent};
+
+impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     pub fn new() -> VirtualSlice<'a, T> {
-        VirtualSlice {
-            vv : Vec::new(),
-        }
+        NonAdjacent( Vec::new() )
+    }
+    pub fn new_adjacent(s: &'a mut[T]) -> VirtualSlice<'a, T> {
+        Adjacent( s )
     }
     pub fn len(&self) -> usize {
-        self.vv.len()
+        match self {
+            NonAdjacent(v) => v.len(),
+            Adjacent(s) => s.len(),
+        }
     }
     pub fn is_empty(&self) -> bool {
-        self.vv.is_empty()
+        match self {
+            NonAdjacent(v) => v.is_empty(),
+            Adjacent(s) => s.is_empty(),
+        }
     }
     /// Append a slice segment onto the VirtualSlice
     pub fn chain(&mut self, s: &'a mut [T]) {
-         s.iter_mut()
-            .for_each(|item| {
-                self.vv.push(item);
-            });
+        if let NonAdjacent(v) = self {
+            s.iter_mut()
+                .for_each(|item| {
+                    v.push(item);
+                });
+        }
+    }
+    pub fn chain_adjacent(&mut self, s: &'a mut [T]) {
+        if let Adjacent(s0) = self {
+            let fs: &mut [T];
+            unsafe {
+                fs = &mut *std::ptr::slice_from_raw_parts_mut::<T>(s0.as_mut_ptr(), s0.len() + s.len());
+                // checking they are aligned and adjacent,
+                // if not panic! so we prevent unpredictable behaviour
+                assert!(&s[0] == &fs[s0.len()]);
+            }
+            *self = VirtualSlice::new_adjacent(fs);
+        }
     }
     /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, &'a mut T> {
-        self.vv.iter_mut()
+        if let NonAdjacent(v) = self {
+            v.iter_mut()
+        } else {
+            panic!()
+        }
+    }
+    pub fn iter_mut_adjacent(&mut self) -> std::slice::IterMut<'_, T> {
+        if let Adjacent(s) = self {
+            s.iter_mut()
+        } else {
+            panic!()
+        }
     }
     /// Swap two referenced positions that could correspond to between or within underlying slice segments
     pub fn swap(&mut self, a: usize, b:usize) {
@@ -218,57 +253,82 @@ impl<'a, T> VirtualSlice<'a, T> {
     }
 }
 
-
-impl<T> Default for VirtualSlice<'_, T> {
+impl<T> Default for VirtualSlice<'_, T> where T: Ord {
     fn default() -> Self {
         VirtualSlice::new()
     }
 }
 
-
-impl<T> Debug for VirtualSlice<'_, T> where T : Debug {
+impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
 
     /// extract and display the slice subsegments attached to the virtualslice
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_list()
-            .entries(
-                // get to the actual element referenced
-                // since we got a *pointer -> virtual slice *pointer -> slice segment item
-                self.vv.iter().map( |x| &**x )
-            )
-            .finish()
+        match self {
+            NonAdjacent(v) =>{
+                f.debug_list()
+                    .entries(
+                        // get to the actual element referenced
+                        // since we got a *pointer -> virtual slice *pointer -> slice segment item
+                        v.iter().map(|x| &**x)
+                    )
+                    .finish()
+            }
+            Adjacent(s) => {
+                f.debug_list()
+                    .entries(
+                        // get to the actual element referenced
+                        // since we got a *pointer -> virtual slice *pointer -> slice segment item
+                        s.iter()
+                    )
+                    .finish()
+            }
+        }
     }
 }
 
-impl<T> Index<usize> for VirtualSlice<'_, T> {
+impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!
-        &(*self.vv[index])
+        match self {
+            NonAdjacent(vv) => &(*vv[index]),
+            Adjacent(s) => &s[index],
+        }
     }
 }
 
-impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> {
+impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
     type Output = [&'a mut T];
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
-        &self.vv[index]
+        if let NonAdjacent(vv) = self {
+            &vv[index]
+        } else {
+            panic!()
+        }
     }
 }
 
-impl<T> IndexMut<usize> for VirtualSlice<'_, T> {
+impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!
-        &mut (*self.vv[index])
+        match self {
+            NonAdjacent(vv) => &mut (*vv[index]),
+            Adjacent(s) => &mut s[index],
+        }
     }
 }
 
-impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> {
+impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
-        &mut self.vv[index]
+        if let NonAdjacent(vv) = self {
+            &mut vv[index]
+        } else {
+            panic!()
+        }
     }
 }
 

@@ -12,11 +12,11 @@ Versions
       * Merge memory adjacent sub-arrays : `fn merge_mut_adjacent()`
         * Use of intelligent swaps 
         * Performance: O(n+m), 
-        * Memory impact: 0.5 * O(n+m) * usize
+        * Memory impact: O(n) * usize
       * Merge Non-adjacent sub-arrays : `fn merge_mut()`
         * Use of intelligent Swaps 
         * Performance: O(n+m)
-        * Memory: 1.5 * O(n+m) * usize
+        * Memory: O(2n+m) * usize
 
 ## In-place Merge Algorithm with intelligent swapping
 ### General Approach
@@ -250,8 +250,8 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 4. Always `[j'] == [j]` 
 
 ### Index Reflector Optimisations
-1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements by half (1.5*O(n)+m) in case of mergesort
-2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes 0.5 * O(n+m) * sizeof(usize)
+1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements from 2(n+m) to (2n+m) in case of mergesort
+2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes O(n) * sizeof(usize)
 3. Given the 1st property we can 
    1. Develop a "sort mask array" through which we can access the source array segments in order and without the need of permanently mutating them.
    2. Such "sort mask" can be imposed or "played onto" the source segments hence mutating them only when is needed

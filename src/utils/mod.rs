@@ -332,9 +332,55 @@ impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
     }
 }
 
+impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (self, other) {
+            (NonAdjacent(v), NonAdjacent(o)) => v.partial_cmp(o),
+            (Adjacent(s), Adjacent(o)) => s.partial_cmp(o),
+            ( _, _ ) => panic!(),
+        }
+    }
+}
+
+impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (NonAdjacent(v), NonAdjacent(o)) => v.eq(o),
+            (Adjacent(s), Adjacent(o)) => s.eq(o),
+            ( _, _ ) => panic!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    #[should_panic]
+    fn test_virtual_slice_adjacent_panic() {
+        let s1 = &mut [1, 3, 5, 7, 9];
+        let _s = &mut [0,0,0,0];
+        let s2 = &mut [2, 4, 6, 8, 10];
+        let mut vs = VirtualSlice::new_adjacent(s1);
+        vs.chain_adjacent(s2);
+    }
+    #[test]
+    fn test_virtual_slice_merge_adjacent() {
+        let s1 = &mut [1, 3, 5, 7, 9];
+        let s2 = &mut [2, 4, 6, 8, 10];
+        let mut vs = VirtualSlice::new_adjacent(s1);
+        vs.chain_adjacent(s2);
+        println!("{:?}",vs);
+        assert_eq!(vs, Adjacent( &mut [1,3,5,7,9,2,4,6,8,10] ) );
+        vs.iter_mut_adjacent()
+            .for_each(|x| {
+                *x = 12;
+            });
+        vs[0] = 11;
+        vs[5] = 9;
+        println!("{:?}",vs);
+        assert_eq!(vs, Adjacent( &mut [11,12,12,12,12,9,12,12,12,12] ) );
+    }
     #[test]
     fn test_virtual_slice_merge() {
         let test_data: [(&mut[i32], &mut[i32], &[i32],&[i32]); 6] = [

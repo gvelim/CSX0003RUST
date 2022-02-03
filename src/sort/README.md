@@ -10,9 +10,9 @@ Versions
    * Overall Performance: O(n log n) with intelligent swapping
    * Approach to in-place merge operations, 
       * Merge memory adjacent sub-arrays : `fn merge_mut_adjacent()`
-        * Use of Rotation/shift 
-        * Performance: O(n * n/2 rotations), 
-        * Memory: no additional memory
+        * Use of intelligent swaps 
+        * Performance: O(n), 
+        * Memory impact: 0.5 * O(n) * usize
       * Merge Non-adjacent sub-arrays : `fn merge_mut()`
         * Use of intelligent Swaps 
         * Performance: O(n)

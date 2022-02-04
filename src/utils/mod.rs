@@ -8,20 +8,29 @@ use std::ops::{Index, IndexMut, Range};
 /// ```
 /// use csx3::utils::VirtualSlice;
 ///
-/// let s1 = &mut [1, 3, 5, 7, 9];
-/// let _s3 = &mut [0, 0, 0];
-/// let s2 = &mut [2, 4, 6, 8 , 10];
+/// let v = &mut [1, 3, 5, 7, 9, 2, 4, 6, 8 , 10];
+/// let (s1, s2) = v.split_at_mut(5);
+/// let _s3 = &mut [0, 0, 0, 0,0];   // Wedge this to break stack continuity
+/// let s4 = &mut [2, 4, 6, 8, 10];
 ///
 /// {
 ///     let mut v = VirtualSlice::new();
 ///     v.attach(s1);
-///     v.attach(s2);
+///     v.attach(s4);
 ///     v[0] = 11;
 ///     v[5] = 9;
 ///     v.swap(0, 5);
 /// }
 /// assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
-/// assert_eq!(s2, &mut [11, 4, 6, 8 , 10]);
+/// assert_eq!(s4, &mut [11, 4, 6, 8 , 10]);
+/// {
+///     let mut v = VirtualSlice::new_adjacent(s1);
+///     v.attach(s2);
+///     v.swap(0, 5);
+/// }
+/// assert_eq!(s1, &mut [2, 3, 5, 7, 9]);
+/// assert_eq!(s2, &mut [9, 4, 6, 8 , 10]);
+///
 /// ```
 pub enum VirtualSlice<'a, T> where T: Ord {
     NonAdjacent( Vec<&'a mut T> ),

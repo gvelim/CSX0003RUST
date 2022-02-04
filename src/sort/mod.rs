@@ -84,17 +84,29 @@ impl<I> Iterator for MergeIterator<I>
     }
 }
 
-/// To be used with merge_sort_mut function, and only with slices that are adjacent
-/// Given that we cannot pass a &mut of the parent array without violating rust's borrowing rules
-/// We have to reconstruct the parent array ourselves which is what VirtualSlice takes care of
-/// GIVEN the slices are adjacent in memory
+/// Applies memory efficient in-place merging when two slices are adjacent to each other.
+/// ```
+/// use csx3::sort::merge_mut_adjacent;
 ///
+/// let mut input = vec![1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
+/// let (s1,s2) = input.split_at_mut(5);
+///
+/// merge_mut_adjacent(s1,s2);
+/// assert_eq!(input, vec![1,2,3,4,5,6,7,8,9,10]);
+/// ```
+/// Panics in case the two slices are found not to be adjacent. For safety, always use *ONLY* against slices that have been mutable split from an existing slice
 /// #[should_panic]
 /// let s1 = &mut [3, 5, 7];
 /// let s2 = &mut [1, 3, 5]; // wedge this between the two
 /// let s3 = &mut [2, 4, 6];
 ///
 /// merge_mut(s1,s3);        // this should throw a panic
+///
+/// There is no warranty that Rust will maintain two slice adjacent in a case like this.
+/// let s1 = &mut [3, 5, 7];
+/// let s3 = &mut [2, 4, 6];
+///
+/// merge_mut(s1,s3);        // this may not always work
 ///
 pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
@@ -106,7 +118,6 @@ pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
 }
 
 /// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
-/// Using a virtualslice allowing us to operate over the slices segments as a "continous slice"
 /// ```
 /// use csx3::sort::merge_mut;
 ///

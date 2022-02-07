@@ -117,19 +117,19 @@ Let's repeat the example but through the memory reconstructed array.
 ```
                            c  j    [c] > [j]  Action
   c           j            ====    =========  ============================
-[ 1 , 3 , 5 , 2 , 4 , 6 ]  1  4     1     2   No swap, just incr(c)
+[(1 , 3 , 5),(2 , 4 , 6)]  1  4     1     2   No swap, just incr(c)
       c       j                   
-[ 1 , 3 , 5 , 2 , 4 , 6 ]  2  4     3     2   right swap(j,c), incr(c,j)
+[ 1 ,(3 , 5),(2 , 4 , 6)]  2  4     3     2   right swap(j,c), incr(c,j)
           c       j 
-[ 1 , 2 ,(5 , 3), 4 , 6 ]  3  5               rotate right by 1, from c to j excluded
+[ 1 , 2 ,(5 , 3),(4 , 6)]  3  5               rotate right by 1, from c to j excluded
           c       j                   
-[ 1 , 2 , 3 , 5 , 4 , 6 ]  3  5     3     4   No swap, just incr(c)
+[ 1 , 2 ,(3 , 5), 4 , 6)]  3  5     3     4   No swap, just incr(c)
               c   j                   
-[ 1 , 2 , 3 , 5 , 4 , 6 ]  4  6     5     4   right swap(j,c), incr(c,j)
+[ 1 , 2 , 3 ,(5),(4 , 6)]  4  6     5     4   right swap(j,c), incr(c,j)
                   c   j                   
-[ 1 , 2 , 3 , 4 ,(5), 6 ]  5  6               rotate right by 1, from c to j excluded 
+[ 1 , 2 , 3 , 4 ,(5),(6)]  5  6               rotate right by 1, from c to j excluded 
                   c   j                   
-[ 1 , 2 , 3 , 4 , 5 , 6 ]  5  6     5     6   no swap, just incr(c) 
+[ 1 , 2 , 3 , 4 ,(5),(6)]  5  6     5     6   no swap, just incr(c) 
                      c/j                   
 [ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we've finished !!
 ```
@@ -199,15 +199,15 @@ Phase 1: Merge the two arrays until a comparison index goes out of bounds
 Left Arr      Rght Arr       VirtualSlice                     Index Reflector                  Compare        Action
 =========     ===========    =============================    =============================    ===========    ===================
                              c'/p          j'                  c/p'         j                  [c'] > [j']
-[ 5, 6, 7] <> [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      5      1     swap(j', p), swap(j, p'), incr(p,j)
+[ 5, 6, 7] <> [ 1, 2, 3, 4]  [(5 , 6 , 7),(1 , 2 , 3 , 4)]    [(1 , 2 , 3),(4 , 5 , 6 , 7)]      5      1     swap(j', p), swap(j, p'), incr(p,j)
                                    p       c'  j'               c   p'          j                             
-[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 , 6 , 7 , 5 , 2 , 3 , 4 ]    [ 4 , 2 , 3 , 1 , 5 , 6 , 7 ]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 ,(6 , 7 , 5),(2 , 3 , 4)]    [(4 , 2 , 3),(1 , 5 , 6 , 7)]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
                                        p   c'      j'           c       p'          j                             
-[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 , 7 , 5 , 6 , 3 , 4 ]    [ 4 , 5 , 3 , 1 , 2 , 6 , 7 ]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 ,(7 , 5 , 6),(3 , 4)]    [(4 , 5 , 3),(1 , 2 , 6 , 7)]      5      3     swap(j', p), swap(j, p'), incr(p,j)
                                           c'/p         j'      c/p'                     j                             
-[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 , 5 , 6 , 7 , 4 ]    [ 4 , 5 , 6 , 1 , 2 , 3 , 7 ]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 ,(5 , 6 , 7),(4)]    [(4 , 5 , 6),(1 , 2 , 3 , 7)]      5      4     swap(j', p), swap(j, p'), incr(p,j)
                                                p       c'  j'   c   p'                       j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     <-- j'/j got out of bounds ! Phase 1 completed
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     <-- j'/j got out of bounds ! Phase 1 completed
 ```
 We ran-out of right array elements (`j`is over bound), which means anything below `[p]` is merged and anything including and above `[p]` just needs to be carried over. But we cannot complete as we have **_out-of-order_** elements in the unmerged partition.
 
@@ -225,11 +225,11 @@ Phase 2: Finishing off the remainder unmerged partition
 Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
 =========     ===========    =============================    =============================    ===========    ===================
                                                p       c'  j'   c   p'                       j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 , 6 , 7 , 5 ]    [ 7 , 5 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 , 7 , 6 ]    [ 5 , 7 , 6 , 1 , 2 , 3 , 4 ]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
                                                      c'/p  j'          c/p'                  j                             
-[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      x      x     <-- We finished ! c' and p are both on the last position
+[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 4)]      x      x     <-- We finished ! c' and p are both on the last position
 ```
 Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n+m)` iterations
 

@@ -82,10 +82,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             }
         }
     }
-    /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
-    pub fn iter_mut(&'a mut self) -> VSIterMut<'_, T> {
-        VSIterMut::new(self)
-    }
     /// Swap two referenced positions that could correspond to between or within underlying slice segments
     pub fn swap(&mut self, a: usize, b:usize) {
         if a == b {
@@ -245,6 +241,44 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         //println!("Merge Done");
         inv_count
     }
+    /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
+    pub fn iter_mut(&'a mut self) -> VSIterMut<'_, T> {
+        VSIterMut::new(self)
+    }
+    /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
+    pub fn iter(&self) -> VSIter<'_, T> {
+        VSIter::new(self)
+    }
+}
+pub enum VSIter<'b, T> where T: Ord {
+    NonAdjacent( std::slice::Iter<'b, &'b mut T> ),
+    Adjacent( std::slice::Iter<'b, T> ),
+}
+
+impl<'b, T> VSIter<'b, T> where T: Ord {
+    pub fn new(vs: &'b VirtualSlice<'b, T>) -> VSIter<'b, T> {
+        match vs {
+            NonAdjacent(v) => VSIter::NonAdjacent(v.iter()),
+            Adjacent(s) => VSIter::Adjacent(s.iter()),
+        }
+    }
+}
+
+impl<'a, T> Iterator for VSIter<'a, T> where T: Ord {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            VSIter::NonAdjacent( vi) => {
+                if let Some(val) = vi.next() {
+                    Some(*val)
+                } else {
+                    None
+                }
+            },
+            VSIter::Adjacent( si) => si.next(),
+        }
+    }
 }
 
 pub enum VSIterMut<'b, T> where T: Ord {
@@ -253,7 +287,6 @@ pub enum VSIterMut<'b, T> where T: Ord {
 }
 
 impl<'b, T> VSIterMut<'b, T> where T: Ord {
-
     pub fn new(vs: &'b mut VirtualSlice<'b, T>) -> VSIterMut<'b, T> {
         match vs {
             NonAdjacent(v) => VSIterMut::NonAdjacent(v.iter_mut()),
@@ -268,12 +301,17 @@ impl<'b, T> Iterator for VSIterMut<'b, T>
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            VSIterMut::NonAdjacent(ref mut vi) => Some( *vi.next().unwrap() ),
-            VSIterMut::Adjacent(ref mut si) => si.next(),
+            VSIterMut::NonAdjacent( vi) => {
+                if let Some(val) = vi.next() {
+                    Some(*val)
+                } else {
+                    None
+                }
+            },
+            VSIterMut::Adjacent( si) => si.next(),
         }
     }
 }
-
 
 impl<T> Default for VirtualSlice<'_, T> where T: Ord {
     fn default() -> Self {
@@ -285,26 +323,12 @@ impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
 
     /// extract and display the slice subsegments attached to the virtualslice
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            NonAdjacent(v) =>{
-                f.debug_list()
-                    .entries(
-                        // get to the actual element referenced
-                        // since we got a *pointer -> virtual slice *pointer -> slice segment item
-                        v.iter().map(|x| &**x)
-                    )
-                    .finish()
-            }
-            Adjacent(s) => {
-                f.debug_list()
-                    .entries(
-                        // get to the actual element referenced
-                        // since we got a *pointer -> virtual slice *pointer -> slice segment item
-                        s.iter()
-                    )
-                    .finish()
-            }
-        }
+        f.debug_list()
+            .entries(
+                // returns a VSIter that serves &'a T
+                self.iter()
+            )
+            .finish()
     }
 }
 
@@ -404,9 +428,9 @@ mod test {
         vs.attach(s2);
     }
     #[test]
-    fn test_virtual_slice_merge_adjacent() {
+    fn test_virtual_slice_iter_mut_adjacent() {
         let mut input = vec![1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
-        let (s1,s2) = input.split_at_mut(5);
+        let (s1, s2) = input.split_at_mut(5);
 
         let mut vs = VirtualSlice::new_adjacent(s1);
         vs.attach(s2);
@@ -416,12 +440,24 @@ mod test {
             .for_each(|x| {
                 *x = 12;
             });
+
+        assert_eq!( s1, &mut [12, 12, 12, 12, 12] );
+        assert_eq!( s2, &mut [12, 12, 12, 12, 12] );
+    }
+    #[test]
+    fn test_virtual_slice_index_adjacent() {
+        let mut input = vec![1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
+        let (s1, s2) = input.split_at_mut(5);
+
+        let mut vs = VirtualSlice::new_adjacent(s1);
+        vs.attach(s2);
         vs[0] = 11;
         vs[5] = 9;
         println!("{:?}", vs);
-        assert_eq!(vs, Adjacent(&mut [11, 12, 12, 12, 12, 9, 12, 12, 12, 12]));
-        assert_eq!( s1, &mut [11, 12, 12, 12, 12] );
-        assert_eq!( s2, &mut [9, 12, 12, 12, 12] );
+
+        assert_eq!(vs, Adjacent(&mut [11, 3, 5, 7, 9, 9, 4, 6, 8, 10]));
+        assert_eq!( s1, &mut [11, 3, 5, 7, 9] );
+        assert_eq!( s2, &mut [9, 4, 6, 8, 10] );
     }
     #[test]
     fn test_virtual_slice_merge() {
@@ -505,6 +541,11 @@ mod test {
                 .for_each(|ptr| {
                     *ptr = 12;
                 });
+        }
+        {
+            let mut v = VirtualSlice::new();
+            v.attach(s1);
+            v.attach(s2);
             v[0] = 11;
             v[5] = 9;
         }

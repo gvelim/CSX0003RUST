@@ -82,7 +82,17 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             }
         }
     }
-    /// Swap two referenced positions that could correspond to between or within underlying slice segments
+    /// Shallow swap, swaps the references of the underlying slice segments. The segments aren't affected
+    /// Operates only with non-adjacent slices
+    pub fn swap_shallow(&mut self, a: usize, b:usize) {
+        if let NonAdjacent(v) = self {
+            v.swap(a, b);
+        } else {
+            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
+        }
+    }
+    /// Deep swap, swaps the two referenced positions of the underlying slice segments
+    /// Operates at both adjacent and non-adjacent slices
     pub fn swap(&mut self, a: usize, b:usize) {
         if a == b {
             return;
@@ -242,7 +252,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         inv_count
     }
     /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
-    pub fn iter_mut(&'a mut self) -> VSIterMut<'_, T> {
+    pub fn iter_mut<'b: 'a>(&'b mut self) -> VSIterMut<'b, T> where T: 'b {
         VSIterMut::new(self)
     }
     /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
@@ -250,12 +260,12 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         VSIter::new(self)
     }
 }
-pub enum VSIter<'b, T> where T: Ord {
+pub enum VSIter<'b, T> where T: Ord + 'b {
     NonAdjacent( std::slice::Iter<'b, &'b mut T> ),
     Adjacent( std::slice::Iter<'b, T> ),
 }
 
-impl<'b, T> VSIter<'b, T> where T: Ord {
+impl<'b, T> VSIter<'b, T> where T: Ord + 'b{
     pub fn new(vs: &'b VirtualSlice<'b, T>) -> VSIter<'b, T> {
         match vs {
             NonAdjacent(v) => VSIter::NonAdjacent(v.iter()),
@@ -264,8 +274,8 @@ impl<'b, T> VSIter<'b, T> where T: Ord {
     }
 }
 
-impl<'a, T> Iterator for VSIter<'a, T> where T: Ord {
-    type Item = &'a T;
+impl<'b, T> Iterator for VSIter<'b, T> where T: Ord + 'b {
+    type Item = &'b T;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
@@ -281,12 +291,12 @@ impl<'a, T> Iterator for VSIter<'a, T> where T: Ord {
     }
 }
 
-pub enum VSIterMut<'b, T> where T: Ord {
+pub enum VSIterMut<'b, T> where T: Ord + 'b {
     NonAdjacent( std::slice::IterMut<'b, &'b mut T> ),
     Adjacent( std::slice::IterMut<'b, T> ),
 }
 
-impl<'b, T> VSIterMut<'b, T> where T: Ord {
+impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b {
     pub fn new(vs: &'b mut VirtualSlice<'b, T>) -> VSIterMut<'b, T> {
         match vs {
             NonAdjacent(v) => VSIterMut::NonAdjacent(v.iter_mut()),
@@ -296,7 +306,7 @@ impl<'b, T> VSIterMut<'b, T> where T: Ord {
 }
 
 impl<'b, T> Iterator for VSIterMut<'b, T>
-    where T: Ord {
+    where T: Ord + 'b {
     type Item = &'b mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -458,6 +468,25 @@ mod test {
         assert_eq!(vs, Adjacent(&mut [11, 3, 5, 7, 9, 9, 4, 6, 8, 10]));
         assert_eq!( s1, &mut [11, 3, 5, 7, 9] );
         assert_eq!( s2, &mut [9, 4, 6, 8, 10] );
+    }
+    #[test]
+    fn test_virtual_slice_swap_shallow() {
+        let s1 = &mut [1, 3, 5, 7, 9];
+        let s2 = &mut [2, 4, 6, 8 , 10];
+
+        let mut vs = VirtualSlice::new();
+        vs.attach(s1);
+        vs.attach(s2);
+        vs[0] = 11;
+        vs[5] = 22;
+        println!("{:?}", vs);
+        assert_eq!(vs, NonAdjacent(vec![&mut 11, &mut 3, &mut 5, &mut 7, &mut 9, &mut 22, &mut 4, &mut 6, &mut 8, &mut 10]));
+        vs.swap_shallow(0,5);
+        // references have been swapped
+        assert_eq!(vs, NonAdjacent(vec![&mut 22, &mut 3, &mut 5, &mut 7, &mut 9, &mut 11, &mut 4, &mut 6, &mut 8, &mut 10]));
+        // however segments haven't been affected
+        assert_eq!( s1, &mut [11, 3, 5, 7, 9] );
+        assert_eq!( s2, &mut [22, 4, 6, 8, 10] );
     }
     #[test]
     fn test_virtual_slice_merge() {

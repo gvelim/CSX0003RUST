@@ -1,7 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut, Range};
-use std::mem;
 
 /// Constructing a VirtualSlice allowing us to operate over
 /// multiple non-adjacent slice segments as a "continuous slice"
@@ -107,6 +106,19 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             )
         }
     }
+    fn _get_idx(&self, idx: usize) -> usize {
+        match self {
+            NonAdjacent(_, idx_rfl) => idx_rfl[idx],
+            Adjacent(_) => panic!(),
+        }
+    }
+    fn _swap(&mut self, a: usize, b:usize) {
+        self.swap(a,b);
+        match self {
+            NonAdjacent(_, idx) => idx.swap(a,b),
+            Adjacent(_) => panic!(),
+        }
+    }
     /// Perform a deep merge by ordering the referred values hence mutating the slice segments
     pub fn merge(&mut self, s: &'a mut [T]) -> usize
         where T: Ord + Debug {
@@ -118,28 +130,23 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         where T: Ord + Debug {
         self._merge(s, VirtualSlice::swap_shallow)
     }
-    pub fn impose_merge(&self) -> bool {
-        if let NonAdjacent( v, idx_rfl) = self {
-            if idx_rfl.is_empty() {
-                return false;
+    pub fn impose_merge(&mut self) {
+
+        let mut total = 0usize;
+        let mut c = 0usize;
+
+        while total < self.len() || c < self.len()
+        {
+            let mut i = self._get_idx(c);
+            while c != i {
+                let idx = self._get_idx(i);
+                self._swap(c, idx);
+                i = idx;
+                total += 1;
             }
-
-            let (mut n, mut c, mut total, len) = (0usize, 0usize, 0usize, v.len());
-            let mut temp : Option<&mut T> = None;
-
-            // while total < len {
-            //     c += 1;
-            //     mem::replace(&mut temp, Some( v[idx_rfl[c]] ) );
-            //     while let Some(ref mut tmp) = temp  {
-            //         n = idx_rfl[c];
-            //         mem::replace(tmp, v[n]);
-            //         c = n;
-            //         total += 1;
-            //     }
-            // }
-            return true;
+            c += 1;
         }
-        return false;
+
     }
 
     /// Merge Self with another non-adjacent slice using in-place memory swaps
@@ -306,7 +313,6 @@ pub enum VSIter<'b, T> where T: Ord + 'b {
     NonAdjacent( std::slice::Iter<'b, &'b mut T> ),
     Adjacent( std::slice::Iter<'b, T> ),
 }
-
 impl<'b, T> VSIter<'b, T> where T: Ord + 'b{
     pub fn new(vs: &'b VirtualSlice<'b, T>) -> VSIter<'b, T> {
         match vs {
@@ -315,7 +321,6 @@ impl<'b, T> VSIter<'b, T> where T: Ord + 'b{
         }
     }
 }
-
 impl<'b, T> Iterator for VSIter<'b, T> where T: Ord + 'b {
     type Item = &'b T;
 
@@ -332,12 +337,10 @@ impl<'b, T> Iterator for VSIter<'b, T> where T: Ord + 'b {
         }
     }
 }
-
 pub enum VSIterMut<'b, T> where T: Ord + 'b {
     NonAdjacent( std::slice::IterMut<'b, &'b mut T> ),
     Adjacent( std::slice::IterMut<'b, T> ),
 }
-
 impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b {
     pub fn new(vs: &'b mut VirtualSlice<'b, T>) -> VSIterMut<'b, T> {
         match vs {
@@ -346,7 +349,6 @@ impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b {
         }
     }
 }
-
 impl<'b, T> Iterator for VSIterMut<'b, T>
     where T: Ord + 'b {
     type Item = &'b mut T;
@@ -370,7 +372,6 @@ impl<T> Default for VirtualSlice<'_, T> where T: Ord {
         VirtualSlice::new()
     }
 }
-
 impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
 
     /// extract and display the slice subsegments attached to the virtualslice
@@ -383,7 +384,6 @@ impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
             .finish()
     }
 }
-
 impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord {
     type Output = T;
 
@@ -397,7 +397,6 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord {
         }
     }
 }
-
 impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord {
 
     /// Index implementation so that VirtualSlice[x] will return a &mut T to the underlying slice segment
@@ -410,7 +409,6 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord {
         }
     }
 }
-
 impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
     type Output = [&'a mut T];
 
@@ -422,7 +420,6 @@ impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
-
 impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
         if let NonAdjacent(vv, _) = self {
@@ -432,7 +429,6 @@ impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
-
 impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
@@ -449,7 +445,6 @@ impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
-
 impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
@@ -470,6 +465,10 @@ impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn test_virtual_slice_impose() {
+
+    }
     #[test]
     #[should_panic]
     fn test_virtual_slice_adjacent_panic() {

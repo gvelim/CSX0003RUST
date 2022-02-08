@@ -1,8 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
-use std::mem;
 use std::ops::{Index, IndexMut, Range};
-
+use std::mem;
 
 /// Constructing a VirtualSlice allowing us to operate over
 /// multiple non-adjacent slice segments as a "continuous slice"
@@ -125,20 +124,20 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                 return false;
             }
 
-            // let (mut n, mut c, mut total, len) = (0usize, 0usize, 0usize, self.len());
-            // let mut tmp: T;
-            //
+            let (mut n, mut c, mut total, len) = (0usize, 0usize, 0usize, v.len());
+            let mut temp : Option<&mut T> = None;
+
             // while total < len {
             //     c += 1;
-            //     mem::swap(&mut tmp, &mut self[idx_rfl[c]]);
-            //     while true {
+            //     mem::replace(&mut temp, Some( v[idx_rfl[c]] ) );
+            //     while let Some(ref mut tmp) = temp  {
             //         n = idx_rfl[c];
-            //         mem::swap(&mut tmp, &mut self[n]);
+            //         mem::replace(tmp, v[n]);
             //         c = n;
             //         total += 1;
             //     }
             // }
-            // return true;
+            return true;
         }
         return false;
     }
@@ -575,13 +574,12 @@ mod test {
         let _z = &[0,0,0,0,0,0]; // wedge to break adjacency
         let s4 = &mut [8,9,15,16];
 
-        {
-            let mut vs = VirtualSlice::new();
-            vs.merge(s1);
-            vs.merge(s2);
-            vs.merge(s3);
-            vs.merge(s4);
-        }
+        let mut vs = VirtualSlice::new();
+        vs.merge(s1);
+        vs.merge(s2);
+        vs.merge(s3);
+        vs.merge(s4);
+
         assert_eq!(s1, &mut [1,2,3]);
         assert_eq!(s2, &mut [4,5,6,7]);
         assert_eq!(s3, &mut [8,9,10]);

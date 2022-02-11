@@ -143,36 +143,40 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     /// Superimposes O(n-1) the derived order onto the attached slice segments.
     /// The stored Index Reflector contains the order per reference
     pub fn superimpose_shallow_merge(&mut self) {
-
-        // make sure entry conditions are correct
-        // prefer to panic as non of those scenarios should be recoverable
-        match &self {
-            Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
-            NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
-            NonAdjacent(_,_) => (),
-        }
-
         // total operations must be len()-1 as we use 1 position as temp swap location
-        let total_swaps = self.len()-2;
+        let total_swaps = self.len() - 2;
         // Count total number of swaps occurred
         let mut swap_count = 0usize;
         // holds the current temp swap position
         let mut temp_idx = 0usize;
 
-        // Exit conditions are
-        // - total swaps == total number of elements - 1 (as one position is used as temp swap)
-        // - current tmp index position reached at the end (when something is already ordered)
-        while swap_count < total_swaps && temp_idx < total_swaps
-        {
-            // Exit condition
-            // - current swap index == correct ordered position, (item is positioned where it should be)
-            println!("{swap_count},{temp_idx}");
-            while temp_idx != self._idx_reflection(temp_idx) {
-                self._swap(temp_idx, self._idx_reflection(temp_idx));
-                swap_count += 1;
-                println!("\t{swap_count},{temp_idx}");
+        // make sure entry conditions are correct
+        // prefer to panic as non of those scenarios should be recoverable
+        match self {
+            Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
+            NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
+            NonAdjacent(vs, Some(idx)) => {
+
+                // Exit conditions are
+                // - total swaps == total number of elements - 1 (as one position is used as temp swap)
+                // - current tmp index position reached at the end (when something is already ordered)
+                while swap_count < total_swaps && temp_idx < total_swaps
+                {
+                    let mut i;
+                    // Exit condition
+                    // - current swap index == correct ordered position, (item is positioned where it should be)
+                    while temp_idx != idx[temp_idx] {
+                        i = idx[temp_idx];
+                        idx.swap(temp_idx, i);
+                        unsafe {
+                            // we need to overcome Rust's borrow checking
+                            std::ptr::swap::<T>(&mut *vs[temp_idx] as *mut T, &mut *vs[i] as *mut T);
+                        }
+                        swap_count += 1;
+                    }
+                    temp_idx += 1;
+                }
             }
-            temp_idx += 1;
         }
     }
 
@@ -327,39 +331,16 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     }
     fn _idx_reflection(&self, idx: usize) -> usize {
         match self {
-            NonAdjacent(_, idx_rfl) => {
-                if let Some(v) = &idx_rfl {
-                    v[idx]
-                } else {
-                    panic!("_idx_reflection(): No index reflector found. Check that merge_shallow() has been executed ?")
-                }
-            },
+            NonAdjacent(_, Some(idx_rfl)) => idx_rfl[idx],
+            NonAdjacent(_, None) => panic!("_idx_reflection(): No index reflector found. Check that merge_shallow() has been executed ?"),
             Adjacent(_) => panic!("called _idx_reflection() in Adjacent mode"),
         }
     }
     fn _idx_len(&self) -> usize {
         match self {
-            NonAdjacent(_, idx_rfl) => {
-                if let Some(v) = idx_rfl {
-                    v.len()
-                } else {
-                    panic!("_idx_len(): No index reflector found. Check that merge_shallow() has been executed ?")
-                }
-            },
+            NonAdjacent(_, Some(idx_rfl)) => idx_rfl.len(),
+            NonAdjacent(_, None) => panic!("_idx_len(): No index reflector found. Check that merge_shallow() has been executed ?"),
             Adjacent(_) => panic!("called _idx_len() in adjacent mode"),
-        }
-    }
-    fn _swap(&mut self, a: usize, b:usize) {
-        self.swap(a,b);
-        match self {
-            NonAdjacent(_, idx) =>  {
-                if let Some(v) = idx {
-                    v.swap(a,b)
-                } else {
-                    panic!("_swap(): No index reflector found. Check that merge_shallow() has been executed ?")
-                }
-            },
-            Adjacent(_) => panic!(),
         }
     }
 }

@@ -634,6 +634,10 @@ mod test {
             vec![&mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8, &mut 9,&mut 10],
             vec![]
         ));
+        vs.iter()
+            .enumerate()
+            .for_each(|(i,x)| assert_eq!(*x,i+1) );
+
         assert_eq!( s1, &mut [1, 3, 5, 7, 9] );
         assert_eq!( s2, &mut [2, 4, 6, 8, 10] );
     }

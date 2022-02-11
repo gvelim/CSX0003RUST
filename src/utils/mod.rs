@@ -329,20 +329,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         //println!("Merge Done");
         (inv_count, Some(idx_rfl))
     }
-    fn _idx_reflection(&self, idx: usize) -> usize {
-        match self {
-            NonAdjacent(_, Some(idx_rfl)) => idx_rfl[idx],
-            NonAdjacent(_, None) => panic!("_idx_reflection(): No index reflector found. Check that merge_shallow() has been executed ?"),
-            Adjacent(_) => panic!("called _idx_reflection() in Adjacent mode"),
-        }
-    }
-    fn _idx_len(&self) -> usize {
-        match self {
-            NonAdjacent(_, Some(idx_rfl)) => idx_rfl.len(),
-            NonAdjacent(_, None) => panic!("_idx_len(): No index reflector found. Check that merge_shallow() has been executed ?"),
-            Adjacent(_) => panic!("called _idx_len() in adjacent mode"),
-        }
-    }
 }
 
 pub enum VSIter<'b, T> where T: Ord + 'b {

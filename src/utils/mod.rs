@@ -1,3 +1,7 @@
+///
+///
+///
+
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut, Range};
@@ -32,7 +36,9 @@ use std::ops::{Index, IndexMut, Range};
 ///
 /// ```
 pub enum VirtualSlice<'a, T> where T: Ord {
+    /// The tuple holds a vector of mutable references and the Index Reflector
     NonAdjacent( Vec<&'a mut T>, Option<Vec<usize>>),
+    /// Holds a mutable reference to the reconstructed parent slice out of two memory adjacent slices
     Adjacent( &'a mut[T] ),
 }
 
@@ -65,7 +71,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     pub fn iter_mut<'b: 'a>(&'b mut self) -> VSIterMut<'b, T> where T: 'b {
         VSIterMut::new(self)
     }
-    /// Get a mutable iterator over the VirtualSlice that return mutable references &mut T
+    /// Get an immutable iterator over the VirtualSlice that return mutable references &mut T
     pub fn iter(&self) -> VSIter<'_, T> {
         VSIter::new(self)
     }
@@ -90,16 +96,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             }
         }
     }
-    /// Shallow swap, swaps the references of the underlying slice segments. The segments aren't affected
-    /// Operates only with non-adjacent slices
-    pub fn swap_shallow(&mut self, a: usize, b:usize) {
-        if let NonAdjacent(v, _) = self {
-            v.swap(a, b);
-        } else {
-            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
-        }
-    }
-    /// Deep swap, swaps the two referenced positions of the underlying slice segments
+    /// Deep swap; swaps the two references to the positions of the underlying slice segments
     /// Operates at both adjacent and non-adjacent slices
     pub fn swap(&mut self, a: usize, b:usize) {
         if a == b {
@@ -121,8 +118,18 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         let (inversion, _) = self._merge(s, VirtualSlice::swap);
         inversion
     }
-    /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values
-    /// In case of non-adjacent slices only, he VirtualSlice can be used as sort-mask layer above the slice segments, which can later be super imposed through the impose() method
+    /// Shallow swap; swaps the references of the underlying slice segments. The segments aren't affected
+    /// Operates only with non-adjacent slices
+    pub fn swap_shallow(&mut self, a: usize, b:usize) {
+        if let NonAdjacent(v, _) = self {
+            v.swap(a, b);
+        } else {
+            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
+        }
+    }
+    /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values.
+    /// The VirtualSlice can be used as sort-mask layer above the slice segments, which later can be superimposed over
+    /// In case of non-adjacent slices only.
     pub fn merge_shallow(&mut self, s: &'a mut [T]) -> usize
         where T: Ord + Debug {
         let (inversions, idx_rfl) = self._merge(s, VirtualSlice::swap_shallow);
@@ -133,8 +140,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         inversions
     }
 
-    /// Superimposes O(n-1) the ordered references onto the attached slice segments by applying the order stored in the index reflector
-    ///
+    /// Superimposes O(n-1) the derived order onto the attached slice segments.
+    /// The stored Index Reflector contains the order per reference
     pub fn superimpose_shallow_merge(&mut self) {
 
         // make sure entry conditions are correct
@@ -493,6 +500,7 @@ impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
+
 impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```

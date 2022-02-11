@@ -8,9 +8,17 @@ pub mod sort;
 /// Selection algorithms
 pub mod select;
 pub mod linkedlists;
+/// utility objects used across libraries like 'VirtualSlice'
 pub mod utils;
 
-
+/// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait
+///```
+/// use csx3::random_sequence;
+/// use csx3::linkedlists::List;
+///
+/// type MyType = u8;
+/// let list : List<MyType> = random_sequence(5);
+///```
 pub fn random_sequence<T, B>(n: usize) -> B
     where B: FromIterator<T>,
           Standard: Distribution<T>

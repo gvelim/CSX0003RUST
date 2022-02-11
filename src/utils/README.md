@@ -31,7 +31,7 @@ Left Array       Right Array
     c            j
 ```
 ## Examples
-### Merging two adjacent slices
+### Merging two adjacent slices O(n+m)
 ```
 use csx3::utils::VirtualSlice;
 let v = &mut [1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
@@ -64,7 +64,7 @@ v.swap(0, 5);
 assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
 assert_eq!(s4, &mut [11, 4, 6, 8 , 10]);
 ```
-### Shallow merge across non-adjacent slices
+### Shallow merge across non-adjacent slices O(n+m)
 ```
 use csx3::utils::VirtualSlice;
 
@@ -83,7 +83,7 @@ vs.iter()                       // ordered access of attached slices
 assert_eq!(s1, &[1,2,3]);       // while s1 & s2 are unaffected
 assert_eq!(s2, &[4,5,6,7]);
 ```
-### Superimpose merged order
+### Superimpose merged order O(n+m-1)
 ```
 use csx3::utils::VirtualSlice;
 

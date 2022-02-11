@@ -133,11 +133,16 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     pub fn merge_shallow(&mut self, s: &'a mut [T]) -> usize
         where T: Ord + Debug {
         let (inversions, idx_rfl) = self._merge(s, VirtualSlice::swap_shallow);
-        // store index reflector
-        if let NonAdjacent(_, idx_reflector) = self {
-            *idx_reflector = idx_rfl;
+
+        match self {
+            Adjacent(_) => panic!("merge_shallow(): cannot operate in adjacent mode"),
+            NonAdjacent(_, None) => panic!("merge_shallow(): unexpected! _merge() didn't return a index reflector vector"),
+            NonAdjacent(_, idx_reflector) => {
+                // we need to store index reflector in case we want to mutate the attached slices via the impose method
+                *idx_reflector = idx_rfl;
+                inversions
+            }
         }
-        inversions
     }
 
     /// Superimposes O(n-1) the derived order onto the attached slice segments.
@@ -152,14 +157,15 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
 
         // make sure entry conditions are correct
         // prefer to panic as non of those scenarios should be recoverable
+        // otherwise, extract internal data and proceed with algorithm
         match self {
             Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
             NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
             NonAdjacent(vs, Some(idx)) => {
 
-                // Exit conditions are
-                // - total swaps == total number of elements - 1 (as one position is used as temp swap)
-                // - current tmp index position reached at the end (when something is already ordered)
+                // Exit conditions are either,
+                // - total swaps == total number of elements - 1 OR
+                // - current tmp index position has reached the end of VirtualSlice (Case: virtualslice already ordered; zero swaps)
                 while swap_count < total_swaps && temp_idx < total_swaps
                 {
                     let mut i;

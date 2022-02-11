@@ -80,8 +80,8 @@ vs.iter()                       // ordered access of attached slices
         assert_eq(*x,i+1) 
      );
 
-assert_eq!(s1, &[1,2,3]);       // while s1 & s2 are unaffected
-assert_eq!(s2, &[4,5,6,7]);
+assert_eq!(s1, &[5,6,7]);       // while s1 & s2 are unaffected
+assert_eq!(s2, &[1,2,3,4]);
 ```
 ### Superimpose merged order O(n+m-1)
 ```

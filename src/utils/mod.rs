@@ -136,7 +136,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
 
         match self {
             Adjacent(_) => panic!("merge_shallow(): cannot operate in adjacent mode"),
-            NonAdjacent(_, None) => panic!("merge_shallow(): unexpected! _merge() didn't return a index reflector vector"),
             NonAdjacent(_, idx_reflector) => {
                 // we need to store index reflector in case we want to mutate the attached slices via the impose method
                 *idx_reflector = idx_rfl;
@@ -522,9 +521,10 @@ mod test {
 
         for (s1,s2, o1, o2) in data {
             let mut vs = VirtualSlice::new();
-            vs.attach(s1);
+            vs.merge_shallow(s1);
             vs.merge_shallow(s2);
             vs.superimpose_shallow_merge();
+            println!("{vs:?}");
             assert_eq!(s1, o1);
             assert_eq!(s2, o2);
         }
@@ -649,7 +649,7 @@ mod test {
         let s2 = &mut [2, 4, 6, 8, 10];
 
         let mut vs = VirtualSlice::new();
-        vs.merge_shallow(s1);
+        vs.attach(s1);
         vs.merge_shallow(s2);
 
         assert_eq!( vs, NonAdjacent(

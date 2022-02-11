@@ -136,42 +136,40 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     /// Superimposes O(n-1) the ordered references onto the attached slice segments by applying the order stored in the index reflector
     ///
     pub fn superimpose_shallow_merge(&mut self) {
-
-        // make sure entry conditions are correct
-        // prefer to panic as non of those scenarios should be recoverable
-        match &self {
-            Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
-            NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
-            NonAdjacent(_,_) => (),
-        }
-
         // total operations must be len()-1 as we use 1 position as temp swap location
-        let total_swaps = self.len()-2;
+        let total_swaps = self.len() - 2;
         // Count total number of swaps occurred
         let mut swap_count = 0usize;
         // holds the current temp swap position
         let mut temp_idx = 0usize;
 
-        // Exit conditions are
-        // - total swaps == total number of elements - 1 (as one position is used as temp swap)
-        // - current tmp index position reached at the end (when something is already ordered)
-        while swap_count < total_swaps && temp_idx < total_swaps
-        {
-            let mut i = 0;
-            // Exit condition
-            // - current swap index == correct ordered position, (item is positioned where it should be)
-            while temp_idx != self._idx_reflection(temp_idx) {
-                match self {
-                    NonAdjacent(_, Some(idx)) => {
+        // make sure entry conditions are correct
+        // prefer to panic as non of those scenarios should be recoverable
+        match self {
+            Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
+            NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
+            NonAdjacent(vs, Some(idx)) => {
+
+                // Exit conditions are
+                // - total swaps == total number of elements - 1 (as one position is used as temp swap)
+                // - current tmp index position reached at the end (when something is already ordered)
+                while swap_count < total_swaps && temp_idx < total_swaps
+                {
+                    let mut i;
+                    // Exit condition
+                    // - current swap index == correct ordered position, (item is positioned where it should be)
+                    while temp_idx != idx[temp_idx] {
                         i = idx[temp_idx];
-                        idx.swap( temp_idx, i)
-                    },
-                    _ => {}
+                        idx.swap(temp_idx, i);
+                        unsafe {
+                            // we need to overcome Rust's borrow checking
+                            std::ptr::swap::<T>(&mut *vs[temp_idx] as *mut T, &mut *vs[i] as *mut T);
+                        }
+                        swap_count += 1;
+                    }
+                    temp_idx += 1;
                 }
-                self.swap(temp_idx, i);
-                swap_count += 1;
             }
-            temp_idx += 1;
         }
     }
 

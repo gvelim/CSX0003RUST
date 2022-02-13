@@ -3,8 +3,11 @@
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
 - Select (Random, Deterministic)
-- Merge (in-place)
-- [Merge sort (mutable slices, in-place merging)](./src/sort/README.md#merge-sort)
+- Merge (linear in-place, memory adjacent/non-adjacent, lazy merge)
+  - [In-place Merge Algorithm using efficient swapping](./src/merge/README.md#in-place-merge-algorithm-using-efficient-swapping)
+  - [Sequential access against multiple slice segments](./src/merge/README.md#sequential-access-against-multiple-slice-segments)
+  - [Lazy merge and delayed slice mutability](./src/merge/README.md#sequential-access-against-multiple-slice-segments)
+- [Merge sort (mutable slices, in-place merging)](./src/sort/README.md)
 - [Quick sort (mutable slices, in-place partitioning)](./src/sort/README.md)
 - Linked list 
 - Binary tree

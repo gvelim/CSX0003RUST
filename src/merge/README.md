@@ -1,7 +1,10 @@
+#Sections
+- [In-place Merge Algorithm using efficient swapping](#in-place-merge-algorithm-using-efficient-swapping)
+- [Sequential access against multiple slice segments](#sequential-access-against-multiple-slice-segments)
+- [Lazy merge and delayed slice mutability](#shallow-merge-across-non-adjacent-slices)
 
-
-## In-place Merge Algorithm with intelligent swapping
-### General Approach
+# In-place Merge Algorithm using efficient swapping
+## General Approach
 In an "In place" merge of two ordered arrays it is always required to maintain a pivot between merged and unmerged sub-arrays as we go over the process of
 1. Use comparison indexes `(c,j)` to find the smallest element between (a) the left and (b) right ordered arrays
 2. Swap the next smallest element of the left and right sub-arrays against a pivot position `(p)`
@@ -29,8 +32,8 @@ Merged   |     Unmerged region
 region   p: Pivot
 ```
 
-### Challenge
-#### Taking a naive first step
+## Challenge
+### Taking a naive first step
 By trying to swap the smallest element of the two arrays with the pivot we quickly realise that things are getting out of control very soon. For example,
 
 ```
@@ -45,8 +48,8 @@ By trying to swap the smallest element of the two arrays with the pivot we quick
 At this stage our partitioned region is left of `p` and equal to `[1,2]` while the unmerged region is `[(5!!,3),(4,6)]` which is clearly **_out-of-order_** and the result from then on is unpredictable. During the 2nd iteration, the left comparison index `[c]` points to a `2` rather `3` which is now at the 4th position in the right array, or the 2nd position in the unmerged partition.
 Therefore, we need to find a way to maintain a solid comparison index reference `[c]` for the left array while we iterate through
 
-### Problem Solution
-#### Canceling the Rotation during right swaps
+## Problem Solution
+### Canceling the Rotation during right swaps
 It becomes obvious that during the right swap operation our left array is rotated left as seen below
 ```
                               c  j  p   [c] > [j]  Action
@@ -125,7 +128,7 @@ So can we do better without need for rotations and non-adjacent to memory arrays
 
 It appears that we can. `Virtual Slice` & `Index Reflector` come to the rescue.
 
-### Virtual Slice - continuous access over array fragments
+## Virtual Slice - continuous access over array fragments
 A `VirtualSlice` is composed out of one or more array fragments, adjacent to memory or not, and enables transparently operating over the **attached** array fragments.
 ```
 Left Array       Right Array
@@ -142,7 +145,7 @@ Left Array       Right Array
 ```
 While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle eliminating the costly rotations.
 
-### Index Reflector - from absolute to derived indexing
+## Index Reflector - from absolute to derived indexing
 We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequentially causing left merge to go **_out-of-order_**.
 
 
@@ -215,7 +218,7 @@ Left Arr      Right Arr      VirtualSlice                     Index Reflector   
 ```
 Phase 2 is now complete. **As if by magic** everything is now in position and ordered after `O(n+m)` iterations
 
-### Useful Index Reflector Properties
+## Useful Index Reflector Properties
 1. At completion the Index Reflector **reflects** the final position per element and given its starting order i.e the 4th element in VirtualSlice ends up in the 1st position, the 1st in the 5th, and so on
 ```
   Left Arr      Right Arr      VirtualSlice                     Index Reflector                  
@@ -231,7 +234,7 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 3. `[p']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]`
 
-### Optimisations & other uses
+## Optimisations & other uses
 1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements from 2(n+m) to (2n+m) in case of mergesort
 2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes O(n) * sizeof(usize)
 3. Given the 1st property we can
@@ -241,7 +244,7 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
     1. [VirtualSlice::impose_shallow_merge](../merge/README.md?4)
 
 
-## Virtual Slice - sequencial access over separate slice segments
+# Sequential access against multiple slice segments
 A `VirtualSlice` is composed out of one or more slice segments, adjacent to memory or not, and enables transparently operating over them. 
 
 The virtualslice operates in two mode. Adjacent and non-adjacent.
@@ -256,7 +259,7 @@ It solves the following needs:
   * while allow such order to be superimposed upon the slices if we later decide to (see superimpose)
 
 ## Memory layout
-#### Non-Adjacent arrays Mode
+### Non-Adjacent arrays Mode
 ```
 Left Array       Right Array
 +---+---+---+    +---+---+---+     
@@ -269,7 +272,7 @@ Left Array       Right Array
 | &2 | &4 | &6 | &1 | &3 | &5 |  Array of mutable references : Virtual Slice
 +----+----+----+----+----+----+  i.e. &2 = pointer/reference to left array[0]
 ```
-#### Adjacent arrays Mode
+### Adjacent arrays Mode
 ```
     Left Array   Right Array
 +----+----+----+----+----+----+
@@ -313,7 +316,7 @@ v.swap(0, 5);
 assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
 assert_eq!(s4, &mut [11, 4, 6, 8 , 10]);
 ```
-### Shallow merge across non-adjacent slices O(n+m)
+### Shallow merge across non-adjacent slices
 ```
 use csx3::utils::VirtualSlice;
 

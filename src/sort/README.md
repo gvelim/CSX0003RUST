@@ -9,12 +9,12 @@ Versions
 2. Mutable sorting with **_in-place_** merge operations
    * Overall Performance: O(n log n) with intelligent swapping
    * Approach to in-place merge operations, 
-      * Merge memory adjacent sub-arrays : `fn merge_mut_adjacent()`
-        * Use of intelligent swaps 
-        * Performance: O(n+m), 
+      * [In-place Merge Algorithm using efficient swapping](../merge/README.md#in-place-merge-algorithm-using-efficient-swapping)
+      * O(n+m) performance
+      * [Merge memory adjacent sub-arrays](../merge/README.md#sequential-access-against-multiple-slice-segments)
+        * `fn merge_mut_adjacent()`
         * Memory impact: O(n) * usize
-      * Merge Non-adjacent sub-arrays : `fn merge_mut()`
-        * Use of intelligent Swaps 
-        * Performance: O(n+m)
+      * [Merge Non-adjacent sub-arrays](../merge/README.md#sequential-access-against-multiple-slice-segments)
+        * `fn merge_mut()`
         * Memory: O(2n+m) * usize
 

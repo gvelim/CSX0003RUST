@@ -225,9 +225,9 @@ Phase 2: Finishing off the remainder unmerged partition
 Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
 =========     ===========    =============================    =============================    ===========    ===================
                                                p       c'  j'   c   p'                       j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
                                                      c'/p  j'          c/p'                  j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 4)]      x      x     <-- We finished ! c' and p are both on the last position
 ```

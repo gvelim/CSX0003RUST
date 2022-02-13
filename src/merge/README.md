@@ -284,6 +284,9 @@ Left Array       Right Array
 ```
 ## Examples
 ### Merging two adjacent slices O(n+m)
+* No additional memory used for holding references
+* Uses (n + m) * usize for dynamic indexing
+  * can be further optimised to hold only (n) * size of additional memory
 ```
 use csx3::utils::VirtualSlice;
 let v = &mut [1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
@@ -297,6 +300,8 @@ assert_eq!(s2, &mut [6, 7, 8, 9, 10]);
 ```
 
 ### Access & swap contents out of two non-adjacent slices
+* Uses n + m memory for holding references 
+* Uses (n + m) * usize for dynamic indexing 
 ```
 use csx3::utils::VirtualSlice;
 
@@ -317,6 +322,8 @@ assert_eq!(s1, &mut [9, 3, 5, 7, 9]);
 assert_eq!(s4, &mut [11, 4, 6, 8 , 10]);
 ```
 ### Shallow merge across non-adjacent slices
+* Swapping of references instead of the actual data (light operation)
+* Ordering logic per iteration
 ```
 use csx3::utils::VirtualSlice;
 
@@ -336,6 +343,8 @@ assert_eq!(s1, &[5,6,7]);       // while s1 & s2 are unaffected
 assert_eq!(s2, &[1,2,3,4]);
 ```
 ### Superimpose merged order O(n+m-1)
+* Straight swapping of data referenced (could end up a heavy heap operation)
+* No ordering logic per iteration
 ```
 use csx3::utils::VirtualSlice;
 

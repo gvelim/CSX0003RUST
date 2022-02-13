@@ -5,11 +5,92 @@
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Index, IndexMut, Range};
+use std::iter::Peekable;
+
+/// Takes two iterators as input with each iteration returning
+/// the next in order item out of the two, plus its inversions' count
+/// ```
+/// use csx3::sort::*;
+/// let s1 = &[2, 4, 6];
+/// let s2 = &[1, 3, 5];
+///
+/// let mut iter = MergeIterator::new(s1.iter(), s2.iter());
+///
+/// assert_eq!(iter.next(), Some( (3,&1) ));
+/// assert_eq!(iter.next(), Some( (0,&2) ));
+/// assert_eq!(iter.next(), Some( (2,&3) ));
+/// assert_eq!(iter.next(), Some( (0,&4) ));
+/// assert_eq!(iter.next(), Some( (1,&5) ));
+/// assert_eq!(iter.next(), Some( (0,&6) ));
+/// assert_eq!(iter.next(), None);
+/// ```
+pub struct MergeIterator<I: Iterator> {
+    right: Peekable<I>,
+    left: Peekable<I>,
+    left_count: u32,
+    left_len: u32,
+}
+impl<I: Iterator> MergeIterator<I> {
+    /// Constructs a new MergeIterator given two iterators
+    pub fn new(left: I, right: I) -> Self {
+        let mut mi = MergeIterator {
+            right: right.peekable(),
+            left: left.peekable(),
+            left_count: 0,
+            left_len: 0,
+        };
+        mi.left_len = mi.left.size_hint().0 as u32;
+        mi
+    }
+}
+impl<I> Iterator for MergeIterator<I>
+    where I: Iterator,
+          I::Item: Ord,
+{
+    // tuple returned = (number of inversions at position, value at position)
+    type Item = (usize, I::Item);
+
+    /// Outputs the next in order value out of the two iterators
+    /// in the form of Some( tuple ), where
+    /// tuple = ( inversions at position, value at position)
+    fn next(&mut self) -> Option<Self::Item> {
+        match (self.left.peek(), self.right.peek()) {
+            // left & right parts remain within their bounds
+            (Some(l), Some(r)) => {
+                match l.cmp(r) {
+                    // left is smaller hence move to output
+                    // there are no inversions to count
+                    // keep count of current position
+                    Ordering::Less | Ordering::Equal=> {
+                        self.left_count += 1;
+                        Some((0, self.left.next().unwrap()))
+                    },
+                    // right is smaller hence move to output
+                    // inversions are equal to left items remain to iterate over
+                    Ordering::Greater => {
+                        let inv = self.left_len - self.left_count;
+                        Some( (inv as usize, self.right.next().unwrap()) )
+                    },
+                }
+            },
+            // right part out of bounds, hence move left item to output
+            (Some(_), None) => {
+                Some( (0, self.left.next().unwrap()) )
+            },
+            // left part out of bounds, hence move right item to output
+            (None, Some(_)) => {
+                Some( (0,self.right.next().unwrap()) )
+            },
+            // both left & right parts out of bounds
+            (None, None) => None,
+        }
+    }
+}
 
 /// Constructing a VirtualSlice allowing us to operate over
 /// multiple non-adjacent slice segments as a "continuous slice"
 /// ```
-/// use csx3::utils::VirtualSlice;
+/// use csx3::merge::VirtualSlice;
 ///
 /// let v = &mut [1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
 /// let (s1, s2) = v.split_at_mut(5);
@@ -201,7 +282,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     /// //[1,2,3] <> [4,5,7,6]  [1,2,3,4,5,7(i),6(c')](j)   [5,7(c),6(i')]     Trick: reflector knows the right order remaining
     /// //[1,2,3] <> [4,6,7,5]  [1,2,3,4,5,6,7(i/c')](j)    [5,6,7(c/i') ] <-- Phase 2: finished merging (reflects starting position)
     ///
-    /// use csx3::utils::VirtualSlice;
+    /// use csx3::merge::VirtualSlice;
     /// let s1 = &mut [5,6,7];
     /// let _s = &[0,0,0,0,0,0]; // wedge to break adjacency
     /// let s2 = &mut [1,2,3,4];
@@ -459,7 +540,7 @@ impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
 impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
-    /// use csx3::utils::VirtualSlice;
+    /// use csx3::merge::VirtualSlice;
     /// let s = &mut [1,2,3,4,5];
     /// let vs = VirtualSlice::new_adjacent(s);
     /// assert_eq!( vs, VirtualSlice::Adjacent( &mut [1,2,3,4,5] ) );
@@ -476,7 +557,7 @@ impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
 impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
-    /// use csx3::utils::VirtualSlice;
+    /// use csx3::merge::VirtualSlice;
     /// let s = &mut [1,2,3,4,5];
     /// let vs = VirtualSlice::new_adjacent(s);
     /// assert_eq!( vs, VirtualSlice::Adjacent( &mut [1,2,3,4,5] ) );

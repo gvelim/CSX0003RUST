@@ -9,7 +9,7 @@ pub mod sort;
 pub mod select;
 pub mod linkedlists;
 /// utility objects used across libraries like 'VirtualSlice'
-pub mod utils;
+pub mod merge;
 
 /// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait
 ///```

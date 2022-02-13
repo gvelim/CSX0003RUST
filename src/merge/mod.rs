@@ -10,7 +10,7 @@ use std::iter::Peekable;
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
 /// ```
-/// use csx3::sort::*;
+/// use csx3::merge::MergeIterator;
 /// let s1 = &[2, 4, 6];
 /// let s2 = &[1, 3, 5];
 ///
@@ -605,7 +605,7 @@ mod test {
             vs.merge_shallow(s1);
             vs.merge_shallow(s2);
             vs.superimpose_shallow_merge();
-            println!("{vs:?}");
+            println!("{:?}",vs);
             assert_eq!(s1, o1);
             assert_eq!(s2, o2);
         }

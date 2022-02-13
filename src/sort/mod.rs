@@ -75,8 +75,9 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// assert_eq!( mergesort_mut(input, merge_mut), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn mergesort_mut<T>(v: &mut [T], fn_merge: fn(&mut[T], &mut[T]) -> usize ) -> usize
-    where T: Ord + Debug {
+pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
+    where T: Ord + Debug,
+          F: Copy + FnMut(&mut[T], &mut[T]) -> usize {
 
     let len = v.len();
 

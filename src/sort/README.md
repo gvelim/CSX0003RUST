@@ -23,7 +23,7 @@ Versions
 In an "In place" merge of two ordered arrays it is always required to maintain a pivot between merged and unmerged sub-arrays as we go over the process of
 1. Use comparison indexes `(c,j)` to find the smallest element between (a) the left and (b) right ordered arrays
 2. Swap the next smallest element of the left and right sub-arrays against a pivot position `(p)`
-3. Repeat until we've exhausted comparing and swapping all elements 
+3. Repeat until we've exhausted comparing and swapping of all elements 
 
 ```
 Start                               Finish
@@ -192,7 +192,7 @@ In the diagram above, the Index Reflector holds the **starting position** of the
 
 Reversely, Pivot index `[p]` is operated on the VirtualSlice and is projected over the Index Reflector as `[p']` using the transformation provided in the diagram.
 
-Let's see how this is going to work; pay attention to the ambidextrous movement of `c'` and `p'`.
+Let's see how this is going to work; pay attention to the non-sequencial movements of `c'` and `p'`.
 ```
 Phase 1: Merge the two arrays until a comparison index goes out of bounds 
 
@@ -225,9 +225,9 @@ Phase 2: Finishing off the remainder unmerged partition
 Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
 =========     ===========    =============================    =============================    ===========    ===================
                                                p       c'  j'   c   p'                       j                             
-[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
                                                    p   c'  j'       c   p'                   j                             
-[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', i), swap(c, i') incr(i,c)
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
                                                      c'/p  j'          c/p'                  j                             
 [ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 4)]      x      x     <-- We finished ! c' and p are both on the last position
 ```

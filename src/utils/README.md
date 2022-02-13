@@ -1,10 +1,16 @@
-## Virtual Slice - continuous access over array fragments
-A `VirtualSlice` is composed out of one or more array fragments, adjacent to memory or not, and enables transparently operating over the **attached** array fragments. The virtualslice operates in two mode. Adjacent and non-adjacent
+## Virtual Slice - sequencial access over separate slice segments
+A `VirtualSlice` is composed out of one or more slice segments, adjacent to memory or not, and enables transparently operating over them. 
 
-* Need to access multiple slices as a single continuous one
-* Need to handle efficiently cases where slices are adjacent in memory
+The virtualslice operates in two mode. Adjacent and non-adjacent.
+
+It solves the following needs:
+
+* Need to access two or more slices as a single continuous one
+* Need to use memory efficiently for cases where such slices are adjacent in memory
 * Need to perform a merge of two or more ordered slices
-* Need to perform "shallow" merge, that is, access the slices in the right order, while I shall be able to mutate them later on if I want to
+* Need to perform "shallow" or lazy merge, that is, 
+  * provide ordered access to the underlying slices without mutating them (see shallow merge)
+  * while allow such order to be superimposed upon the slices if we later decide to (see superimpose)
 
 ## Memory layout
 #### Non-Adjacent arrays Mode
@@ -80,8 +86,8 @@ vs.iter()                       // ordered access of attached slices
         assert_eq(*x,i+1) 
      );
 
-assert_eq!(s1, &[1,2,3]);       // while s1 & s2 are unaffected
-assert_eq!(s2, &[4,5,6,7]);
+assert_eq!(s1, &[5,6,7]);       // while s1 & s2 are unaffected
+assert_eq!(s2, &[1,2,3,4]);
 ```
 ### Superimpose merged order O(n+m-1)
 ```

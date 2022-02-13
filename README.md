@@ -1,4 +1,4 @@
-# CSX0003RUST
+# CSX3 in Rust 
 
 Rust playground; familiarising with ownership, generics, trait objects, etc
 
@@ -6,7 +6,7 @@ Rust playground; familiarising with ownership, generics, trait objects, etc
 - Merge (linear in-place, memory adjacent/non-adjacent, lazy merge)
   - [In-place Merge Algorithm using efficient swapping](./src/merge/README.md#in-place-merge-algorithm-using-efficient-swapping)
   - [Sequential access against multiple slice segments](./src/merge/README.md#sequential-access-against-multiple-slice-segments)
-  - [Lazy merge and delayed slice mutability](./src/merge/README.md#sequential-access-against-multiple-slice-segments)
+  - [Lazy merge and delayed slice mutability](./src/merge/README.md#shallow-merge-across-non-adjacent-slices)
 - [Merge sort (mutable slices, in-place merging)](./src/sort/README.md)
 - [Quick sort (mutable slices, in-place partitioning)](./src/sort/README.md)
 - Linked list 

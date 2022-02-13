@@ -1,4 +1,4 @@
-#Sections
+# Sections
 - [In-place Merge Algorithm using efficient swapping](#in-place-merge-algorithm-using-efficient-swapping)
 - [Sequential access against multiple slice segments](#sequential-access-against-multiple-slice-segments)
 - [Lazy merge and delayed slice mutability](#shallow-merge-across-non-adjacent-slices)

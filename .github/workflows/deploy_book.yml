@@ -22,14 +22,14 @@ jobs:
         # Just add a `cd` here if you need to change to another directory.
         cd csx3
         mdbook build
-        git worktree add gh-pages gh-pages
+        git worktree add gh-pages Book
         git config user.name "Deploy from CI"
         git config user.email "3185416+gvelim@users.noreply.github.com"
-        cd gh-pages
+        cd gh-pages/csx3
         # Delete the ref to avoid keeping history.
         git update-ref -d refs/heads/gh-pages
         rm -rf *
-        mv ../book/* .
+        mv ../../book/* .
         git add .
         git commit -m "Deploy $GITHUB_SHA to gh-pages"
         git push --force

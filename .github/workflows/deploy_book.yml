@@ -1,8 +1,8 @@
-name: Deploy
+name: Book Deploy
 on:
   push:
     branches:
-      - Book
+      - master
 
 jobs:
   deploy:

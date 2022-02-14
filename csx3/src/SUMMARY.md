@@ -1,5 +1,5 @@
-# Summary
-
+# Algorithms in Rust
+Writting algorithms is a good way of learning the "ways" of a language.
 - [Merge Topics](./merge.md)
   - [In-place merge](./merge_in_place.md)
   - [Sequential access across multiple slices](./merge_sequencial_access.md)

@@ -256,6 +256,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                         idx.swap(temp_idx, i);
                         unsafe {
                             // we need to overcome Rust's borrow checking
+                            // as we cannot use self.swap() here
                             std::ptr::swap::<T>(&mut *vs[temp_idx] as *mut T, &mut *vs[i] as *mut T);
                         }
                         swap_count += 1;
@@ -307,6 +308,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
         let mut j = self.len();
 
+        // attach slice to be merged with self
         self.attach(s);
 
         // i = partition position in working slice so that ... [merged elements] < ws[i] < [unmerged elements]
@@ -315,38 +317,37 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // used for optimising finding i pos in index array
         let (mut inv_count, mut c, mut i, p) = (0usize, 0usize, 0usize, j);
 
-        // ws_len = working slice's length
+        // ws_len = working slice's length = self.len + s.len
         let ws_len = self.len();
 
-        // Build the index reflector of size [ 0 .. size of left slice] since the following properties apply
+        // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
         let mut idx_rfl = (0..ws_len).into_iter().collect::<Vec<usize>>();
 
-        //println!("-:Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
+        //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
-        // Phase 1 : Conditions
-        // j == v.len() => no more comparisons since ws[j] is the rightmost, last and largest of the two slices
-        // i == j => no more comparison required, since everything in ws[..i] << ws[j]
-        while j < ws_len && i != j {
-            match ( self[idx_rfl[c]] ).cmp( &self[j] ) {
-                Ordering::Less | Ordering::Equal => {
-
-                    // swap left slice's item in the working slice with merged partition edge ws[i]
-                    // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                    f_swap(self, i, idx_rfl[c] );
-
-                    // swap index_reflect[c] with index_reflector[i']
-                    // i' == index_reflector[x]; where x == i;
-                    // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
-                    //swap( i' with c )
-                    idx_rfl.swap(idx, c);
-                    //print!("\tl:");
-                    // point to the next in order position (left slice)
-                    c += 1;
-                }
-                Ordering::Greater => {
+        let c_bound = p-1;
+        // Memory Optimisation: if idx_len() = s1.len() then use:
+        //let c_bound = idx_rfl.len()-1;
+        let i_bound = ws_len-1;
+        loop {
+            // Flattening/de-normalising the workflow logic
+            // ============================================
+            // A: (i != j or j < ws_len ) => Any more comparisons required ? is everything in ws[..i] << ws[j] ?
+            // B: ( i != [c] where i < ws_len-1, c < p-1 ) => Have all left slice elements been processed ? Have we reached the end where i == [c] ?
+            // +------+-------+----------+---------------------------------------
+            // |   A  |   B   | if Guard | Action
+            // +------+-------+----------+---------------------------------------
+            // | true |  true |   l > r  | Phase 1: swap right with pivot
+            // | true | false |   l > r  |  - Case not applicable -
+            // | true |  true |    ANY   | Phase 1: l<=r implied; swap left with pivot
+            // |false |  true |    ANY   | Phase 2: finish remaining left items
+            // |false | false |    N/A   | Exit: Merge completed
+            // +------+-------+----------+---------------------------------------
+            //
+            match (j < ws_len && i != j, i < i_bound && c < c_bound) {
+                (true, _) if self[idx_rfl[c]].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent inversions
                     inv_count += j - i;
 
@@ -365,52 +366,32 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                     //print!("\tr:");
                     // point to the next in order position (right slice)
                     j += 1;
-                }
-            }
+                },
+                (_, true) => {
+                    // condition saves cpu-cycles from zero-impact operations when i == c' (no swap)
+                    // otherwise it has no algorithmic impact
+                    if i != idx_rfl[c] {
+                        // swap left slice's item in the working slice with merged partition edge ws[i]
+                        // swap( ws[i] with ws[c'] where c' = index_reflector[c]
+                        f_swap(self, i, idx_rfl[c]);
+
+                        // swap index_reflect[c] with index_reflector[i']
+                        // i' == index_reflector[x]; where x == i;
+                        // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
+                        let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                        //swap( i' with c )
+                        idx_rfl.swap(idx, c);
+                        print!("\tl:");
+                    }
+                    // point to the next in order position (left slice)
+                    c += 1;
+                },
+                (_, _) => break,
+            };
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
-            //println!("Phase 1: Merge:{:?} :: {:?} ({},{},{}={})",self, idx_rfl, i, j, c, idx_rfl[c]);
-        }
-
-        // Phase 2 : Finalise the trailing ends remaining after rightmost part has been exhausted,
-        // Conditions: i == [c], i == ws_len-1, c == p-1
-        //
-        // Here is an example:
-        // [5(i/c),6,7] <> [1(j),2,3,4]
-        // [1,6(i),7] <> [5(c),2(j),3,4]
-        // [1,2,7(i)] <> [5(c),6,3(j),4]
-        // [1,2,3] <> [5(c/i),6,7,4(j)]
-        // [1,2,3] <> [5(c/i),6,7,4(j)]
-        // [1,2,3] <> [4,6(i),7,5(c)] (j) <-- Finished merge however we are left with an unordered rightmost part
-        //                                    [1,2,3,4,6(i),7,5(c')] = VirtualSlice needs to be ordered between i..c'
-        // Tip: the index_reflector already stores the correct order of the trailing items
-        // all we have to do is to let it guide the remaining swapping
-        let c_bound = p-1;
-        // or if we optimise with idx_len() = s1.len() then
-        //let c_bound = idx_rfl.len()-1;
-        let i_bound = ws_len-1;
-        while i < i_bound && c < c_bound {
-
-            // condition saves cpu-cycles from zero-impact operations when i == c' (no swap)
-            // otherwise it has no algorithmic impact
-            if i != idx_rfl[c] {
-                // swap i with c' in working slice
-                f_swap(self, i, idx_rfl[c]);
-
-                // extract i' from index_reflector[]
-                let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
-
-                // swap i' with c
-                idx_rfl.swap(idx, c);
-
-                //println!("\ts:Merge:{:?} :: {:?} ({i},{j},{c}={},{p})", self, idx_rfl, idx_rfl[c]);
-            }
-            // point to the next in order position,
-            // so that idx_rfl[c] point to the right ws['c] item to be swapped
-            c += 1;
-            // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
-            i += 1;
-        }
+            //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
+        };
 
         //println!("Merge Done");
         (inv_count, Some(idx_rfl))

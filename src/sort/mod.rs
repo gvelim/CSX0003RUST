@@ -24,8 +24,8 @@ use crate::merge::VirtualSlice;
 pub struct MergeIterator<I: Iterator> {
     right: Peekable<I>,
     left: Peekable<I>,
-    left_count: u32,
-    left_len: u32,
+    left_count: usize,
+    left_len: usize,
 }
 impl<I: Iterator> MergeIterator<I> {
     /// Constructs a new MergeIterator given two iterators
@@ -36,7 +36,7 @@ impl<I: Iterator> MergeIterator<I> {
             left_count: 0,
             left_len: 0,
         };
-        mi.left_len = mi.left.size_hint().0 as u32;
+        mi.left_len = mi.left.size_hint().0;
         mi
     }
 }
@@ -66,7 +66,7 @@ impl<I> Iterator for MergeIterator<I>
                     // inversions are equal to left items remain to iterate over
                     Ordering::Greater => {
                         let inv = self.left_len - self.left_count;
-                        Some( (inv as usize, self.right.next().unwrap()) )
+                        Some( (inv, self.right.next().unwrap()) )
                     },
                 }
             },
@@ -97,16 +97,16 @@ impl<I> Iterator for MergeIterator<I>
 /// Panics in case the two slices are found not to be adjacent. For safety, always use *ONLY* against slices that have been mutable split from an existing slice
 /// #[should_panic]
 /// let s1 = &mut [3, 5, 7];
-/// let s2 = &mut [1, 3, 5]; // wedge this between the two
+/// let s2 = &mut [1, 3, 5];   // wedge this between the two
 /// let s3 = &mut [2, 4, 6];
 ///
-/// merge_mut(s1,s3);        // this should throw a panic
+/// merge_mut_adjacent(s1,s3); // this should throw a panic
 ///
 /// There is no warranty that Rust will maintain two slice adjacent in a case like this.
 /// let s1 = &mut [3, 5, 7];
 /// let s3 = &mut [2, 4, 6];
 ///
-/// merge_mut(s1,s3);        // this may not always work
+/// merge_mut_adjacent(s1,s3); // this may not always work
 ///
 pub fn merge_mut_adjacent<T>(s1: &mut[T], s2:&mut[T]) -> usize
     where T: Ord + Debug
@@ -157,8 +157,9 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
 /// assert_eq!( mergesort_mut(input, merge_mut), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
-pub fn mergesort_mut<T>(v: &mut [T], fn_merge: fn(&mut[T], &mut[T]) -> usize ) -> usize
-    where T: Ord + Debug {
+pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
+    where T: Ord + Debug,
+          F: Copy + FnMut(&mut[T], &mut[T]) -> usize {
 
     let len = v.len();
 

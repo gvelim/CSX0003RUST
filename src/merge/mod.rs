@@ -381,7 +381,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                         let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
                         //swap( i' with c )
                         idx_rfl.swap(idx, c);
-                        print!("\tl:");
+                        //print!("\tl:");
                     }
                     // point to the next in order position (left slice)
                     c += 1;

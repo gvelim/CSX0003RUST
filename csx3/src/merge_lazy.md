@@ -3,11 +3,10 @@ Need to perform "shallow" or lazy merge, that is,
 * provide ordered access to the underlying slices without mutating them (see shallow merge)
 * while allow such order to be superimposed upon the slices if we later decide to (see superimpose)
 
-
 ## Lazy merge operation 
 * Swapping of references instead of the actual data (light operation)
 * Ordering logic per iteration
-```
+```rust
 use csx3::utils::VirtualSlice;
 
 let (s1, s2) = (&mut [5,6,7], &mut[1,2,3,4]);
@@ -28,7 +27,7 @@ assert_eq!(s2, &[1,2,3,4]);
 ## Deferred Mutability; Superimpose order
 * Straight swapping of data referenced (could end up a heavy heap operation)
 * No ordering logic per iteration
-```
+```rust
 use csx3::utils::VirtualSlice;
 
 let (s1, s2) = (&mut [5,6,7], &mut[1,2,3,4]);

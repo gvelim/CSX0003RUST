@@ -138,7 +138,7 @@ Left Array       Right Array
 +----+----+----+----+----+----+  i.e. &2 = pointer/reference to left array[0]
  p/c             j
 ```
-While the VirtualSlice will ensure we can operate transparently over the array fragments, hence retain index consistency, we still need to tackle eliminating the costly rotations.
+The VirtualSlice enables transparent operation over the array fragments, hence enable us to retain index consistency, we still need to tackle eliminating the costly rotations. For more detail go to the [internals and sequential access section](merge_sequencial_access.md) 
 
 ## Index Reflector - from absolute to derived indexing
 We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequentially causing left merge to go **_out-of-order_**.

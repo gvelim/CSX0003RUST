@@ -1,6 +1,6 @@
 name: Book Deploy
 on:
-  [push, workflow_dispatch]:
+  push:
     branches:
       - master
 

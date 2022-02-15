@@ -1,9 +1,9 @@
 # Sequential access against multiple slice segments
 A `VirtualSlice` is composed out of one or more slice segments, adjacent to memory or not, and enables transparently operating over them.
 
-The virtualslice operates in two mode. Adjacent and non-adjacent.
+The virtual slice operates in two modes. Adjacent and non-adjacent.
 
-It solves the following needs:
+It addresses the following needs:
 
 * Need to access two or more slices as a single continuous one
 * Need to use memory efficiently for cases where such slices are adjacent in memory
@@ -38,7 +38,7 @@ Left Array       Right Array
 * No additional memory used for holding references
 * Uses (n + m) * usize for dynamic indexing
     * can be further optimised to hold only (n) * size of additional memory
-```
+```rust
 use csx3::utils::VirtualSlice;
 let v = &mut [1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
 let (s1, s2) = v.split_at_mut(5);
@@ -53,7 +53,7 @@ assert_eq!(s2, &mut [6, 7, 8, 9, 10]);
 ### Access & swap contents out of two non-adjacent slices
 * Uses n + m memory for holding references
 * Uses (n + m) * usize for dynamic indexing
-```
+```rust
 use csx3::utils::VirtualSlice;
 
 let s1 = &mut [1, 3, 5, 7, 9];

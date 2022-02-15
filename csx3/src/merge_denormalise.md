@@ -63,22 +63,42 @@ A: (left_index < total_length && pivot != left_index )
 B: (left_index < array_length-1 && pivot < array_length-1 )
    => Have all left slice elements been processed ? Have we reached the end where i == [c] ?
    
-+------+-------+----------+---------------------------------------
-|   A  |   B   | if Guard | Action
-+------+-------+----------+---------------------------------------
-| true |  true |   l > r  | Phase 1: swap right with pivot
-| true | false |   l > r  | - nothing to do here, right > left -
-| true |  true |    ANY   | Phase 1: l<=r implied; swap left with pivot
-|false |  true |    ANY   | Phase 2: finish remaining left items
-|false | false |    N/A   | Exit: Merge completed
-+------+-------+----------+---------------------------------------
+  +------+-------+----------+------------------------------------------------
+  |   A  |   B   | if Guard | Action
+  +------+-------+----------+------------------------------------------------
+1 | true |  true |   l > r  | Phase 1: swap right with pivot
+2 | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
+3 | true |  true |   l < r  | Phase 1: l<=r implied; swap left with pivot
+4 |false |  true |    N/A   | Phase 2: move remaining items; swap with pivot
+5 |false | false |    N/A   | Exit: Merge completed; we have reached the end
+  +------+-------+----------+------------------------------------------------
 ```
 This resembles a state-machine pattern which helps us understand
 1. condition priority/order, i.e. exit condition is last
 2. all execution paths and matching logic
 3. path compression, i.e. Phase 1 & 2 for left copies/swaps
 
-With `match` offering a powerful matching expression mechanism we can write the above table in the following way
+As a result we make the following observations
+* Paths (1) & (3) only differ by the `Guard` condition
+* Paths (3) & (4) only differ by condition `A` while the `Guard` condition is not relevant
+* Paths (2) & (5) only differ by condition `A`
+
+So the table can be re-prioritise the table matching order and can further simplify as follows
+```gitignore
+  +------+-------+----------+------------------------------------------------
+  |   A  |   B   | if Guard | Action
+  +------+-------+----------+------------------------------------------------
+1 | true |   _   |   l > r  | Phase 1: swap right with pivot
+  +------+-------+----------+------------------------------------------------
+3 |  _   |  true |    N/A   | Phase 1: l<=r implied; swap left with pivot
+4 |  _   |  true |    N/A   | Phase 2: move remaining items; swap with pivot
+  +------+-------+----------+------------------------------------------------
+2 |  _   |   _   |    N/A   | Exit: Merge completed; finished all left part, right remaining is ordered
+5 |  _   |   _   |    N/A   | Exit: Merge completed; we have reached the end
+  +------+-------+----------+------------------------------------------------
+```
+
+With `match` realising a powerful matching expression mechanism we express the above table in the following way
 
 ```rust
 loop {
@@ -86,17 +106,24 @@ loop {
     let b = left_index < array_length-1 && pivot < array_length-1
 
     match (a, b) {
-        (true, _) => if left[left_index] > right[right_index] {
+        (true, _) => if array[left_index] > array[right_index] {
             
             // Phase 1: swap right with pivot
         }  
         (_, true) => {
         
-            // Phase 1: l<=r iPhase; swap left with pivot
-            // Phase 2: swap left with pivot
+            // Phase 1: l<=r implied; swap left with pivot
+            // Phase 2: move remaining items; swap with pivot
      
         }
         (_, _) => break; // Exit: Merge completed
     }
 }
 ```
+As a result of this analysis 
+* all execution paths have been understood
+* we have eliminated duplication of logic across the paths
+* have been documented in an ease to understand way
+
+
+

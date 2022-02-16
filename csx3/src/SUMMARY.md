@@ -6,7 +6,7 @@
 # Topics
 
 - [Merging](./merge.md)
-  - [In-place merge](./merge_in_place.md)
+  - [In-place merge with O(n+m) swaps](./merge_in_place.md)
   - [Sequential access across multiple slices](./merge_sequencial_access.md)
   - [Lazy merge and deferred slice mutability](./merge_lazy.md)
   - [Pattern matching: De-normalising control flow](./merge_denormalise.md)

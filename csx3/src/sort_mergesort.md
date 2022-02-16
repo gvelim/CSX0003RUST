@@ -9,7 +9,7 @@
 ### Mutable sorting using in-place merge operations
    * Performance: O(n log n)
    * Approach to in-place merge operations, 
-      * [In-place Merge Algorithm using efficient swapping](./merge_in_place.md)
+      * [In-place Merge Algorithm with O(n+m) swaps](./merge_in_place.md)
       * O(n+m) performance
       * [Merge memory adjacent sub-arrays](./merge_sequencial_access.md)
         * `fn merge_mut_adjacent()`

@@ -6,7 +6,7 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Random
   - Deterministic
 - [Merge](https://gvelim.github.io/CSX0003RUST/merge.html)
-  - In-place Merge Algorithm using efficient swapping
+  - In-place Merge Algorithm with O(n+m) swaps
   - Sequential access across multiple slices
   - Lazy merge and deferred slice mutability
   - De-normalise control flow with pattern matching

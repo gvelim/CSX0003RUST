@@ -340,8 +340,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             // |   A  |   B   | if Guard | Action
             // +------+-------+----------+---------------------------------------
             // | true |  true |   l > r  | Phase 1: swap right with pivot
-            // | true | false |   l > r  |  - Case not applicable -
-            // | true |  true |    ANY   | Phase 1: l<=r implied; swap left with pivot
+            // | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
+            // | true |  true |   l > r  | Phase 1: l<=r implied; swap left with pivot
             // |false |  true |    ANY   | Phase 2: finish remaining left items
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------

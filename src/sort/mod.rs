@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::ops::{Add, Sub};
 use rand::Rng;
 use crate::merge::{MergeIterator, VirtualSlice};
 
@@ -267,10 +268,15 @@ pub fn quick_sort<T>(v: &mut [T])
 /// count_sort(v);
 /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
 /// ```
-pub fn count_sort(slice: &mut [u16]) {
+pub fn count_sort<T>(slice: &mut [T])
+    where T: Copy + Clone + Debug + PartialOrd + Sub<Output=T> + Add<Output=T> + TryFrom<usize>,
+          usize: TryFrom<T> {
 
-    fn min_max(s: &[u16]) -> (u16,u16) {
-        let (mut min, mut max) = (!u16::default(), u16::default());
+    #[inline]
+    fn min_max<T>(s: &[T]) -> (T,T)
+        where T: Copy + PartialOrd {
+
+        let (mut min, mut max) = (s[0],s[0]);
         s.into_iter()
             .for_each(|x| {
                 if *x > max { max = *x; }
@@ -279,38 +285,53 @@ pub fn count_sort(slice: &mut [u16]) {
         (min,max)
     }
 
-    assert!( slice.len() < (!u16::default()).into() );
+    #[inline]
+    fn from_usize<C: Copy + TryFrom<usize>>(s:usize) -> C {
+        C::try_from(s).ok().unwrap()
+    }
+    #[inline]
+    fn into_usize<C: Copy>(s:C) -> usize where usize:TryFrom<C> {
+        usize::try_from(s).ok().unwrap()
+    }
+
+    println!("{slice:?}");
 
     // find min and max elements
     // so we can construct the boundaries of the counting array
     // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
     let (min, max) = min_max(slice);
+    print!("({min:?},{max:?})-");
 
     // construct a counting array with length = Max - Min + 1
     // initialise it with zero counts
     // and finally measure counts per item
-    let mut count = vec![0usize; usize::from(max - min) + 1];
+    let len: usize = into_usize(max - min ) + 1;
+    print!("({len}) ");
+    let mut count = vec![0usize; len];
     slice.into_iter()
         .for_each(|x| {
             // construct index offset based on Min value, such as, Min is at [0] position
-            count[ usize::from(*x - min) ] += 1;
+            count[ into_usize(*x - min) ] += 1;
         });
+    println!("{count:?}");
 
     // playback collected counts
     // let mut output: Vec<u16> = Vec::with_capacity(slice.len());
     let mut s_idx = 0;
     count.into_iter()
         .enumerate()
+        .filter(|(_,x)| *x > 0 )
         .for_each(|(i, mut x)| if x > 0 {
             // reverse index offset mapping
             // hence, output[i] = Min + i
-            let val = i as u16 + min;
+            let val: T = min + from_usize(i);
             while x > 0 {
                 slice[s_idx] = val;
                 s_idx += 1;
                 x -= 1;
             }
         });
+    println!("{slice:?}");
 }
 
 
@@ -319,14 +340,26 @@ mod test {
     use crate::random_sequence;
     use super::*;
     #[test]
+    fn test_countsort_head_to_head()
+    {
+        for _ in 0..8 {
+            let v1: Vec<i8> = random_sequence(8);
+            let mut v2 = v1.clone();
+
+            count_sort(&mut v2);
+            let (_, v) = mergesort(&v1);
+            assert_eq!( &v, &v2 );
+        }
+    }
+    #[test]
     fn test_count_sort() {
-        let test_data: [(&mut [u16], &[u16]);6] = [
+        let test_data: [(&mut [i8], &[i8]);6] = [
             (&mut [13,12,11],              &[11,12,13]),
             (&mut [14,11,13,12],           &[11,12,13,14]),
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),
             (&mut [36,32,34,33,35,31],     &[31,32,33,34,35,36]),
             (&mut [7,6,5,4,3,2,1],         &[1,2,3,4,5,6,7]),
-            (&mut [8,7,6,5,4,3,2,1],       &[1,2,3,4,5,6,7,8])
+            (&mut [8,7,-16,5,-14,3,2,1],   &[-16,-14,1,2,3,5,7,8])
         ];
 
         test_data.into_iter()

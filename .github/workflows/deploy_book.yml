@@ -1,5 +1,8 @@
 name: Book Deploy
 on:
+  workflow_dispatch:
+    paths:
+      - 'csx/**'
   push:
     paths:
       - 'csx/**'

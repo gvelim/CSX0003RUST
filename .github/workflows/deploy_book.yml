@@ -4,8 +4,10 @@ on:
     paths:
       - 'csx/**'
   push:
+    branches:
+      - master
     paths:
-      - 'csx/**'
+      - 'csx3/**'
 
 jobs:
   deploy:

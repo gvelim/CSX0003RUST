@@ -1,8 +1,9 @@
 name: Book Deploy
 on:
   push:
-    branches:
-      - master
+    paths:
+      - 'csx/**'
+      - '!csx/**'
 
 jobs:
   deploy:

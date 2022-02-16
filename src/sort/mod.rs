@@ -231,7 +231,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
 
     (l, &mut p[0], r)
 }
-/// Short a given array using the Quick Sort algorithm.
+/// Sorts a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
 /// ```
 /// use csx3::sort::quick_sort;
@@ -257,12 +257,84 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(left_partition);
     quick_sort(right_partition);
 }
+/// Sorts a given array using the Count Sort algorithm.
+/// The input array size should not exceed 32bit size
+/// ```
+/// use csx3::sort::count_sort;
+///
+/// let v = &mut [3,5,8,1,2,4,6,0];
+///
+/// count_sort(v);
+/// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
+/// ```
+pub fn count_sort(slice: &mut [u16]) {
+
+    fn min_max(s: &[u16]) -> (u16,u16) {
+        let (mut min, mut max) = (!u16::default(), u16::default());
+        s.into_iter()
+            .for_each(|x| {
+                if *x > max { max = *x; }
+                else if *x < min { min = *x; }
+        });
+        (min,max)
+    }
+
+    assert!( slice.len() < (!u16::default()).into() );
+
+    // find min and max elements
+    // so we can construct the boundaries of the counting array
+    // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+    let (min, max) = min_max(slice);
+
+    // construct a counting array with length = Max - Min + 1
+    // initialise it with zero counts
+    // and finally measure counts per item
+    let mut count = vec![0usize; usize::from(max - min) + 1];
+    slice.into_iter()
+        .for_each(|x| {
+            // construct index offset based on Min value, such as, Min is at [0] position
+            count[ usize::from(*x - min) ] += 1;
+        });
+
+    // playback collected counts
+    // let mut output: Vec<u16> = Vec::with_capacity(slice.len());
+    let mut s_idx = 0;
+    count.into_iter()
+        .enumerate()
+        .for_each(|(i, mut x)| if x > 0 {
+            // reverse index offset mapping
+            // hence, output[i] = Min + i
+            let val = i as u16 + min;
+            while x > 0 {
+                slice[s_idx] = val;
+                s_idx += 1;
+                x -= 1;
+            }
+        });
+}
 
 
 #[cfg(test)]
 mod test {
     use crate::random_sequence;
     use super::*;
+    #[test]
+    fn test_count_sort() {
+        let test_data: [(&mut [u16], &[u16]);6] = [
+            (&mut [13,12,11],              &[11,12,13]),
+            (&mut [14,11,13,12],           &[11,12,13,14]),
+            (&mut [28, 24, 22, 21],        &[21,22,24,28]),
+            (&mut [36,32,34,33,35,31],     &[31,32,33,34,35,36]),
+            (&mut [7,6,5,4,3,2,1],         &[1,2,3,4,5,6,7]),
+            (&mut [8,7,6,5,4,3,2,1],       &[1,2,3,4,5,6,7,8])
+        ];
+
+        test_data.into_iter()
+            .for_each( | (input, output) | {
+                count_sort(input);
+                assert_eq!( input, output);
+            });
+    }
     #[test]
     fn test_quick_sort() {
         let test_data: [(&mut [u32], &[u32]);6] = [

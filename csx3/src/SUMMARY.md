@@ -14,5 +14,6 @@
 - [Sorting](./sort.md)
   - [Merge sort](./sort_mergesort.md)
   - [Quick sort](./sort_quicksort.md)
+  - [Count sort](./sort_count.md)
 
 - [Selecting](./selection.md)

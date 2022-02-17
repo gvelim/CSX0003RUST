@@ -58,21 +58,21 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     ws.merge(s1);
     ws.merge(s2)
 }
-
+// ANCHOR: sort_merge_mut
 /// Sort function based on the merge sort algorithm
-/// Sorts the mutable vector with no additional memory by applying in-place merging
+/// Sorts the mutable vector with in-place operations
 /// while it returns the total count of inversions occurred
 ///
 /// The following functions are available to use as passing parameter
-/// - merge_mut : safe to use with non-adjacent (CPU: O(n), Memory: 2O(n))
-/// - merge_mut_adjacent : only to be used when slices are memory adjacent (CPU: O(n log n), Memory: 0)
+/// - merge_mut : safe to use with non-adjacent; time: O(n+m), space: O(2n+m)*usize
+/// - merge_mut_adjacent : use only when slices are adjacent in memory: time: O(n+m), space: O(n)*usize
 ///
 /// ```
-/// use csx3::sort::{merge_mut, mergesort_mut};
+/// use csx3::sort::{merge_mut_adjacent, mergesort_mut};
 ///
 /// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!( mergesort_mut(input, merge_mut), 6 );
+/// assert_eq!( mergesort_mut(input, merge_mut_adjacent), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
@@ -110,6 +110,8 @@ pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
         }
     }
 }
+// ANCHOR_END: sort_merge_mut
+// ANCHOR: sort_merge
 /// Sort function based on the merge sort algorithm
 /// Returns a new sorted vector given an input reference slice - heap allocations
 /// along with the total count of inversions occurred
@@ -161,7 +163,9 @@ pub fn mergesort<T>(v: &[T]) -> (usize, Vec<T>)
         }
     }
 }
+// ANCHOR_END: sort_merge
 
+// ANCHOR: sort_quick_partition
 /// Splits an array into two mutable slices/partitions around a pivot location index
 /// so that *[values in left partition] < [pivot] < [values in right partition]*
 /// ```
@@ -180,7 +184,6 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
 
     let len = v.len();
     assert!(idx < len);
-    //println!("\tInput: {:?}, (@{}{})",v, idx+1, match idx {0=>"st",1=>"nd",2=>"rd",_=>"th"});
 
     let mut i = 0usize;
 
@@ -210,14 +213,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
                         ptr.wrapping_add(i),
                         ptr.wrapping_add(j)
                     );
-                }
-                //print!("\ts:");
-            }
-            // else {
-            //     print!("\t-:");
-            // }
-            //
-            // println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts::<T>(ptr, len) }, i+1, j+1);
+                } }
         });
     // we found the correct order for pivot
     // hence swap v[i] with v[0]
@@ -231,7 +227,10 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
 
     (l, &mut p[0], r)
 }
-/// Short a given array using the Quick Sort algorithm.
+// ANCHOR_END: sort_quick_partition
+
+// ANCHOR: sort_quick
+/// Sorts a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
 /// ```
 /// use csx3::sort::quick_sort;
@@ -257,12 +256,102 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(left_partition);
     quick_sort(right_partition);
 }
+// ANCHOR_END: sort_quick
 
+// ANCHOR: sort_count
+/// Sorts a given array using the Count Sort algorithm.
+/// Input array NuType shouldn't exceed u16 to avoid memory issues
+/// ```
+/// use csx3::sort::count_sort;
+///
+/// let v = &mut [3,5,8,1,2,4,6,0];
+///
+/// count_sort(v);
+/// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
+/// ```
+pub type NumType = u8;
+pub fn count_sort(slice: &mut [NumType]) {
+
+    #[inline]
+    fn min_max(s: &[NumType]) -> (NumType,NumType) {
+
+        let (mut min, mut max) = (s[0],s[0]);
+        s.into_iter()
+            .for_each(|x| {
+                if *x > max { max = *x; }
+                else if *x < min { min = *x; }
+        });
+        (min,max)
+    }
+
+    // find min and max elements
+    // so we can construct the boundaries of the counting array
+    // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+    let (min, max) = min_max(slice);
+
+    // construct a counting array with length = Max - Min + 1
+    let len = max.saturating_sub(min) as usize;
+    // initialise it with zero counts
+    let mut count = vec![0usize; len  +1];
+    // and finally measure counts per item
+    slice.into_iter()
+        .for_each(|x| {
+            // construct index offset based on Min value, such as, Min is at [0] position
+            let idx: usize = (*x - min).try_into().unwrap();
+            count[ idx ] += 1;
+        });
+
+    // play back onto the input slice the counts collected with Sum of all counts == slice.len()
+    let mut s_idx = 0;
+    count.into_iter()
+        .enumerate()
+        .filter(|(_,x)| *x > 0 )
+        .for_each(|(i, mut x)| {
+            // reverse index offset mapping
+            // hence, output[i] = Min + i
+            let val = min + i as NumType;
+            while x > 0 {
+                slice[s_idx] = val;
+                s_idx += 1;
+                x -= 1;
+            }
+        });
+}
+// ANCHOR_END: sort_count
 
 #[cfg(test)]
 mod test {
     use crate::random_sequence;
     use super::*;
+    #[test]
+    fn test_countsort_head_to_head()
+    {
+        for _ in 0..512 {
+            let v1: Vec<NumType> = random_sequence(1024);
+            let mut v2 = v1.clone();
+
+            count_sort(&mut v2);
+            let (_, v) = mergesort(&v1);
+            assert_eq!( &v, &v2 );
+        }
+    }
+    #[test]
+    fn test_count_sort() {
+        let test_data: [(&mut [NumType], &[NumType]);5] = [
+            (&mut [13,12,11],              &[11,12,13]),
+            (&mut [14,11,13,12],           &[11,12,13,14]),
+            (&mut [28, 24, 22, 21],        &[21,22,24,28]),
+            (&mut [36,32,34,33,35,31],     &[31,32,33,34,35,36]),
+            (&mut [7,6,5,4,3,2,1],         &[1,2,3,4,5,6,7]),
+            //(&mut [113, 82, 122, 58, 16, -123, -58, -110],   &[113, 82, 122, 58, 16, -123, -58, -110])
+        ];
+
+        test_data.into_iter()
+            .for_each( | (input, output) | {
+                count_sort(input);
+                assert_eq!( input, output);
+            });
+    }
     #[test]
     fn test_quick_sort() {
         let test_data: [(&mut [u32], &[u32]);6] = [

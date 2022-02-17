@@ -58,21 +58,21 @@ pub fn merge_mut<T>(s1: &mut[T], s2:&mut[T]) -> usize
     ws.merge(s1);
     ws.merge(s2)
 }
-
+// ANCHOR: sort_merge_mut
 /// Sort function based on the merge sort algorithm
-/// Sorts the mutable vector with no additional memory by applying in-place merging
+/// Sorts the mutable vector with in-place operations
 /// while it returns the total count of inversions occurred
 ///
 /// The following functions are available to use as passing parameter
-/// - merge_mut : safe to use with non-adjacent (CPU: O(n), Memory: 2O(n))
-/// - merge_mut_adjacent : only to be used when slices are memory adjacent (CPU: O(n log n), Memory: 0)
+/// - merge_mut : safe to use with non-adjacent; time: O(n+m), space: O(2n+m)*usize
+/// - merge_mut_adjacent : use only when slices are adjacent in memory: time: O(n+m), space: O(n)*usize
 ///
 /// ```
-/// use csx3::sort::{merge_mut, mergesort_mut};
+/// use csx3::sort::{merge_mut_adjacent, mergesort_mut};
 ///
 /// let input = &mut [8, 4, 2, 1];
 ///
-/// assert_eq!( mergesort_mut(input, merge_mut), 6 );
+/// assert_eq!( mergesort_mut(input, merge_mut_adjacent), 6 );
 /// assert_eq!( input, &[1,2,4,8] );
 /// ```
 pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
@@ -110,6 +110,8 @@ pub fn mergesort_mut<T, F>(v: &mut [T], mut fn_merge: F ) -> usize
         }
     }
 }
+// ANCHOR_END: sort_merge_mut
+// ANCHOR: sort_merge
 /// Sort function based on the merge sort algorithm
 /// Returns a new sorted vector given an input reference slice - heap allocations
 /// along with the total count of inversions occurred
@@ -161,7 +163,9 @@ pub fn mergesort<T>(v: &[T]) -> (usize, Vec<T>)
         }
     }
 }
+// ANCHOR_END: sort_merge
 
+// ANCHOR: sort_quick_partition
 /// Splits an array into two mutable slices/partitions around a pivot location index
 /// so that *[values in left partition] < [pivot] < [values in right partition]*
 /// ```
@@ -180,7 +184,6 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
 
     let len = v.len();
     assert!(idx < len);
-    //println!("\tInput: {:?}, (@{}{})",v, idx+1, match idx {0=>"st",1=>"nd",2=>"rd",_=>"th"});
 
     let mut i = 0usize;
 
@@ -210,14 +213,7 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
                         ptr.wrapping_add(i),
                         ptr.wrapping_add(j)
                     );
-                }
-                //print!("\ts:");
-            }
-            // else {
-            //     print!("\t-:");
-            // }
-            //
-            // println!("{:?},({},{})", unsafe{ &*slice_from_raw_parts::<T>(ptr, len) }, i+1, j+1);
+                } }
         });
     // we found the correct order for pivot
     // hence swap v[i] with v[0]
@@ -231,6 +227,9 @@ pub fn partition_at_index<T>(v: &mut [T], idx: usize) -> (&mut [T], &mut T, &mut
 
     (l, &mut p[0], r)
 }
+// ANCHOR_END: sort_quick_partition
+
+// ANCHOR: sort_quick
 /// Sorts a given array using the Quick Sort algorithm.
 /// The function rearranges the array contents rather than returning a new sorted copy of the input array
 /// ```
@@ -257,8 +256,11 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(left_partition);
     quick_sort(right_partition);
 }
+// ANCHOR_END: sort_quick
+
+// ANCHOR: sort_count
 /// Sorts a given array using the Count Sort algorithm.
-/// The input array size should not exceed 32bit size
+/// Input array NuType shouldn't exceed u16 to avoid memory issues
 /// ```
 /// use csx3::sort::count_sort;
 ///
@@ -288,10 +290,10 @@ pub fn count_sort(slice: &mut [NumType]) {
     let (min, max) = min_max(slice);
 
     // construct a counting array with length = Max - Min + 1
-    // initialise it with zero counts
-    // and finally measure counts per item
     let len = max.saturating_sub(min) as usize;
+    // initialise it with zero counts
     let mut count = vec![0usize; len  +1];
+    // and finally measure counts per item
     slice.into_iter()
         .for_each(|x| {
             // construct index offset based on Min value, such as, Min is at [0] position
@@ -299,13 +301,12 @@ pub fn count_sort(slice: &mut [NumType]) {
             count[ idx ] += 1;
         });
 
-    // playback collected counts
-    // let mut output: Vec<u16> = Vec::with_capacity(slice.len());
+    // play back onto the input slice the counts collected with Sum of all counts == slice.len()
     let mut s_idx = 0;
     count.into_iter()
         .enumerate()
         .filter(|(_,x)| *x > 0 )
-        .for_each(|(i, mut x)| if x > 0 {
+        .for_each(|(i, mut x)| {
             // reverse index offset mapping
             // hence, output[i] = Min + i
             let val = min + i as NumType;
@@ -316,7 +317,7 @@ pub fn count_sort(slice: &mut [NumType]) {
             }
         });
 }
-
+// ANCHOR_END: sort_count
 
 #[cfg(test)]
 mod test {

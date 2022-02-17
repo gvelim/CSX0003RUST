@@ -1,8 +1,2 @@
 # Sort Algorithms
-
-## Merge Sort
-
-## Quick Sort
-
-## Count Sort
-
+Collection of algorithms with implementation attention to rust's expressiveness in terms of Iterators, generic types, matching expressions, ownership and borrowing rules, safe `unsafe` use, etc 

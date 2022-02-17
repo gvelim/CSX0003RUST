@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use rand::Rng;
 use super::sort::{mergesort_mut, merge_mut_adjacent, partition_at_index};
 
+// ANCHOR: selection_r
 /// Find the nth order statistic within an unordered set with O(n) performance
 /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
 /// When function returns, the input array has been rearranged so that ```item == array[ nth order ]```
@@ -43,6 +44,7 @@ pub fn r_selection<T>(v: &mut [T], nth_min: usize) -> &T
             r_selection(right_partition, nth_min - order),
     }
 }
+// ANCHOR_END: selection_r
 
 /// Find the nth order statistic within an unordered set with O(n) performance
 /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
@@ -89,6 +91,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
     }
 }
 
+// ANCHOR: selection_median
 /// Returns a vector of N/5 medians where N = input array length
 /// It breaks array into N/5 sub-arrays of length 5 for cheap sorting and picking the median value
 ///
@@ -118,7 +121,7 @@ pub fn find_median<T>(v:&mut [T]) -> T
     let mut medians: Vec<T> = medians_of_medians(v);
     find_median(&mut medians)
 }
-
+// ANCHOR_END: selection_median
 
 #[cfg(test)]
 mod test {

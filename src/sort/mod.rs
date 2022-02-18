@@ -304,7 +304,7 @@ pub fn count_sort(slice: &mut [NumType]) {
     let len : usize = diff(max,min);
     println!("{len:?}");
     // initialise it with zero counts
-    let mut count = vec![0usize; len  +1];
+    let mut count = vec![0usize; len+1];
     // and finally measure counts per item
     slice.into_iter()
         .for_each(|x| {
@@ -326,7 +326,7 @@ pub fn count_sort(slice: &mut [NumType]) {
             print!("{min:?},{i:?}={:?}::",i % NumType::MAX as usize);
             let val = if i > NumType::MAX as usize {
                 print!(">");
-                min + NumType::MAX + (i - NumType::MAX as usize) as NumType
+                (min + NumType::MAX).wrapping_add( (i - NumType::MAX as usize) as NumType )
             } else {
                 print!("<");
                 min + i as NumType
@@ -349,7 +349,7 @@ mod test {
     fn test_countsort_head_to_head()
     {
         for i in 0..16 {
-            let v1: Vec<NumType> = random_sequence(64);
+            let v1: Vec<NumType> = random_sequence(128);
             let mut v2 = v1.clone();
             println!("RUN: {i} =====================");
             count_sort(&mut v2);

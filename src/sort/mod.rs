@@ -286,7 +286,7 @@ pub fn count_sort(slice: &mut [NumType]) {
     #[inline]
     fn diff(max:NumType, min:NumType) -> usize {
         match (min < 0, max < 0) {
-            (true, false) => max as usize + min.abs() as usize,
+            (true, false) => max as usize + min.unsigned_abs() as usize,
             (true, true) => (max - min) as usize,
             (false, false) => (max - min) as usize,
             (false, true) => panic!("incomprehensible!"),
@@ -323,8 +323,14 @@ pub fn count_sort(slice: &mut [NumType]) {
         .for_each(|(i, mut x)| {
             // reverse index offset mapping
             // hence, output[i] = Min + i
-            print!("{min:?},{i:?}={:?}::",i % 127);
-            let val = min.saturating_add(i as NumType);
+            print!("{min:?},{i:?}={:?}::",i % NumType::MAX as usize);
+            let val = if i > NumType::MAX as usize {
+                print!(">");
+                min + NumType::MAX + (i - NumType::MAX as usize) as NumType
+            } else {
+                print!("<");
+                min + i as NumType
+            };
             println!("{val:?}");
             while x > 0 {
                 slice[s_idx] = val;
@@ -342,10 +348,10 @@ mod test {
     #[test]
     fn test_countsort_head_to_head()
     {
-        for _ in 0..16 {
-            let v1: Vec<NumType> = random_sequence(12);
+        for i in 0..16 {
+            let v1: Vec<NumType> = random_sequence(64);
             let mut v2 = v1.clone();
-
+            println!("RUN: {i} =====================");
             count_sort(&mut v2);
             let (_, v) = mergesort(&v1);
             assert_eq!( &v, &v2 );
@@ -353,13 +359,13 @@ mod test {
     }
     #[test]
     fn test_count_sort() {
-        let test_data: [(&mut [NumType], &[NumType]);5] = [
+        let test_data: [(&mut [NumType], &[NumType]);6] = [
             (&mut [13,12,11],              &[11,12,13]),
             (&mut [14,11,13,12],           &[11,12,13,14]),
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),
             (&mut [36,32,34,33,35,31],     &[31,32,33,34,35,36]),
             (&mut [7,6,5,4,3,2,1],         &[1,2,3,4,5,6,7]),
-            //(&mut [113, 82, 122, 58, 16, -123, -58, -110],   &[113, 82, 122, 58, 16, -123, -58, -110])
+            (&mut [113, 82, 122, 58, 16, -123, -58, -110],   &[-123, -110, -58, 16, 58, 82, 113, 122])
         ];
 
         test_data.into_iter()

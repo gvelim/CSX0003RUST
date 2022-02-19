@@ -257,19 +257,17 @@ pub fn quick_sort<T>(v: &mut [T])
     quick_sort(right_partition);
 }
 // ANCHOR_END: sort_quick
-
-
+// ANCHOR: sort_count
 /// Sorts a given array using the Count Sort algorithm.
 /// Input array NuType shouldn't exceed u16 to avoid memory issues
 /// ```
 /// use csx3::sort::CountSort;
 ///
-/// let v = &mut [3i8,5,8,1,2,4,6,0];
+/// let v : &mut [i8] = &mut [3,5,8,1,2,4,6,0];
 ///
 /// v.count_sort();
 /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
 /// ```
-
 pub trait CountSort {
     type NumType;
 
@@ -300,7 +298,6 @@ impl CountSort for [i8] {
         }
     }
     // ANCHOR_END: sort_count_diff
-    // ANCHOR: sort_count
     fn count_sort(&mut self) {
         // find min and max elements
         // so we can construct the boundaries of the counting array

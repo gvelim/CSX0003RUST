@@ -1,73 +1,99 @@
 # Count Sort
-A near liner sorting algorithm with **O(n) time complexity**, however with usage limitations due to memory demands when used numbers larger than 16bit.
-
-Key points
+A sorting algorithm with **O(n) time complexity** with the following key points
 * Sorts the array in 2 passes
 * Does not make use of comparisons
-* Keeps a Bookkeeping array for counting number of occurences per array item.
+* Keeps a Bookkeeping array for counting number of occurrences per array item.
 
-## Challenges working with signed numbers
+The algorithm's limitation is that memory demand grows to the `2 ^ sizeof(type)` hence it is not recommended for arrays holding values 16bit and over.
+
+## Challenges working with integer arrays
 The algorithm requires the ability to **translate** 
 * input array values (positive or negative) to BookKeeping indexes (positive)
 * Index positions to negative or positive values
 
-Both cases require knowledge of the `distance` between `min` & `max` values found in the input array
 ```
-  0                          255
-  |---------------------------|        Unsigned values to index conversion
-                                       Distance calculation without overflow
-  min <----- distance ----> max
-  
--127            0            +127
-  |-------------|-------------|        Integer values to index comversion
-                                       Causes Overflow when distance > 127 
++---+---+---+---+---+---+---+---+     Type: Integer or Unsigned
+| 2 | 2 | 5 | 5 | 8 | 1 | 5 | 3 |     (Min, Max) = (1,8)
++---+---+---+---+---+---+---+---+     (distance) = Min - Max + 1 = 8
+  |   |   |   |    \______|__
+   \__|    \__|__________/   \
+      |       |               |
++---+---+---+---+---+---+---+---+    Type: Unsigned
+| 1 | 2 | 2 | 3 | 0 | 0 | 0 | 1 |    BookKeeping capacity(8)
++---+---+---+---+---+---+---+---+    holding counts from [min..max]   
+min(1)        ^ = idx['5']   max(8)       
 ```
-### Translating integer/unsigned values to index
-For unsigned values the translation is straight forward and can be easily casted
-```rust,noplayground
-let idx = value as usize;
-```
-However, dealing with signed values we can easily cause an overflow and panic since the `distance` between `min` and `max` can exceed the `[-127..0]` or `[0..127]` ranges
+### Distance calculation
+Therefore, knowing the `distance` between `min` & `max` values are fundamental to the algorithm's logic.
+
+However, integer values can easily cause an overflow when the `distance` between `min` and `max` exceeds the `[-127..0]` or `[0..127]` ranges
 ```
 -127            0            +127
   |-------------|-------------|        Both Min and Max are negative
-   <-- len --->                        
+   <-- dist --->                        Safe: Dist = (max - min)
 
 -127            0            +127
   |-------------|-------------|        Min is negative, Max is positive
-           <-- len --->                
+                                       Unsafe: (max - min) overflows
+    <-------- dist --------->                
 
 -127            0            +127
   |-------------|-------------|        Both Min & Max are positive
-                  <-- len --->         
+                  <-- dist -->         Safe: Dist = (max - min)
 ```
-Therefore, we conclude that
-* when either both are positive or negative the distance falls within either the `[-127..0]` or `[0..127]` ranges, which is safe
-* otherwise, we are at risk of an overflow, and therefore we have to covert both to `usize` before we calculate the `distance`
+Therefore, when `min` and `max` have opposite signs we have to covert both to `usize` before we calculate the `distance`. In all other cases, incl. unsigned types, `(max - min)` is sufficient.
 
-The following implementation covers all cases incl. those with unsigned numbers
+The following implementation covers the above
 ```rust,no_run,noplayground
 {{#include ../../src/sort/mod.rs:sort_count_diff}}
 ```
+Now that we know the `distance` we can use it to translate value-to-index and index-to-value.
 
-### Translating the index back to integer/unsigned values
-Here we have to cater for the case where the `index > 127` as such condition will cause an overflow.
+### Value-to-index translation
+We know that 
+* `Min` is at `Bookkeeping[0]` position and
+* `Max` is at `BookKeeping[distance]` position
+* `Min < value < Max`
 
-The following implementation, ensures under such scenario we
-* add `127` to avoid the overflow condition, then
-* add the remainder of distance given by `index - 127` 
+Therefore, the index is found as `index = value - Min` which more or less follows the same logic as the `distance` calculation, if instead of `value` you think `max`.
+
+Therefore, for both integer and unsigned we have...
+
 ```rust,noplayground
-let val = if i > i8::MAX as usize {
+let idx = diff(value, min);
+BookKeeping[idx] += 1;
+```
+
+### Index-to-value translation
+This is the reverse effect, where we need to translate the data from the BookKeeper array onto the input array. 
+
+For example, with `Min = 1` we have
+* `BookKeeper[0]`, `value = min`
+* `BookKeeper[1]`, `value = min + 1`
+
+As a result, the translation to `value` is given by `min + index`. Recall that the `index == distance` and `distance` 
+* always fits the unsigned numbers value range
+* overflows the signed numbers value range as shown below
+
+```
+-127            0            +127
+  |-------------|-------------|        (Min,Max) = (-120,100)
+    -120 <----- dist -----> 100        distance = 220
+     min                    max        value = (Min: -120 + index: 220)
+                                       ^^^^^ ** OVERFLOW **
+```
+For `i8` the `type::MAX` value is `127` hence when we add `220` we are causing an overflow of `93` that is `220 - type::MAX`.
+
+Therefore, the trick here is to break the `index` down to`type::MAX` + `delta` and as shown by the below implementation
+```rust,noplayground
+let value = if i > i8::MAX as usize {
         (min + i8::MAX).wrapping_add((i - i8::MAX as usize) as i8)
     } else {
         min + i as i8
     };
 ```
-## Implementation
-Therefore, this implementation 
-* Might take lots of memory even if the input array is [0x00, 0xFFFF_FFFF]
-* Is better suited to unsigned numerical types up to 16bit size.
-
+## Final implementation
+Putting all the above together, we are getting the following implementation of the `count_sort()` method
 ```rust,no_run,noplayground
 {{#include ../../src/sort/mod.rs:sort_count}}
 ```

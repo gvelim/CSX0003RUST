@@ -287,34 +287,27 @@ pub fn count_sort(slice: &mut [NumType]) {
     fn diff(max:NumType, min:NumType) -> usize {
         match (min < 0, max < 0) {
             (true, false) => max as usize + min.unsigned_abs() as usize,
-            (true, true) => (max - min) as usize,
-            (false, false) => (max - min) as usize,
-            (false, true) => panic!("incomprehensible!"),
+            (_, _) => (max - min) as usize,
         }
     }
 
-    print!("{slice:?}::");
     // find min and max elements
     // so we can construct the boundaries of the counting array
     // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
     let (min, max) = min_max(slice);
-    print!("{min:?},{max:?}::");
 
     // construct a counting array with length = Max - Min + 1
     let len : usize = diff(max,min);
-    println!("{len:?}");
     // initialise it with zero counts
     let mut count = vec![0usize; len+1];
     // and finally measure counts per item
     slice.into_iter()
         .for_each(|x| {
             // construct index offset based on Min value, such as, Min is at [0] position
-            print!("{x:?},{min:?}::");
             let idx: usize = diff(*x, min);
-            println!("{idx:?}");
             count[ idx ] += 1;
         });
-    println!("{count:?}");
+
     // play back onto the input slice the counts collected with Sum of all counts == slice.len()
     let mut s_idx = 0;
     count.into_iter()
@@ -323,15 +316,11 @@ pub fn count_sort(slice: &mut [NumType]) {
         .for_each(|(i, mut x)| {
             // reverse index offset mapping
             // hence, output[i] = Min + i
-            print!("{min:?},{i:?}={:?}::",i % NumType::MAX as usize);
             let val = if i > NumType::MAX as usize {
-                print!(">");
                 (min + NumType::MAX).wrapping_add( (i - NumType::MAX as usize) as NumType )
             } else {
-                print!("<");
                 min + i as NumType
             };
-            println!("{val:?}");
             while x > 0 {
                 slice[s_idx] = val;
                 s_idx += 1;
@@ -348,10 +337,10 @@ mod test {
     #[test]
     fn test_countsort_head_to_head()
     {
-        for i in 0..16 {
-            let v1: Vec<NumType> = random_sequence(128);
+        for _i in 0..64 {
+            let v1: Vec<NumType> = random_sequence(256);
             let mut v2 = v1.clone();
-            println!("RUN: {i} =====================");
+
             count_sort(&mut v2);
             let (_, v) = mergesort(&v1);
             assert_eq!( &v, &v2 );

@@ -258,7 +258,7 @@ pub fn quick_sort<T>(v: &mut [T])
 }
 // ANCHOR_END: sort_quick
 
-// ANCHOR: sort_count
+
 /// Sorts a given array using the Count Sort algorithm.
 /// Input array NuType shouldn't exceed u16 to avoid memory issues
 /// ```
@@ -283,21 +283,24 @@ impl CountSort for [i8] {
 
     #[inline]
     fn min_max(&self) -> (Self::NumType, Self::NumType) {
-            let (mut min, mut max) = (self[0], self[0]);
-            self.into_iter()
-                .for_each(|x| {
-                    if *x > max { max = *x; } else if *x < min { min = *x; }
-                });
-            (min, max)
-        }
+        let (mut min, mut max) = (self[0], self[0]);
+        self.into_iter()
+            .for_each(|x| {
+                if *x > max { max = *x; } else if *x < min { min = *x; }
+            });
+        (min, max)
+   }
+
     #[inline]
+    // ANCHOR: sort_count_diff
     fn diff(max: Self::NumType, min: Self::NumType) -> usize {
         match (min < 0, max < 0) {
             (true, false) => max as usize + min.unsigned_abs() as usize,
             (_, _) => (max - min) as usize,
         }
     }
-
+    // ANCHOR_END: sort_count_diff
+    // ANCHOR: sort_count
     fn count_sort(&mut self) {
         // find min and max elements
         // so we can construct the boundaries of the counting array
@@ -336,8 +339,8 @@ impl CountSort for [i8] {
                 }
             });
     }
+    // ANCHOR_END: sort_count
 }
-// ANCHOR_END: sort_count
 
 #[cfg(test)]
 mod test {

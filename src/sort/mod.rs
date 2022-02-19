@@ -262,71 +262,80 @@ pub fn quick_sort<T>(v: &mut [T])
 /// Sorts a given array using the Count Sort algorithm.
 /// Input array NuType shouldn't exceed u16 to avoid memory issues
 /// ```
-/// use csx3::sort::count_sort;
+/// use csx3::sort::CountSort;
 ///
-/// let v = &mut [3,5,8,1,2,4,6,0];
+/// let v = &mut [3i8,5,8,1,2,4,6,0];
 ///
-/// count_sort(v);
+/// v.count_sort();
 /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
 /// ```
-pub type NumType = i8;
-pub fn count_sort(slice: &mut [NumType]) {
+
+pub trait CountSort {
+    type NumType;
+
+    fn count_sort(&mut self);
+    fn min_max(&self) -> (Self::NumType, Self::NumType);
+    fn diff(max:Self::NumType, min: Self::NumType) -> usize;
+}
+
+impl CountSort for [i8] {
+   type NumType = i8;
 
     #[inline]
-    fn min_max(s: &[NumType]) -> (NumType,NumType) {
-
-        let (mut min, mut max) = (s[0],s[0]);
-        s.into_iter()
-            .for_each(|x| {
-                if *x > max { max = *x; }
-                else if *x < min { min = *x; }
-        });
-        (min,max)
-    }
+    fn min_max(&self) -> (Self::NumType, Self::NumType) {
+            let (mut min, mut max) = (self[0], self[0]);
+            self.into_iter()
+                .for_each(|x| {
+                    if *x > max { max = *x; } else if *x < min { min = *x; }
+                });
+            (min, max)
+        }
     #[inline]
-    fn diff(max:NumType, min:NumType) -> usize {
+    fn diff(max: Self::NumType, min: Self::NumType) -> usize {
         match (min < 0, max < 0) {
             (true, false) => max as usize + min.unsigned_abs() as usize,
             (_, _) => (max - min) as usize,
         }
     }
 
-    // find min and max elements
-    // so we can construct the boundaries of the counting array
-    // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
-    let (min, max) = min_max(slice);
+    fn count_sort(&mut self) {
+        // find min and max elements
+        // so we can construct the boundaries of the counting array
+        // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+        let (min, max) = self.min_max();
 
-    // construct a counting array with length = Max - Min + 1
-    let len : usize = diff(max,min);
-    // initialise it with zero counts
-    let mut count = vec![0usize; len+1];
-    // and finally measure counts per item
-    slice.into_iter()
-        .for_each(|x| {
-            // construct index offset based on Min value, such as, Min is at [0] position
-            let idx: usize = diff(*x, min);
-            count[ idx ] += 1;
-        });
+        // construct a counting array with length = Max - Min + 1
+        let len: usize = Self::diff(max, min);
+        // initialise it with zero counts
+        let mut count = vec![0usize; len + 1];
+        // and finally measure counts per item
+        self.into_iter()
+            .for_each(|x| {
+                // construct index offset based on Min value, such as, Min is at [0] position
+                let idx: usize = Self::diff(*x, min);
+                count[idx] += 1;
+            });
 
-    // play back onto the input slice the counts collected with Sum of all counts == slice.len()
-    let mut s_idx = 0;
-    count.into_iter()
-        .enumerate()
-        .filter(|(_,x)| *x > 0 )
-        .for_each(|(i, mut x)| {
-            // reverse index offset mapping
-            // hence, output[i] = Min + i
-            let val = if i > NumType::MAX as usize {
-                (min + NumType::MAX).wrapping_add( (i - NumType::MAX as usize) as NumType )
-            } else {
-                min + i as NumType
-            };
-            while x > 0 {
-                slice[s_idx] = val;
-                s_idx += 1;
-                x -= 1;
-            }
-        });
+        // play back onto the input slice the counts collected with Sum of all counts == slice.len()
+        let mut s_idx = 0;
+        count.into_iter()
+            .enumerate()
+            .filter(|(_, x)| *x > 0)
+            .for_each(|(i, mut x)| {
+                // reverse index offset mapping
+                // hence, output[i] = Min + i
+                let val = if i > Self::NumType::MAX as usize {
+                    (min + Self::NumType::MAX).wrapping_add((i - Self::NumType::MAX as usize) as Self::NumType)
+                } else {
+                    min + i as Self::NumType
+                };
+                while x > 0 {
+                    self[s_idx] = val;
+                    s_idx += 1;
+                    x -= 1;
+                }
+            });
+    }
 }
 // ANCHOR_END: sort_count
 
@@ -338,17 +347,17 @@ mod test {
     fn test_countsort_head_to_head()
     {
         for _i in 0..64 {
-            let v1: Vec<NumType> = random_sequence(256);
+            let v1: Vec<i8> = random_sequence(256);
             let mut v2 = v1.clone();
 
-            count_sort(&mut v2);
+            v2.as_mut_slice().count_sort();
             let (_, v) = mergesort(&v1);
             assert_eq!( &v, &v2 );
         }
     }
     #[test]
     fn test_count_sort() {
-        let test_data: [(&mut [NumType], &[NumType]);6] = [
+        let test_data: [(&mut [i8], &[i8]);6] = [
             (&mut [13,12,11],              &[11,12,13]),
             (&mut [14,11,13,12],           &[11,12,13,14]),
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),
@@ -359,7 +368,7 @@ mod test {
 
         test_data.into_iter()
             .for_each( | (input, output) | {
-                count_sort(input);
+                input.count_sort();
                 assert_eq!( input, output);
             });
     }

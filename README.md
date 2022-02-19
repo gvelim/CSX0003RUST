@@ -11,7 +11,8 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Lazy merge and deferred slice mutability
   - De-normalise control flow with pattern matching
 - [Sorting](https://gvelim.github.io/CSX0003RUST/sort.html)
-  - MergeSort
-  - QuickSort
+  - MergeSort O(n log n)
+  - QuickSort O(n log n)
+  - CountSort O(n)
 - Linked list
 - Binary tree

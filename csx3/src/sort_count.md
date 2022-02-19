@@ -84,13 +84,10 @@ As a result, the translation to `value` is given by `min + index`. Recall that t
 ```
 For `i8` the `type::MAX` value is `127` hence when we add `220` we are causing an overflow of `93` that is `220 - type::MAX`.
 
-Therefore, the trick here is to break the `index` down to`type::MAX` + `delta` and as shown by the below implementation
+Therefore, the addition has to wrap around at the boundary of `i8`; use of modular addition.
 ```rust,noplayground
-let value = if i > i8::MAX as usize {
-        (min + i8::MAX).wrapping_add((i - i8::MAX as usize) as i8)
-    } else {
-        min + i as i8
-    };
+let value = min.wrapping_add(index as i8);
+array[index] = value;
 ```
 ## Final implementation
 Putting all the above together, we are getting the following implementation of the `count_sort()` method

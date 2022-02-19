@@ -324,11 +324,7 @@ impl CountSort for [i8] {
             .for_each(|(i, mut x)| {
                 // reverse index offset mapping
                 // hence, output[i] = Min + i
-                let val = if i > Self::NumType::MAX as usize {
-                    (min + Self::NumType::MAX).wrapping_add((i - Self::NumType::MAX as usize) as Self::NumType)
-                } else {
-                    min + i as Self::NumType
-                };
+                let val = min.wrapping_add(i  as Self::NumType);
                 while x > 0 {
                     self[s_idx] = val;
                     s_idx += 1;
@@ -346,8 +342,8 @@ mod test {
     #[test]
     fn test_countsort_head_to_head()
     {
-        for _i in 0..64 {
-            let v1: Vec<i8> = random_sequence(256);
+        for _i in 0..127 {
+            let v1: Vec<i8> = random_sequence(512);
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();

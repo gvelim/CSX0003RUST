@@ -77,17 +77,26 @@ As a result, the translation to `value` is given by `min + index`. Recall that t
 
 ```
 -127            0            +127
-  |-------------|-------------|        (Min,Max) = (-120,100)
-    -120 <----- dist -----> 100        distance = 220
-     min                    max        value = (Min: -120 + index: 220)
+  |-------------|-------------|        (Min,Max) = (-123,122)
+    -123 <----- dist -----> 122        distance = 245
+     min                    max        value = (Min: -123 + index: 245)
                                        ^^^^^ ** OVERFLOW **
 ```
-For `i8` the `type::MAX` value is `127` hence when we add `220` we are causing an overflow of `93` that is `220 - type::MAX`.
+For `i8` the `i8::MIN` value is `-128` hence when we add `245` we are causing an overflow of `-11` that is `245 % type::MIN`. Adding `-11` to `min` and wrapping around, will yield the desired `value`.
 
-Therefore, the addition has to wrap around at the boundary of `i8`; use of modular addition.
+Therefore, the steps  to translate `index/usize` to `value/signed` are
+1. Convert `index` to `i8` given by `index % i8:MIN`
+2. Perform **Modular Add** between `min` and (1) given by `(min + (1)) % i8:MAX`
+```
+Value = (Min  + (   index as i8  )) % 128                
+=====   =====   ===================   ===
+82    = (-123 + (-51 = 205 % -128)) % 128
+113   = (-123 + (-20 = 236 % -128)) % 128
+122   = (-123 + (-11 = 245 % -128)) % 128
+```
+The above has been translated in rust to the below statement
 ```rust,noplayground
-let value = min.wrapping_add(index as i8);
-array[index] = value;
+array[index] = min.wrapping_add(index as i8);
 ```
 ## Final implementation
 Putting all the above together, we are getting the following implementation of the `count_sort()` method

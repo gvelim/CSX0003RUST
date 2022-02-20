@@ -68,7 +68,7 @@ BookKeeping[idx] += 1;
 This is the reverse effect, where we need to translate the data from the BookKeeper array onto the input array. 
 
 For example, with `Min = 1` we have
-* `BookKeeper[0]`, `value = min`
+* `BookKeeper[0]`, `value = min + 0`
 * `BookKeeper[1]`, `value = min + 1`
 
 As a result, the translation to `value` is given by `min + index`. Recall that the `index == distance` and `distance` 

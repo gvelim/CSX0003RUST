@@ -4,7 +4,7 @@ A sorting algorithm with **O(n) time complexity** with the following key points
 * Does not make use of comparisons
 * Keeps a Bookkeeping array for counting number of occurrences per array item.
 
-The algorithm's limitation is that memory demand grows to the `2 ^ sizeof(type)` hence it is not recommended for arrays holding values 16bit and over.
+The algorithm's limitation is that memory demand grows to the `2 ^ bits` hence it is not recommended for arrays holding values 16bit and over.
 
 ## Challenges working with integer arrays
 The algorithm requires the ability to **translate** 

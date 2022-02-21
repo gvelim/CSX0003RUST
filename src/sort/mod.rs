@@ -335,13 +335,14 @@ macro_rules! impl_countsort {
                             x -= 1;
                         }
                     });
-           }
+               }
         })*
     }
 }
 
 impl_countsort!(i8,i16,i32);
 // ANCHOR_END: sort_count
+
 
 #[cfg(test)]
 mod test {
@@ -361,7 +362,7 @@ mod test {
     }
     #[test]
     fn test_count_sort() {
-        let test_data: [(&mut [i8], &[i8]);6] = [
+        let test_data: [(&mut [i16], &[i16]);6] = [
             (&mut [13,12,11],              &[11,12,13]),
             (&mut [14,11,13,12],           &[11,12,13,14]),
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),

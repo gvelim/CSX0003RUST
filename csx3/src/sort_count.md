@@ -60,7 +60,7 @@ Therefore, the index is found as `index = value - Min` which more or less follow
 Therefore, for both integer and unsigned we have...
 
 ```rust,noplayground
-let idx = diff(value, min);
+let idx = i8::dist(value, min);
 BookKeeping[idx] += 1;
 ```
 

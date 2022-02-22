@@ -43,7 +43,7 @@ However, integer values can easily cause an overflow when the `distance` between
 ```
 Therefore, when `min` and `max` have opposite signs we have to covert both to `usize` before we calculate the `distance`. In all other cases, incl. unsigned types, `(max - min)` is sufficient.
 
-The following implementation covers the above
+The following implementation covers the above for `unsigned` and `signed` primitive types
 ```rust,no_run,noplayground
 {{#include ../../src/sort/mod.rs:sort_count_diff}}
 ```

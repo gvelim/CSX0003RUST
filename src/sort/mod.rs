@@ -270,63 +270,56 @@ pub fn quick_sort<T>(v: &mut [T])
 /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
 /// ```
 pub trait CountSort {
-    type NumType;
 
     fn count_sort(&mut self);
 }
 
 // CountSort macro implementation for singed and unsigned types
-macro_rules! impl_countsort {
-    ( $($x:ty),* ) => {
-        $(
-        impl CountSort for [$x] {
-            type NumType = $x;
+impl<T> CountSort for [T]
+    where T: Distance<T> + Copy + Ord {
 
-            fn count_sort(&mut self) {
-                // find min and max elements
-                // so we can construct the boundaries of the counting array
-                // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
-                let (min, max) = min_max(self);
+    fn count_sort(&mut self) {
+        // find min and max elements
+        // so we can construct the boundaries of the counting array
+        // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+        let (min, max) = min_max(&self);
 
-                // construct a counting array with length = Max - Min + 1
-                let len: usize = <$x>::dist(max, min);
-                // initialise it with zero counts
-                let mut count = vec![0usize; len + 1];
-                // and finally measure counts per item
-                self.into_iter()
-                    .for_each(|x| {
-                        // construct index offset based on Min value, such as, Min is at [0] position
-                        let idx: usize = <$x>::dist(*x, min);
-                        count[idx] += 1;
-                    });
+        // construct a counting array with length = Max - Min + 1
+        let len: usize = T::dist(max, min);
+        // initialise it with zero counts
+        let mut count = vec![0usize; len + 1];
+        // and finally measure counts per item
+        self.into_iter()
+            .for_each(|x| {
+                // construct index offset based on Min value, such as, Min is at [0] position
+                let idx: usize = T::dist(*x, min);
+                count[idx] += 1;
+            });
 
-                // play back onto the input slice the counts collected with Sum of all counts == slice.len()
-                let mut s_idx = 0;
-                count.into_iter()
-                    .enumerate()
-                    .filter(|(_, x)| *x > 0)
-                    .for_each(|(i, mut x)| {
-                        // reverse index offset mapping
-                        // hence, output[i] = Min + i
-                        let val = min.wrapping_add(i as Self::NumType);
-                        while x > 0 {
-                            self[s_idx] = val;
-                            s_idx += 1;
-                            x -= 1;
-                        }
-                    });
-               }
-        })*
+        // play back onto the input slice the counts collected with Sum of all counts == slice.len()
+        let mut s_idx = 0;
+        count.into_iter()
+            .enumerate()
+            .filter(|(_, x)| *x > 0)
+            .for_each(|(i, mut x)| {
+                // reverse index offset mapping
+                // hence, output[i] = Min + i
+                let val = min.add_index(i );
+                while x > 0 {
+                    self[s_idx] = val;
+                    s_idx += 1;
+                    x -= 1;
+                }
+            });
     }
 }
-
-impl_countsort!(i8,i16,i32,u8,u16,u32,isize,usize);
 // ANCHOR_END: sort_count
 
 // ANCHOR: sort_count_diff
 /// Distance calculation between numbers that are either both signed or unsigned types
 pub trait Distance<T> {
     fn dist(max: T, min: T) -> usize;
+    fn add_index(&self, idx: usize) -> T;
 }
 
 macro_rules! impl_dist_unsigned {
@@ -334,6 +327,7 @@ macro_rules! impl_dist_unsigned {
         $(impl Distance<$x> for $x {
             #[inline]
             fn dist(max: $x, min: $x) -> usize { (max - min) as usize }
+            fn add_index(&self, idx: usize) -> $x { *self + idx as $x }
         })*
     }
 }
@@ -349,6 +343,7 @@ macro_rules! impl_dist_signed {
                 (_, _) => (max - min) as usize,
             }
         }
+        fn add_index(&self, idx: usize) -> $x { self.wrapping_add(idx as $x) }
     })*
     }
 }

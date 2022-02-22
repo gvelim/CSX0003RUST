@@ -269,54 +269,34 @@ pub fn quick_sort<T>(v: &mut [T])
 /// v.count_sort();
 /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
 /// ```
-
 pub trait CountSort {
     type NumType;
 
     fn count_sort(&mut self);
-    fn min_max(&self) -> (Self::NumType, Self::NumType);
-    fn diff(max:Self::NumType, min: Self::NumType) -> usize;
 }
 
+// CountSort macro implementation for singed and unsigned types
 macro_rules! impl_countsort {
     ( $($x:ty),* ) => {
-        $(impl CountSort for [$x] {
+        $(
+        impl CountSort for [$x] {
             type NumType = $x;
 
-            #[inline]
-            fn min_max(&self) -> (Self::NumType, Self::NumType) {
-                let (mut min, mut max) = (self[0], self[0]);
-                self.into_iter()
-                    .skip(1)
-                    .for_each(|x| {
-                        if *x > max { max = *x; } else if *x < min { min = *x; }
-                    });
-                (min, max)
-            }
-            #[inline]
-            // ANCHOR: sort_count_diff
-            fn diff(max: Self::NumType, min: Self::NumType) -> usize {
-                match (min < 0, max < 0) {
-                    (true, false) => max as usize + min.unsigned_abs() as usize,
-                    (_, _) => (max - min) as usize,
-                }
-            }
-            // ANCHOR_END: sort_count_diff
             fn count_sort(&mut self) {
                 // find min and max elements
                 // so we can construct the boundaries of the counting array
                 // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
-                let (min, max) = self.min_max();
+                let (min, max) = min_max(self);
 
                 // construct a counting array with length = Max - Min + 1
-                let len: usize = Self::diff(max, min);
+                let len: usize = <$x>::dist(max, min);
                 // initialise it with zero counts
                 let mut count = vec![0usize; len + 1];
                 // and finally measure counts per item
                 self.into_iter()
                     .for_each(|x| {
                         // construct index offset based on Min value, such as, Min is at [0] position
-                        let idx: usize = Self::diff(*x, min);
+                        let idx: usize = <$x>::dist(*x, min);
                         count[idx] += 1;
                     });
 
@@ -340,8 +320,51 @@ macro_rules! impl_countsort {
     }
 }
 
-impl_countsort!(i8,i16,i32);
+impl_countsort!(i8,i16,i32,u8,u16,u32,isize,usize);
 // ANCHOR_END: sort_count
+
+// ANCHOR: sort_count_diff
+/// Distance calculation between numbers that are either both signed or unsigned types
+pub trait Distance<T> {
+    fn dist(max: T, min: T) -> usize;
+}
+
+macro_rules! impl_dist_unsigned {
+    ( $($x:ty),*) => {
+        $(impl Distance<$x> for $x {
+            #[inline]
+            fn dist(max: $x, min: $x) -> usize { (max - min) as usize }
+        })*
+    }
+}
+impl_dist_unsigned!(u8,u16,u32,usize);
+
+macro_rules! impl_dist_signed {
+    ( $($x:ty),*) => {$(
+    impl Distance<$x> for $x {
+        #[inline]
+        fn dist(max: $x, min: $x) -> usize {
+            match (min < 0, max < 0) {
+                (true, false) => max as usize + min.unsigned_abs() as usize,
+                (_, _) => (max - min) as usize,
+            }
+        }
+    })*
+    }
+}
+impl_dist_signed!(i8,i16,i32,isize);
+// ANCHOR_END: sort_count_diff
+
+#[inline]
+fn min_max<T>(s: &[T]) -> (T, T) where T: Copy + Ord {
+    let (mut min, mut max) = (s[0], s[0]);
+    s.into_iter()
+        .skip(1)
+        .for_each(|x| {
+            if *x > max { max = *x; } else if *x < min { min = *x; }
+        });
+    (min, max)
+}
 
 
 #[cfg(test)]
@@ -352,7 +375,7 @@ mod test {
     fn test_countsort_head_to_head()
     {
         for _i in 0..127 {
-            let v1: Vec<i8> = random_sequence(512);
+            let v1: Vec<i16> = random_sequence(512);
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();
@@ -527,3 +550,4 @@ mod test {
         }
     }
 }
+

@@ -45,6 +45,10 @@ fn main() {
     quick_sort(&mut v);
     println!("Quick Sort     : {:?}", v);
 
+    let mut arr: Vec<MyType> = list.iter().copied().collect();
+    arr.count_sort();
+    println!("Count Sort     : {:?}", arr);
+
     let bt : BinaryTree<MyType> = list.iter().copied().collect();
     println!("bTree Sort     : {:?}", bt.iter().collect::<Vec<_>>());
     println!("List Sort      : {:?}", list.sort_with_count() );

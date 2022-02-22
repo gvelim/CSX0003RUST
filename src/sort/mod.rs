@@ -275,12 +275,14 @@ pub trait CountSort {
 
     fn count_sort(&mut self);
     fn min_max(&self) -> (Self::NumType, Self::NumType);
-    fn diff(max:Self::NumType, min: Self::NumType) -> usize;
+    fn distance(max:Self::NumType, min: Self::NumType) -> usize;
 }
 
+// CountSort macro implementation for singed and unsigned types
 macro_rules! impl_countsort {
     ( $($x:ty),* ) => {
-        $(impl CountSort for [$x] {
+        $(
+        impl CountSort for [$x] {
             type NumType = $x;
 
             #[inline]
@@ -295,7 +297,7 @@ macro_rules! impl_countsort {
             }
             #[inline]
             // ANCHOR: sort_count_diff
-            fn diff(max: Self::NumType, min: Self::NumType) -> usize {
+            fn distance(max: Self::NumType, min: Self::NumType) -> usize {
                 match (min < 0, max < 0) {
                     (true, false) => max as usize + min.unsigned_abs() as usize,
                     (_, _) => (max - min) as usize,
@@ -309,14 +311,14 @@ macro_rules! impl_countsort {
                 let (min, max) = self.min_max();
 
                 // construct a counting array with length = Max - Min + 1
-                let len: usize = Self::diff(max, min);
+                let len: usize = Self::distance(max, min);
                 // initialise it with zero counts
                 let mut count = vec![0usize; len + 1];
                 // and finally measure counts per item
                 self.into_iter()
                     .for_each(|x| {
                         // construct index offset based on Min value, such as, Min is at [0] position
-                        let idx: usize = Self::diff(*x, min);
+                        let idx: usize = Self::distance(*x, min);
                         count[idx] += 1;
                     });
 
@@ -340,7 +342,26 @@ macro_rules! impl_countsort {
     }
 }
 
-impl_countsort!(i8,i16,i32);
+impl_countsort!(i8,i16,i32,u8,u16,u32,isize,usize);
+
+// Dummy trait to overcome compiler complaint
+// about unsigned types not support unsigned_abs()
+pub trait DummyABS<T> {
+    fn unsigned_abs(self) -> T;
+}
+
+// Dummy trait implementation
+macro_rules! impl_DummyAbs {
+    ( $($x:ty),*) => {
+        $(impl DummyABS<$x> for $x {
+            fn unsigned_abs(self) -> $x {
+                self
+            }
+        })*
+    }
+}
+impl_DummyAbs!(u8,u16,u32,usize);
+
 // ANCHOR_END: sort_count
 
 
@@ -352,7 +373,7 @@ mod test {
     fn test_countsort_head_to_head()
     {
         for _i in 0..127 {
-            let v1: Vec<i8> = random_sequence(512);
+            let v1: Vec<i16> = random_sequence(512);
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();

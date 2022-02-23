@@ -313,27 +313,15 @@ impl<T> CountSort for [T]
             });
     }
 }
-// ANCHOR_END: sort_count
-
 // ANCHOR: sort_count_diff
-/// Distance calculation between numbers that are either both signed or unsigned types
+/// Distance calculation between two types that are either both signed or unsigned
+/// Returns the distance as unsigned type
 pub trait Distance<T> {
     fn dist(max: T, min: T) -> usize;
     fn add_index(&self, idx: usize) -> T;
 }
 
-macro_rules! impl_dist_unsigned {
-    ( $($x:ty),*) => {
-        $(impl Distance<$x> for $x {
-            #[inline]
-            fn dist(max: $x, min: $x) -> usize { (max - min) as usize }
-            #[inline]
-            fn add_index(&self, idx: usize) -> $x { *self + idx as $x }
-        })*
-    }
-}
-impl_dist_unsigned!(u8,u16,u32,usize);
-
+/// Macro implementation of Distance trait for all signed types
 macro_rules! impl_dist_signed {
     ( $($x:ty),*) => {$(
     impl Distance<$x> for $x {
@@ -350,7 +338,21 @@ macro_rules! impl_dist_signed {
     }
 }
 impl_dist_signed!(i8,i16,i32,isize);
+
+/// Macro implementation of Distance trait for all unsigned types
+macro_rules! impl_dist_unsigned {
+    ( $($x:ty),*) => {
+        $(impl Distance<$x> for $x {
+            #[inline]
+            fn dist(max: $x, min: $x) -> usize { (max - min) as usize }
+            #[inline]
+            fn add_index(&self, idx: usize) -> $x { *self + idx as $x }
+        })*
+    }
+}
+impl_dist_unsigned!(u8,u16,u32,usize);
 // ANCHOR_END: sort_count_diff
+// ANCHOR_END: sort_count
 
 #[inline]
 fn min_max<T>(s: &[T]) -> (T, T) where T: Copy + Ord {
@@ -382,7 +384,7 @@ mod test {
     }
     #[test]
     fn test_count_sort() {
-        let test_data: [(&mut [i16], &[i16]);6] = [
+        let test_data: [(&mut [isize], &[isize]);6] = [
             (&mut [13,12,11],              &[11,12,13]),
             (&mut [14,11,13,12],           &[11,12,13,14]),
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),

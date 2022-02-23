@@ -41,20 +41,17 @@ However, integer values can easily cause an overflow when the `distance` between
   |-------------|-------------|        Both Min & Max are positive
                   <-- dist -->         Safe: Dist = (max - min)
 ```
-Therefore, when `min` and `max` have opposite signs we have to covert both to `usize` before we calculate the `distance`.
-In all other cases, incl. unsigned types, `(max - min)` is sufficient.
+Therefore, when `min` and `max` have opposite signs we have to convert both to `usize` before we calculate the `distance`. Therefore the below implementation will calculate the distance correctly for both `signed` and `unsigned` types.
 ```rust,noplayground
-fn dist(max: i8, min: i8) -> usize {
-    match (min < 0, max < 0) {
-        (true, false) => max as usize + min.unsigned_abs() as usize,
-        (_, _) => (max - min) as usize,
+fn dist_from(&self, min: i8) -> usize {
+    if *self > min {
+        (*self as usize).wrapping_sub(min as usize)
+    } else {
+        (min as usize).wrapping_sub(*self as usize)
     }
 }
-```
-However, since `unsigned` types do not support the `unsigned_abs()` method we'll have to abstract the `distance` function onto a `trait` and use `macro` implementations for the all numerical primitives. Using generics here would add significant complexity.
 
-```rust,no_run,noplayground
-{{#include ../../src/sort/count.rs:sort_count_diff}}
+let len: usize = max.dist_from(min);
 ```
 Now that we know how to calculate the `distance` we can proceed with **value-to-index** and **index-to-value** translations.
 
@@ -65,10 +62,10 @@ We know that
 * where `Min <= array[..] <= Max`
 
 Therefore, the index is found as `index = value - Min` which more or less is the `distance` from `min`, which we already know how to calculate.
-As a result and for the `i8` type, we get the following implementation ...
+As a result the translation is given by the following implementation ...
 
 ```rust,noplayground
-let idx = i8::dist(value, min);     // Map array value -> BK index 
+let idx = value.dist_from(min);     // Map array value -> BK index 
 BookKeeping[idx] += 1;              // increment count by 1
 ```
 
@@ -109,7 +106,8 @@ Rust performs then above operation with the following statement and implemented 
 array[index] = min.wrapping_add( index as i8 );
 ```
 ## Final implementation
-Hence, by putting all the above together, we have the following implementation for the `count_sort()` method
+Hence, by putting all the above together, we have the following implementation for the `CountSort` trait
 ```rust,no_run,noplayground
 {{#include ../../src/sort/count.rs:sort_count}}
 ```
+ 

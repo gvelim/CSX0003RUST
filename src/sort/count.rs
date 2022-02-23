@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 
 // ANCHOR: sort_count
 /// Sorts a given array using the Count Sort algorithm.
@@ -17,7 +18,7 @@ pub trait CountSort {
 
 // CountSort macro implementation for singed and unsigned types
 impl<T> CountSort for [T]
-    where T: Distance<T> + Copy + Ord {
+    where T: Distance<T> + Copy + Ord + Debug{
 
     fn count_sort(&mut self) {
         // find min and max elements
@@ -26,14 +27,14 @@ impl<T> CountSort for [T]
         let (min, max) = min_max(&self);
 
         // construct a counting array with length = Max - Min + 1
-        let len: usize = T::dist(max, min);
+        let len: usize = max.dist_from(min);
         // initialise it with zero counts
         let mut count = vec![0usize; len + 1];
         // and finally measure counts per item
         self.into_iter()
             .for_each(|x| {
                 // construct index offset based on Min value, such as, Min is at [0] position
-                let idx: usize = T::dist(*x, min);
+                let idx: usize = x.dist_from(min);
                 count[idx] += 1;
             });
 
@@ -58,40 +59,28 @@ impl<T> CountSort for [T]
 /// Distance calculation between two types that are either both signed or unsigned
 /// Returns the distance as unsigned type
 pub trait Distance<T> {
-    fn dist(max: T, min: T) -> usize;
+    fn dist_from(&self, min: T) -> usize;
     fn add_index(&self, idx: usize) -> T;
 }
 
 /// Macro implementation of Distance trait for all signed types
 macro_rules! impl_dist_signed {
-    ( $($x:ty),*) => {$(
-    impl Distance<$x> for $x {
-        #[inline]
-        fn dist(max: $x, min: $x) -> usize {
-            match (min < 0, max < 0) {
-                (true, false) => max as usize + min.unsigned_abs() as usize,
-                (_, _) => (max - min) as usize,
-            }
-        }
-        #[inline]
-        fn add_index(&self, idx: usize) -> $x { self.wrapping_add(idx as $x) }
-    })*
-    }
-}
-impl_dist_signed!(i8,i16,i32,isize);
-
-/// Macro implementation of Distance trait for all unsigned types
-macro_rules! impl_dist_unsigned {
     ( $($x:ty),*) => {
-        $(impl Distance<$x> for $x {
+        $( impl Distance<$x> for $x {
             #[inline]
-            fn dist(max: $x, min: $x) -> usize { (max - min) as usize }
+            fn dist_from(&self, min: $x) -> usize {
+                if *self > min {
+                    (*self as usize).wrapping_sub(min as usize)
+                } else {
+                    (min as usize).wrapping_sub(*self as usize)
+                }
+            }
             #[inline]
-            fn add_index(&self, idx: usize) -> $x { *self + idx as $x }
-        })*
+            fn add_index(&self, idx: usize) -> $x { self.wrapping_add(idx as $x) }
+        } )*
     }
 }
-impl_dist_unsigned!(u8,u16,u32,usize);
+impl_dist_signed!(i8,i16,i32,isize,u8,u16,u32,usize);
 // ANCHOR_END: sort_count_diff
 // ANCHOR_END: sort_count
 
@@ -132,7 +121,7 @@ mod test {
             (&mut [28, 24, 22, 21],        &[21,22,24,28]),
             (&mut [36,32,34,33,35,31],     &[31,32,33,34,35,36]),
             (&mut [7,6,5,4,3,2,1],         &[1,2,3,4,5,6,7]),
-            (&mut [113, 82, 122, 58, 16, -123, -58, -110],   &[-123, -110, -58, 16, 58, 82, 113, 122])
+            (&mut [113, 82, 127, 58, 16, -128, -58, -110],   &[-128, -110, -58, 16, 58, 82, 113, 127])
         ];
 
         test_data.into_iter()

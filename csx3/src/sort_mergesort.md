@@ -11,7 +11,7 @@ In relation to time and space complexity, the implementation offers
 * Takes up to `O(n+m) * usize` memory space per merge cycle which can be further reduced to `O(n) * usize` 
 
 ```rust,no_run,noplayground
-{{#include ../../src/sort/mod.rs:sort_merge_mut}}
+{{#include ../../src/sort/merge.rs:sort_merge_mut}}
 ```
 
 ### Out-of-place sorting (immutable)
@@ -23,5 +23,5 @@ The implementation
 * Takes `O(n+m) * typeof(array)` memory space per merge cycle
 
 ```rust,no_run,noplayground
-{{#include ../../src/sort/mod.rs:sort_merge}}
+{{#include ../../src/sort/merge.rs:sort_merge}}
 ```

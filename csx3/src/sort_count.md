@@ -54,7 +54,7 @@ fn dist(max: i8, min: i8) -> usize {
 However, since `unsigned` types do not support the `unsigned_abs()` method we'll have to abstract the `distance` function onto a `trait` and use `macro` implementations for the all numerical primitives. Using generics here would add significant complexity.
 
 ```rust,no_run,noplayground
-{{#include ../../src/sort/mod.rs:sort_count_diff}}
+{{#include ../../src/sort/count.rs:sort_count_diff}}
 ```
 Now that we know how to calculate the `distance` we can proceed with **value-to-index** and **index-to-value** translations.
 
@@ -111,5 +111,5 @@ array[index] = min.wrapping_add( index as i8 );
 ## Final implementation
 Hence, by putting all the above together, we have the following implementation for the `count_sort()` method
 ```rust,no_run,noplayground
-{{#include ../../src/sort/mod.rs:sort_count}}
+{{#include ../../src/sort/count.rs:sort_count}}
 ```

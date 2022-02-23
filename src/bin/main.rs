@@ -1,4 +1,4 @@
-use csx3::sort::*;
+use csx3::sort::{merge::*, quick::quick_sort, count::CountSort};
 use csx3::trees::*;
 use csx3::linkedlists::*;
 use csx3::select::*;

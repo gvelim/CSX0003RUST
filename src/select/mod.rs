@@ -1,7 +1,13 @@
 use std::fmt::Debug;
 use std::cmp::Ordering;
 use rand::Rng;
-use super::sort::{mergesort_mut, merge_mut_adjacent, partition_at_index};
+use crate::sort::{
+    partition_at_index,
+    merge::{
+        mergesort_mut,
+        merge_mut_adjacent
+    }
+};
 
 // ANCHOR: selection_r
 /// Find the nth order statistic within an unordered set with O(n) performance

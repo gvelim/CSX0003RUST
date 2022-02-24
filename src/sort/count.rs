@@ -109,7 +109,7 @@ mod test {
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();
-            let (_, v) = mergesort(&v1);
+            let (_, v) = v1.mergesort();
             assert_eq!( &v, &v2 );
         }
     }

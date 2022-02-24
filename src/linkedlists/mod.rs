@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 use crate::{
-    sort::merge::mergesort_mut,
+    sort::merge::MergeSort,
     merge::Merge
 };
 
@@ -111,7 +111,7 @@ impl<T> List<T>
     }
     pub fn sort_with_count(&self) -> (usize, Vec<T>){
         let mut s  = self.iter().copied().collect::<Vec<T>>();
-        (mergesort_mut(&mut s[..], Merge::merge_mut_adjacent), s)
+        (s.mergesort_mut(Merge::merge_mut_adjacent), s)
     }
 }
 

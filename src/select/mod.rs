@@ -4,7 +4,7 @@ use rand::Rng;
 use crate::{
     sort::{
         partition_at_index,
-        merge::mergesort_mut,
+        merge::MergeSort,
     },
     merge::Merge
 };
@@ -117,7 +117,7 @@ pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
     v.chunks_mut(5)
         .map(|chunk| {
             // sort each group
-            mergesort_mut(chunk, Merge::merge_mut_adjacent);
+            chunk.mergesort_mut(Merge::merge_mut_adjacent);
             // pull the median out
             chunk[ chunk.len() >> 1]
         })

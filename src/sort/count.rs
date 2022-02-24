@@ -99,7 +99,7 @@ fn min_max<T>(s: &[T]) -> (T, T) where T: Copy + Ord {
 #[cfg(test)]
 mod test {
     use crate::random_sequence;
-    use crate::sort::merge::mergesort;
+    use crate::sort::merge::*;
     use super::*;
     #[test]
     fn test_countsort_head_to_head()
@@ -109,7 +109,7 @@ mod test {
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();
-            let (_, v) = mergesort(&v1);
+            let (_, v) = v1.mergesort();
             assert_eq!( &v, &v2 );
         }
     }

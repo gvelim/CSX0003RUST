@@ -11,7 +11,7 @@ use csx3::merge::Merge;
 
 let (s1, s2) = (&mut [5,6,7], &mut[1,2,3,4]);
 
-let mut vs = s1.merge_shallow(s2);  // attach to s2 and do shallow merge with s1
+let mut vs = s1.merge_virtual(s2);  // attach to s2 and do shallow merge with s1
  
 vs.iter()                           // ordered access of attached slices
     .enumerate()                    // [&1, &2, &3, &4, &5, &6, &7]

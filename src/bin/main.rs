@@ -1,10 +1,17 @@
-use csx3::sort::{merge::*, quick::quick_sort, count::CountSort};
-use csx3::trees::*;
-use csx3::linkedlists::*;
-use csx3::select::*;
 use std::env::args;
 use std::str::FromStr;
-use csx3::random_sequence;
+use csx3::{
+    sort::{
+        merge::*,
+        quick::quick_sort,
+        count::CountSort
+    },
+    merge::Merge,
+    select::Select,
+    trees::*,
+    linkedlists::*,
+    random_sequence
+};
 
 type MyType = i8;
 
@@ -30,18 +37,12 @@ fn main() {
 
     println!("Random Selection");
     let mut arr: Vec<MyType> = list.iter().copied().collect();
-    println!("1st order stat= {:?}", r_selection(&mut arr, 1));
-    println!("2nd order stat= {:?}", r_selection(&mut arr, 2));
-    println!("3rd order stat= {:?}", r_selection(&mut arr, 3));
-
-    println!("Deterministic Selection");
-    let mut arr: Vec<MyType> = list.iter().copied().collect();
-    println!("1st order stat= {:?}", d_selection(&mut arr, 1));
-    println!("2nd order stat= {:?}", d_selection(&mut arr, 2));
-    println!("3rd order stat= {:?}", d_selection(&mut arr, 3));
+    println!("1st order stat= {:?}", arr.r_selection(1));
+    println!("2nd order stat= {:?}", arr.r_selection(2));
+    println!("3rd order stat= {:?}", arr.r_selection(3));
 
     println!("MergeSort Immut: {:?}", mergesort(&v));
-    println!("MergeSort Mut  : ({}, {:?})", mergesort_mut(&mut v, merge_mut), v);
+    println!("MergeSort Mut  : ({}, {:?})", mergesort_mut(&mut v, Merge::merge_mut), v);
     quick_sort(&mut v);
     println!("Quick Sort     : {:?}", v);
 

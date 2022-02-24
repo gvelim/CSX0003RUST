@@ -1,53 +1,60 @@
 use std::fmt::Debug;
 use std::cmp::Ordering;
 use rand::Rng;
-use crate::sort::{
-    partition_at_index,
-    merge::{
-        mergesort_mut,
-        merge_mut_adjacent
-    }
+use crate::{
+    sort::{
+        partition_at_index,
+        merge::mergesort_mut,
+    },
+    merge::Merge
 };
 
 // ANCHOR: selection_r
-/// Find the nth order statistic within an unordered set with O(n) performance
-/// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
-/// When function returns, the input array has been rearranged so that ```item == array[ nth order ]```
-/// ```
-/// use csx3::select::r_selection;
-///
-/// let (arr, nth_order) = (&mut [23,43,8,22,15,11], 1usize);
-///
-/// let ret_val = r_selection(arr, nth_order);
-/// assert_eq!(ret_val, &8);
-/// assert_eq!(&arr[nth_order-1], &8);
-/// ```
-pub fn r_selection<T>(v: &mut [T], nth_min: usize) -> &T
-    where T: Copy + Ord + Debug  {
+pub trait Select<T> {
+    fn r_selection(&mut self, nth_min: usize) -> &T;
+}
 
-    // println!("Input: {:?}::{}th", v, order_nth);
-    if v.len() == 1 {
-        return &v[0];
-    }
+impl<T> Select<T> for [T]
+    where T: Copy + Ord {
+    /// Find the nth order statistic within an unordered set with O(n) performance
+    /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
+    /// When function returns, the input array has been rearranged so that ```item == array[ nth order ]```
+    /// ```
+    /// use csx3::select::Select;
+    ///
+    /// let (arr, nth_order) = (&mut [23,43,8,22,15,11], 1usize);
+    ///
+    /// let ret_val = arr.r_selection(nth_order);
+    /// assert_eq!(ret_val, &8);
+    /// assert_eq!(&arr[nth_order-1], &8);
+    /// ```
+    fn r_selection(&mut self, nth_min: usize) -> &T
+    {
 
-    // pick an index at random based on a uniform distribution
-    let idx = rand::thread_rng().gen_range(0..(v.len()-1) );
-    // find out the nth order of this sample
-    let (left_partition, nth, right_partition) = partition_at_index(v, idx);
+        // println!("Input: {:?}::{}th", v, order_nth);
+        if self.len() == 1 {
+            return &self[0];
+        }
 
-    let order = left_partition.len()+1;
-    // println!("\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?}", nth_min, idx, left_partition, order, right_partition);
+        // pick an index at random based on a uniform distribution
+        let idx = rand::thread_rng().gen_range(0..(self.len() - 1));
+        // find out the nth order of this sample
+        let (left_partition, nth, right_partition) = partition_at_index(self, idx);
 
-    // is nth order sampled over, equal or above the desired nth_min ?
-    match nth_min.cmp(&order) {
-        // we've found the item in nth_min order
-        Ordering::Equal => nth,
-        // the nth_min is below the nth found so recurse on the left partition
-        Ordering::Less =>
-            r_selection(left_partition, nth_min),
-        // the nth_min is above the nth found so recurse on the right partition with adjusted order
-        Ordering::Greater =>
-            r_selection(right_partition, nth_min - order),
+        let order = left_partition.len() + 1;
+        // println!("\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?}", nth_min, idx, left_partition, order, right_partition);
+
+        // is nth order sampled over, equal or above the desired nth_min ?
+        match nth_min.cmp(&order) {
+            // we've found the item in nth_min order
+            Ordering::Equal => nth,
+            // the nth_min is below the nth found so recurse on the left partition
+            Ordering::Less =>
+                left_partition.r_selection(nth_min),
+            // the nth_min is above the nth found so recurse on the right partition with adjusted order
+            Ordering::Greater =>
+                right_partition.r_selection(nth_min - order),
+        }
     }
 }
 // ANCHOR_END: selection_r
@@ -58,7 +65,7 @@ pub fn r_selection<T>(v: &mut [T], nth_min: usize) -> &T
 /// The algorithm aims to find the best pivot deterministically rather pick a random value
 ///
 pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
-    where T: Copy + Ord + Debug  {
+    where T: Copy + Ord  {
 
     // println!("DS Input: {:?}::{}th", v, nth_min);
     if v.len() == 1 {
@@ -97,19 +104,20 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
     }
 }
 
+
 // ANCHOR: selection_median
 /// Returns a vector of N/5 medians where N = input array length
 /// It breaks array into N/5 sub-arrays of length 5 for cheap sorting and picking the median value
 ///
 pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
-    where T : Copy + Ord + Debug {
+    where T : Copy + Ord {
 
     // extract median of medians array
     // split input slice into n/5 groups of 5
     v.chunks_mut(5)
         .map(|chunk| {
             // sort each group
-            mergesort_mut(chunk, merge_mut_adjacent);
+            mergesort_mut(chunk, Merge::merge_mut_adjacent);
             // pull the median out
             chunk[ chunk.len() >> 1]
         })
@@ -183,7 +191,7 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(input, order, item)| {
-                let ret_val = r_selection(input, order);
+                let ret_val = input.r_selection(order);
                 assert_eq!(item, ret_val);
                 assert_eq!(&input[order - 1], item);
             })

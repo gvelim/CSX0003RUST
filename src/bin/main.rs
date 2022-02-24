@@ -3,7 +3,7 @@ use std::str::FromStr;
 use csx3::{
     sort::{
         merge::*,
-        quick::quick_sort,
+        quick::QuickSort,
         count::CountSort
     },
     merge::Merge,
@@ -43,7 +43,7 @@ fn main() {
 
     println!("MergeSort Immut: {:?}", v.mergesort());
     println!("MergeSort Mut  : ({}, {:?})", v.mergesort_mut(Merge::merge_mut), v);
-    quick_sort(&mut v);
+    v.quick_sort();
     println!("Quick Sort     : {:?}", v);
 
     let mut arr: Vec<MyType> = list.iter().copied().collect();

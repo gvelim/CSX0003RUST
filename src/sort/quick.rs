@@ -1,33 +1,39 @@
-use std::fmt::Debug;
 use rand::Rng;
 use super::partition_at_index;
 
 // ANCHOR: sort_quick
-/// Sorts a given array using the Quick Sort algorithm.
-/// The function rearranges the array contents rather than returning a new sorted copy of the input array
-/// ```
-/// use csx3::sort::quick::quick_sort;
-///
-/// let v = &mut [3,5,8,1,2,4,6,0];
-///
-/// quick_sort(v);
-/// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
-/// ```
-pub fn quick_sort<T>(v: &mut [T])
-    where T: Copy + Clone + Ord + Debug {
+pub trait QuickSort {
+    fn quick_sort(&mut self);
+}
 
-    // have we reached the end of the recursion ?
-    if v.len() < 2 {
-        return;
+impl<T> QuickSort for [T]
+    where T: Copy + Clone + Ord {
+
+    /// Sorts a given array using the Quick Sort algorithm.
+    /// The function rearranges the array contents rather than returning a new sorted copy of the input array
+    /// ```
+    /// use csx3::sort::quick::QuickSort;
+    ///
+    /// let v = &mut [3,5,8,1,2,4,6,0];
+    ///
+    /// v.quick_sort();
+    /// assert_eq!(v, &[0,1,2,3,4,5,6,8]);
+    /// ```
+    fn quick_sort(&mut self) {
+
+        // have we reached the end of the recursion ?
+        if self.len() < 2 {
+            return;
+        }
+        // pick an index at random based on a uniform distribution
+        let idx = rand::thread_rng().gen_range(0..(self.len()-1) );
+        // partition the array into to mutable slices for further sorting
+        let (left_partition,_ , right_partition) = partition_at_index(self, idx);
+
+        // Recurse against left an right partitions
+        left_partition.quick_sort();
+        right_partition.quick_sort();
     }
-    // pick an index at random based on a uniform distribution
-    let idx = rand::thread_rng().gen_range(0..(v.len()-1) );
-    // partition the array into to mutable slices for further sorting
-    let (left_partition,_ , right_partition) = partition_at_index(v, idx);
-
-    // Recurse against left an right partitions
-    quick_sort(left_partition);
-    quick_sort(right_partition);
 }
 // ANCHOR_END: sort_quick
 
@@ -48,7 +54,7 @@ mod test {
 
         test_data.into_iter()
             .for_each( | (input, output) | {
-                quick_sort(input);
+                input.quick_sort();
                 assert_eq!(input, output);
             })
     }

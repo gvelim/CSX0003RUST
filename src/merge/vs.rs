@@ -126,7 +126,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values.
     /// The VirtualSlice can be used as sort-mask layer above the slice segments, which later can be superimposed over
     /// In case of non-adjacent slices only.
-    pub fn merge_shallow(&mut self, s: &'a mut [T]) -> usize
+    pub fn merge_lazy(&mut self, s: &'a mut [T]) -> usize
         where T: Ord  {
         let (inversions, idx_rfl) = self._merge(s, VirtualSlice::swap_shallow);
 
@@ -141,8 +141,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
     }
 
     /// Superimposes O(n-1) the derived order onto the attached slice segments.
-    /// The stored Index Reflector contains the order per reference
-    pub fn superimpose_shallow_merge(&mut self) {
+    /// The stored Index Reflector contains the order per reference hence no need for reordering
+    pub fn superimpose_state(&mut self) {
         // total operations must be len()-1 as we use 1 position as temp swap location
         let total_swaps = self.len() - 2;
         // Count total number of swaps occurred
@@ -477,7 +477,7 @@ mod test {
         let s1 = &mut [5, 6, 7];
         let mut vs = VirtualSlice::new();
         vs.attach(s1);
-        vs.superimpose_shallow_merge();      // there is no index_reflector yet, should do nothing
+        vs.superimpose_state();      // there is no index_reflector yet, should do nothing
     }
 
     #[test]
@@ -488,7 +488,7 @@ mod test {
 
         vs.attach(s1);
         vs.merge(s2);                // deep merge creates a reflector
-        vs.superimpose_shallow_merge(); // it should do nothing as the vs is already ordered
+        vs.superimpose_state(); // it should do nothing as the vs is already ordered
     }
 
     #[test]

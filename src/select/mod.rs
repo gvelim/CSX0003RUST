@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use rand::Rng;
 use crate::{
     sort::{
-        partition_at_index,
+        Partition,
         merge::MergeSort,
     },
     merge::Merge
@@ -39,7 +39,7 @@ impl<T> Select<T> for [T]
         // pick an index at random based on a uniform distribution
         let idx = rand::thread_rng().gen_range(0..(self.len() - 1));
         // find out the nth order of this sample
-        let (left_partition, nth, right_partition) = partition_at_index(self, idx);
+        let (left_partition, nth, right_partition) = self.partition_at_idx(idx);
 
         let order = left_partition.len() + 1;
         // println!("\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?}", nth_min, idx, left_partition, order, right_partition);
@@ -86,7 +86,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
     let idx = v.iter_mut().position(|i| *i == *p).unwrap();
 
     // find out the nth order of this sample
-    let (left_partition, nth, right_partition) = partition_at_index(v, idx);
+    let (left_partition, nth, right_partition) = v.partition_at_idx(idx);
 
     let order = left_partition.len()+1;
     // println!("\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?} - {:?}", nth_min, idx, left_partition, order, right_partition, p);

@@ -1,5 +1,5 @@
 use rand::Rng;
-use super::partition_at_index;
+use super::Partition;
 
 // ANCHOR: sort_quick
 pub trait QuickSort {
@@ -28,7 +28,7 @@ impl<T> QuickSort for [T]
         // pick an index at random based on a uniform distribution
         let idx = rand::thread_rng().gen_range(0..(self.len()-1) );
         // partition the array into to mutable slices for further sorting
-        let (left_partition,_ , right_partition) = partition_at_index(self, idx);
+        let (left_partition,_ , right_partition) = self.partition_at_idx(idx);
 
         // Recurse against left an right partitions
         left_partition.quick_sort();
@@ -61,7 +61,7 @@ mod test {
     #[test]
     fn test_partition_at_index() {
         let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
-        let (l, idx, r) = partition_at_index(&mut v, 4);
+        let (l, idx, r) = v.partition_at_idx(4);
 
         // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
         // idx = &7 (7th position)

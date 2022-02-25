@@ -2,9 +2,6 @@
 Writing algorithms is a good way of learning the "ways", or better, the expressiveness of the rust language
 
 ## Content
-- [Selection](https://gvelim.github.io/CSX0003RUST/selection.html)
-  - Random
-  - Deterministic
 - [Merge](https://gvelim.github.io/CSX0003RUST/merge.html)
   - In-place Merge Algorithm with O(n+m) swaps
   - Sequential access across multiple slices
@@ -14,5 +11,8 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - MergeSort O(n log n)
   - QuickSort O(n log n)
   - CountSort O(n)
-- Linked list
-- Binary tree
+- [Selection](https://gvelim.github.io/CSX0003RUST/selection.html)
+  - Random
+  - Deterministic
+- [Linked list](./src/linkedlists/README.md)
+- [Binary tree](./src/trees/README.md)

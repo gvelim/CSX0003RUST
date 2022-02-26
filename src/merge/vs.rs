@@ -238,7 +238,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl = (0..ws_len).into_iter().collect::<Vec<usize>>();
+        let mut idx_rfl = Vec::<usize>::with_capacity(ws_len);
+        (0..ws_len).into_iter().for_each(|x| idx_rfl.push(x));
 
         //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
@@ -273,7 +274,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                     // swap index_reflect[j] with index_reflector[i']
                     // i' == index_reflector[x]; where x == i;
                     // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                    let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
                     // swap( i' with j )
                     idx_rfl.swap(idx, j);
                     // or since always j == j' we just copy the value over no need to swap
@@ -293,7 +294,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                         // swap index_reflect[c] with index_reflector[i']
                         // i' == index_reflector[x]; where x == i;
                         // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                        let idx = idx_rfl[c..p].iter().position(|x| *x == i).unwrap() + c;
+                        let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
                         //swap( i' with c )
                         idx_rfl.swap(idx, c);
                         //print!("\tl:");

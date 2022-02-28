@@ -24,14 +24,14 @@ impl<T> CountSort for [T]
         // find min and max elements
         // so we can construct the boundaries of the counting array
         // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
-        let (min, max) = min_max(&self);
+        let (min, max) = min_max(self);
 
         // construct a counting array with length = Max - Min + 1
         let len: usize = max.dist_from(min);
         // initialise it with zero counts
         let mut count = vec![0usize; len + 1];
         // and finally measure counts per item
-        self.into_iter()
+        self.iter()
             .for_each(|x| {
                 // construct index offset based on Min value, such as, Min is at [0] position
                 let idx: usize = x.dist_from(min);
@@ -87,7 +87,7 @@ impl_dist_signed!(i8,i16,i32,isize,u8,u16,u32,usize);
 #[inline]
 fn min_max<T>(s: &[T]) -> (T, T) where T: Copy + Ord {
     let (mut min, mut max) = (s[0], s[0]);
-    s.into_iter()
+    s.iter()
         .skip(1)
         .for_each(|x| {
             if *x > max { max = *x; } else if *x < min { min = *x; }
@@ -99,18 +99,18 @@ fn min_max<T>(s: &[T]) -> (T, T) where T: Copy + Ord {
 #[cfg(test)]
 mod test {
     use crate::random_sequence;
-    use crate::sort::merge::*;
+    use crate::{sort::merge::*,merge::Merge};
     use super::*;
     #[test]
     fn test_countsort_head_to_head()
     {
         for _i in 0..127 {
-            let v1: Vec<i16> = random_sequence(512);
+            let mut v1: Vec<i16> = random_sequence(512);
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();
-            let (_, v) = v1.mergesort();
-            assert_eq!( &v, &v2 );
+            let _ = v1.mergesort_mut(Merge::merge_mut_adjacent);
+            assert_eq!( &v1, &v2 );
         }
     }
     #[test]

@@ -238,8 +238,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl = Vec::<usize>::with_capacity(ws_len);
-        (0..ws_len).into_iter().for_each(|x| idx_rfl.push(x));
+        let mut idx_rfl = Vec::<usize>::from_iter(0..ws_len);
+        //(0..ws_len).into_iter().for_each(|x| idx_rfl.push(x));
 
         //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
 
@@ -247,6 +247,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // Memory Optimisation: if idx_len() = s1.len() then use:
         //let c_bound = idx_rfl.len()-1;
         let i_bound = ws_len-1;
+        let mut cc;
+        let mut idx;
         loop {
             // Flattening/de-normalising the workflow logic
             // ============================================
@@ -262,8 +264,11 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------
             //
+
+            cc = idx_rfl[c];
+            idx = c + (c..p).position(|x| idx_rfl[x] == i).unwrap();
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
-                (true, _) if self[idx_rfl[c]].cmp(&self[j]) == Ordering::Greater => {
+                (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent inversions
                     inv_count += j - i;
 
@@ -274,7 +279,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                     // swap index_reflect[j] with index_reflector[i']
                     // i' == index_reflector[x]; where x == i;
                     // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
                     // swap( i' with j )
                     idx_rfl.swap(idx, j);
                     // or since always j == j' we just copy the value over no need to swap
@@ -286,15 +290,15 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                 (_, true) => {
                     // condition saves cpu-cycles from zero-impact operations when i == c' (no swap)
                     // otherwise it has no algorithmic impact
-                    if i != idx_rfl[c] {
+                    if i != cc {
                         // swap left slice's item in the working slice with merged partition edge ws[i]
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                        f_swap(self, i, idx_rfl[c]);
+                        f_swap(self, i, cc);
 
                         // swap index_reflect[c] with index_reflector[i']
                         // i' == index_reflector[x]; where x == i;
                         // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                        let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
+                        //let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
                         //swap( i' with c )
                         idx_rfl.swap(idx, c);
                         //print!("\tl:");

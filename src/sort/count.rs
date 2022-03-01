@@ -101,6 +101,10 @@ mod test {
     use crate::random_sequence;
     use crate::{sort::merge::*,merge::Merge};
     use super::*;
+
+    extern crate test;
+    use test::Bencher;
+
     #[test]
     fn test_countsort_head_to_head()
     {
@@ -129,5 +133,12 @@ mod test {
                 input.count_sort();
                 assert_eq!( input, output);
             });
+    }
+    #[bench]
+    fn bench_countsort(b: &mut Bencher) {
+        let v: Vec<i16> = random_sequence(512);
+        b.iter(||{
+            v.clone().count_sort()
+        });
     }
 }

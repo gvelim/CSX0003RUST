@@ -264,9 +264,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------
             //
-
             cc = idx_rfl[c];
-            idx = c + (c..p).position(|x| idx_rfl[x] == i).unwrap();
+            idx = c + idx_rfl[c..p].iter().position(|x| *x == i).unwrap();
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent inversions

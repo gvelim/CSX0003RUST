@@ -122,9 +122,6 @@ mod test {
     use crate::merge::Merge;
     use super::*;
 
-    extern crate test;
-    use test::Bencher;
-
     #[test]
     fn test_merge_sort_mut() {
         let test_data: [(&mut [i32], (usize, &[i32]));7] = [
@@ -170,26 +167,5 @@ mod test {
             let inv = v2.mergesort_mut(Merge::merge_mut_adjacent);
             assert_eq!( v1.mergesort(), (inv, v2) );
         }
-    }
-    #[bench]
-    fn bench_mergesort_mut_adjacent(b: &mut Bencher) {
-        let v: Vec<i16> = random_sequence(512);
-        b.iter(||{
-            v.clone().mergesort_mut(Merge::merge_mut_adjacent)
-        });
-    }
-    #[bench]
-    fn bench_mergesort_mut(b: &mut Bencher) {
-        let v: Vec<i16> = random_sequence(512);
-        b.iter(||{
-            v.clone().mergesort_mut(Merge::merge_mut)
-        });
-    }
-    #[bench]
-    fn bench_mergesort(b: &mut Bencher) {
-        let v: Vec<i16> = random_sequence(512);
-        b.iter(||{
-            v.clone().mergesort()
-        });
     }
 }

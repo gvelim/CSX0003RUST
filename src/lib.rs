@@ -1,5 +1,3 @@
-#![feature(test)]
-
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 

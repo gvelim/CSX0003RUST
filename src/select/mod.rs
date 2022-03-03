@@ -65,7 +65,7 @@ impl<T> Select<T> for [T]
 /// The algorithm aims to find the best pivot deterministically rather pick a random value
 ///
 pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
-    where T: Copy + Ord  {
+    where T: Copy + Ord + Debug {
 
     // println!("DS Input: {:?}::{}th", v, nth_min);
     if v.len() == 1 {
@@ -110,7 +110,7 @@ pub fn d_selection<T>(v: &mut [T], nth_min: usize) -> &T
 /// It breaks array into N/5 sub-arrays of length 5 for cheap sorting and picking the median value
 ///
 pub fn medians_of_medians<T>(v:&mut [T]) -> Vec<T>
-    where T : Copy + Ord {
+    where T : Copy + Ord + Debug {
 
     // extract median of medians array
     // split input slice into n/5 groups of 5

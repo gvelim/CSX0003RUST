@@ -48,3 +48,11 @@ fn bench_quicksort(b: &mut Bencher) {
         v.clone().quick_sort()
     });
 }
+
+#[bench]
+fn bench_std_vector_sort(b: &mut Bencher) {
+    let v: Vec<i16> = random_sequence(5000);
+    b.iter(||{
+        v.clone().sort()
+    });
+}

@@ -3,6 +3,7 @@ pub mod vs;
 use std::cmp::Ordering;
 use std::iter::Peekable;
 use vs::VirtualSlice;
+use std::fmt::Debug;
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -85,14 +86,14 @@ impl<I> Iterator for MergeIterator<I>
 }
 
 /// Merge capabilities for generic type arrays
-pub trait Merge<T> where T: Ord {
+pub trait Merge<T> where T: Ord + Debug {
     fn merge_lazy<'a>(&'a mut self, s:&'a mut[T]) -> VirtualSlice<T>;
     fn merge_mut_adjacent(&mut self, s:&mut[T]) -> usize;
     fn merge_mut(&mut self, s:&mut[T]) -> usize;
 }
 
 impl<T> Merge<T> for [T]
-    where T: Ord  {
+    where T: Ord + Debug  {
 
     /// Returns a merged representation (virtual slice) that attaches onto `self` with another slice without mutating their contents
     /// The virtual slice can then be used for further ordered operations across the attached slices,

@@ -32,7 +32,7 @@ use std::ops::{Index, IndexMut, Range};
 /// assert_eq!(s4, &mut [11, 4, 6, 8 , 10]);
 ///
 /// ```
-pub enum VirtualSlice<'a, T> where T: Ord {
+pub enum VirtualSlice<'a, T> where T: Ord + Debug {
     /// The tuple holds a vector of mutable references and the Index Reflector
     NonAdjacent( Vec<&'a mut T>, Option<Vec<usize>>),
     /// Holds a mutable reference to the reconstructed parent slice out of two memory adjacent slices
@@ -41,7 +41,7 @@ pub enum VirtualSlice<'a, T> where T: Ord {
 
 use VirtualSlice::{NonAdjacent, Adjacent};
 
-impl<'a, T> VirtualSlice<'a, T> where T: Ord {
+impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// Create a new VirtualSlice for use with non-adjacent slice segments
     pub fn new() -> VirtualSlice<'a, T> {
         NonAdjacent( Vec::new(), None )
@@ -239,9 +239,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
         let mut idx_rfl = Vec::<usize>::from_iter(0..ws_len);
-        //(0..ws_len).into_iter().for_each(|x| idx_rfl.push(x));
 
-        //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
+        //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 
         let c_bound = p-1;
         // Memory Optimisation: if idx_len() = s1.len() then use:
@@ -263,9 +262,10 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             // |false |  true |    ANY   | Phase 2: finish remaining left items
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------
-            //
+            // translate c --> c'
             cc = idx_rfl[c];
-            idx = c + idx_rfl[c..p].iter().position(|x| *x == i).unwrap();
+            // translate i --> i'
+            idx = idx_rfl[i];
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent inversions
@@ -276,12 +276,10 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                     f_swap(self, i, j);
 
                     // swap index_reflect[j] with index_reflector[i']
-                    // i' == index_reflector[x]; where x == i;
-                    // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                    // swap( i' with j )
-                    idx_rfl.swap(idx, j);
                     // or since always j == j' we just copy the value over no need to swap
-                    //idx_rfl[idx] = j;
+                    idx_rfl.swap(idx, j);
+                    // Store i' at position [j]
+                    idx_rfl[j] = idx;
                     //print!("\tr:");
                     // point to the next in order position (right slice)
                     j += 1;
@@ -294,11 +292,9 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
                         f_swap(self, i, cc);
 
+                        // Store i' at position [c]
+                        idx_rfl[cc] = idx;
                         // swap index_reflect[c] with index_reflector[i']
-                        // i' == index_reflector[x]; where x == i;
-                        // e.g. i = 3rd pos, hence i' = index_reflector[x] where x == 3;
-                        //let idx = { let mut x = c; while idx_rfl[x] != i { x +=1 } x  };
-                        //swap( i' with c )
                         idx_rfl.swap(idx, c);
                         //print!("\tl:");
                     }
@@ -309,7 +305,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord {
             };
             // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
             i += 1;
-            //println!("Merge:{:?} :: {:?} ({:?},{:?},{:?})", self, idx_rfl, i, j, c);
+            //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
         };
 
         //println!("Merge Done");
@@ -321,7 +317,7 @@ pub enum VSIter<'b, T> where T: Ord + 'b {
     NonAdjacent( std::slice::Iter<'b, &'b mut T> ),
     Adjacent( std::slice::Iter<'b, T> ),
 }
-impl<'b, T> VSIter<'b, T> where T: Ord + 'b{
+impl<'b, T> VSIter<'b, T> where T: Ord + 'b + Debug {
     pub fn new(vs: &'b VirtualSlice<'b, T>) -> VSIter<'b, T> {
         match vs {
             NonAdjacent(v, _) => VSIter::NonAdjacent(v.iter()),
@@ -345,11 +341,12 @@ impl<'b, T> Iterator for VSIter<'b, T> where T: Ord + 'b {
         }
     }
 }
-pub enum VSIterMut<'b, T> where T: Ord + 'b {
+#[derive(Debug)]
+pub enum VSIterMut<'b, T> where T: Ord + 'b + Debug {
     NonAdjacent( std::slice::IterMut<'b, &'b mut T> ),
     Adjacent( std::slice::IterMut<'b, T> ),
 }
-impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b {
+impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b + Debug {
     pub fn new(vs: &'b mut VirtualSlice<'b, T>) -> VSIterMut<'b, T> {
         match vs {
             NonAdjacent(v, _) => VSIterMut::NonAdjacent(v.iter_mut()),
@@ -358,7 +355,7 @@ impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b {
     }
 }
 impl<'b, T> Iterator for VSIterMut<'b, T>
-    where T: Ord + 'b {
+    where T: Ord + 'b + Debug {
     type Item = &'b mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -375,7 +372,7 @@ impl<'b, T> Iterator for VSIterMut<'b, T>
     }
 }
 
-impl<T> Default for VirtualSlice<'_, T> where T: Ord {
+impl<T> Default for VirtualSlice<'_, T> where T: Ord + Debug {
     fn default() -> Self {
         VirtualSlice::new()
     }
@@ -392,7 +389,7 @@ impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
             .finish()
     }
 }
-impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord {
+impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
     type Output = T;
 
     /// Index implementation so that VirtualSlice[x] will return a &T to the underlying slice segment
@@ -405,7 +402,7 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord {
         }
     }
 }
-impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord {
+impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
 
     /// Index implementation so that VirtualSlice[x] will return a &mut T to the underlying slice segment
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
@@ -417,7 +414,7 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord {
         }
     }
 }
-impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
+impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord + Debug {
     type Output = [&'a mut T];
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
@@ -428,7 +425,7 @@ impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
-impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
+impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord + Debug {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
         if let NonAdjacent(vv, _) = self {
             &mut vv[index]
@@ -437,7 +434,7 @@ impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord {
         }
     }
 }
-impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
+impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord + Debug {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
     /// use csx3::merge::vs::VirtualSlice;
@@ -454,7 +451,7 @@ impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord {
     }
 }
 
-impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  {
+impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  + Debug {
     /// Enable VirtualSlice comparison so we can write things like
     /// ```
     /// use csx3::merge::vs::VirtualSlice;
@@ -567,7 +564,7 @@ mod test {
 
     #[test]
     fn test_virtual_slice_merge() {
-        let test_data: [(&mut [i32], &mut [i32], &[i32], &[i32]); 6] = [
+        let test_data: [(&mut [i32], &mut [i32], &[i32], &[i32]); 8] = [
             (&mut [-88, -29, 4, 84], &mut [-127, -113, -71, -54],
              &[-127, -113, -88, -71], &[-54, -29, 4, 84]),
             (&mut [5, 6, 7], &mut [1, 2, 3, 4],
@@ -579,7 +576,11 @@ mod test {
             (&mut [-106, -82, -64, -57, 5, 23, 67, 79], &mut [-103, -85, -85, -49, -42, -38, -37, 86],
              &[-106, -103, -85, -85, -82, -64, -57, -49], &[-42, -38, -37, 5, 23, 67, 79, 86]),
             (&mut [-122, -19, 3, 51, 69, 77, 78, 115], &mut [-118, -99, 23, 23, 35, 59, 63, 75],
-             &[-122, -118, -99, -19, 3, 23, 23, 35], &[51, 59, 63, 69, 75, 77, 78, 115])
+             &[-122, -118, -99, -19, 3, 23, 23, 35], &[51, 59, 63, 69, 75, 77, 78, 115]),
+            (&mut [-79, -39, -5, 69, 87, 117, 118, 126], &mut [-59, -39, -39, -14, 40, 86, 97, 113],
+             &[-79, -59, -39, -39, -39, -14, -5, 40], &[69, 86, 87, 97, 113, 117, 118, 126]),
+            (&mut [-108, -84, 6, 49, 74, 96, 100, 112], &mut [-118, -91, -86, -81, -43, 16, 45, 52],
+             &[-118, -108, -91, -86, -84, -81, -43, 6], &[16, 45, 49, 52, 74, 96, 100, 112])
         ];
 
         for (s1, s2, c1, c2) in test_data {

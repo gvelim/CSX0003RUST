@@ -34,7 +34,7 @@ use std::ops::{Index, IndexMut, Range};
 /// ```
 pub enum VirtualSlice<'a, T> where T: Ord + Debug {
     /// The tuple holds a vector of mutable references and the Index Reflector
-    NonAdjacent( Vec<&'a mut T>, Option<Vec<usize>>),
+    NonAdjacent( Vec<&'a mut T> ),
     /// Holds a mutable reference to the reconstructed parent slice out of two memory adjacent slices
     Adjacent( &'a mut[T] ),
 }
@@ -44,7 +44,7 @@ use VirtualSlice::{NonAdjacent, Adjacent};
 impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// Create a new VirtualSlice for use with non-adjacent slice segments
     pub fn new() -> VirtualSlice<'a, T> {
-        NonAdjacent( Vec::new(), None )
+        NonAdjacent( Vec::new() )
     }
     /// Create a new VirtualSlice for use with adjacent slice segments
     pub fn new_adjacent(s: &'a mut[T]) -> VirtualSlice<'a, T> {
@@ -53,13 +53,13 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// Current length of the VirtualSlice is equal to sum of all attached slice segments
     pub fn len(&self) -> usize {
         match self {
-            NonAdjacent(v,_) => v.len(),
+            NonAdjacent(v) => v.len(),
             Adjacent(s) => s.len(),
         }
     }
     pub fn is_empty(&self) -> bool {
         match self {
-            NonAdjacent(v,_) => v.is_empty(),
+            NonAdjacent(v) => v.is_empty(),
             Adjacent(s) => s.is_empty(),
         }
     }
@@ -74,7 +74,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// Attach a slice segment onto the VirtualSlice
     pub fn attach(&mut self, s: &'a mut [T]) {
         match self {
-            NonAdjacent(v, _) => {
+            NonAdjacent(v) => {
                 s.iter_mut()
                     .for_each(|item| {
                         v.push(item);
@@ -86,7 +86,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                     fs = &mut *std::ptr::slice_from_raw_parts_mut::<T>((*s0).as_mut_ptr(), s0.len() + s.len());
                     // checking they are aligned and adjacent,
                     // if not panic! so we prevent unpredictable behaviour
-                    assert!(&s[0] == &fs[s0.len()]);
+                    assert!(s[0] == fs[s0.len()]);
                 }
                 *self = VirtualSlice::new_adjacent(fs);
             }
@@ -107,81 +107,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
             )
         }
     }
-    /// Perform a deep merge by ordering the referred values hence mutating the slice segments
-    pub fn merge(&mut self, s: &'a mut [T]) -> usize
-        where T: Ord  {
-        // we are not interested in the index reflector here so we don't store it
-        let (inversion, _) = self._merge(s, VirtualSlice::swap);
-        inversion
-    }
-    /// Shallow swap; swaps the references of the underlying slice segments. The segments aren't affected
-    /// Operates only with non-adjacent slices
-    pub fn swap_shallow(&mut self, a: usize, b:usize) {
-        if let NonAdjacent(v, _) = self {
-            v.swap(a, b);
-        } else {
-            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
-        }
-    }
-    /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values.
-    /// The VirtualSlice can be used as sort-mask layer above the slice segments, which later can be superimposed over
-    /// In case of non-adjacent slices only.
-    pub fn merge_lazy(&mut self, s: &'a mut [T]) -> usize
-        where T: Ord  {
-        let (inversions, idx_rfl) = self._merge(s, VirtualSlice::swap_shallow);
-
-        match self {
-            Adjacent(_) => panic!("merge_shallow(): cannot operate in adjacent mode"),
-            NonAdjacent(_, idx_reflector) => {
-                // we need to store index reflector in case we want to mutate the attached slices via the impose method
-                *idx_reflector = idx_rfl;
-                inversions
-            }
-        }
-    }
-
-    /// Superimposes O(n-1) the derived order onto the attached slice segments.
-    /// The stored Index Reflector contains the order per reference hence no need for reordering
-    pub fn superimpose_state(&mut self) {
-        // total operations must be len()-1 as we use 1 position as temp swap location
-        let total_swaps = self.len() - 2;
-        // Count total number of swaps occurred
-        let mut swap_count = 0usize;
-        // holds the current temp swap position
-        let mut temp_idx = 0usize;
-
-        // make sure entry conditions are correct
-        // prefer to panic as non of those scenarios should be recoverable
-        // otherwise, extract internal data and proceed with algorithm
-        match self {
-            Adjacent(_) => panic!("superimpose_shallow_merge(): call doesn't work over adjacent slice segments"),
-            NonAdjacent(_, None) => panic!("superimpose_shallow_merge(): Index Reflector does not exist. Did merge_shallow() run ?"),
-            NonAdjacent(vs, Some(idx)) => {
-
-                // Exit conditions are either,
-                // - total swaps == total number of elements - 1 OR
-                // - current tmp index position has reached the end of VirtualSlice (Case: virtualslice already ordered; zero swaps)
-                while swap_count < total_swaps && temp_idx < total_swaps
-                {
-                    let mut i;
-                    // Exit condition
-                    // - current swap index == correct ordered position, (item is positioned where it should be)
-                    while temp_idx != idx[temp_idx] {
-                        i = idx[temp_idx];
-                        idx.swap(temp_idx, i);
-                        unsafe {
-                            // we need to overcome Rust's borrow checking
-                            // as we cannot use self.swap() here
-                            std::ptr::swap::<T>(&mut *vs[temp_idx] as *mut T, &mut *vs[i] as *mut T);
-                        }
-                        swap_count += 1;
-                    }
-                    temp_idx += 1;
-                }
-            }
-        }
-    }
-
     /// Merge Self with another non-adjacent slice using in-place memory swaps
     /// For the algorithm to work we need the following components
     /// - Append VirtualSlice with given &mut slice so to form a "continuous slice"
@@ -211,13 +136,12 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// assert_eq!(s1, &[1,2,3]);
     /// assert_eq!(s2, &[4,5,6,7]);
     /// ```
-    fn _merge<F>(&mut self, s: &'a mut [T], mut f_swap: F) -> (usize, Option<Vec<usize>>)
-        where T: Ord ,
-              F: FnMut(&mut Self, usize, usize) {
+    pub fn merge(&mut self, s: &'a mut [T]) -> usize
+        where T: Ord {
 
         if self.is_empty() {
             self.attach(s);
-            return (0, None)
+            return 0
         }
 
         // j = s2[j] equivalent position within the working slice (j') and index reflector (j)
@@ -273,7 +197,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
 
                     // swap right slice's item in the working slice with merged partition edge ws[i]
                     // swap( ws[i] with ws[j'] where j' = index_reflector[j], but j' == j so
-                    f_swap(self, i, j);
+                    self.swap(i, j);
 
                     // swap index_reflect[j] with index_reflector[i']
                     // or since always j == j' we just copy the value over no need to swap
@@ -290,7 +214,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                     if i != cc {
                         // swap left slice's item in the working slice with merged partition edge ws[i]
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                        f_swap(self, i, cc);
+                        self.swap(i, cc);
 
                         // Store i' at position [c]
                         idx_rfl[cc] = idx;
@@ -309,7 +233,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         };
 
         //println!("Merge Done");
-        (inv_count, Some(idx_rfl))
+        inv_count
     }
 }
 
@@ -320,7 +244,7 @@ pub enum VSIter<'b, T> where T: Ord + 'b {
 impl<'b, T> VSIter<'b, T> where T: Ord + 'b + Debug {
     pub fn new(vs: &'b VirtualSlice<'b, T>) -> VSIter<'b, T> {
         match vs {
-            NonAdjacent(v, _) => VSIter::NonAdjacent(v.iter()),
+            NonAdjacent(v) => VSIter::NonAdjacent(v.iter()),
             Adjacent(s) => VSIter::Adjacent(s.iter()),
         }
     }
@@ -349,7 +273,7 @@ pub enum VSIterMut<'b, T> where T: Ord + 'b + Debug {
 impl<'b, T> VSIterMut<'b, T> where T: Ord + 'b + Debug {
     pub fn new(vs: &'b mut VirtualSlice<'b, T>) -> VSIterMut<'b, T> {
         match vs {
-            NonAdjacent(v, _) => VSIterMut::NonAdjacent(v.iter_mut()),
+            NonAdjacent(v) => VSIterMut::NonAdjacent(v.iter_mut()),
             Adjacent(s) => VSIterMut::Adjacent(s.iter_mut()),
         }
     }
@@ -397,7 +321,7 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
         match self {
             // syntactic overkill as rust will automatically dereference the chain of references
             // but it feels good to be explicit!!
-            NonAdjacent(vv, _) => &(*vv[index]),
+            NonAdjacent(vv) => &(*vv[index]),
             Adjacent(s) => &s[index],
         }
     }
@@ -409,7 +333,7 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!
         match self {
-            NonAdjacent(vv, _) => &mut (*vv[index]),
+            NonAdjacent(vv) => &mut (*vv[index]),
             Adjacent(s) => &mut s[index],
         }
     }
@@ -418,7 +342,7 @@ impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord + Debug {
     type Output = [&'a mut T];
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
-        if let NonAdjacent(vv, _) = self {
+        if let NonAdjacent(vv) = self {
             &vv[index]
         } else {
             panic!()
@@ -427,7 +351,7 @@ impl<'a, T> Index<Range<usize>> for VirtualSlice<'a, T> where T: Ord + Debug {
 }
 impl<'a, T> IndexMut<Range<usize>> for VirtualSlice<'a, T> where T: Ord + Debug {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
-        if let NonAdjacent(vv, _) = self {
+        if let NonAdjacent(vv) = self {
             &mut vv[index]
         } else {
             panic!()
@@ -444,7 +368,7 @@ impl<'a, T> PartialOrd for VirtualSlice<'a, T> where T: Ord + Debug {
     /// ```
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
-            (NonAdjacent(v, _), NonAdjacent(o, _)) => v.partial_cmp(o),
+            (NonAdjacent(v), NonAdjacent(o)) => v.partial_cmp(o),
             (Adjacent(s), Adjacent(o)) => s.partial_cmp(o),
             ( _, _ ) => panic!(),
         }
@@ -461,7 +385,7 @@ impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  + Debug {
     /// ```
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (NonAdjacent(v, _), NonAdjacent(o,_)) => v.eq(o),
+            (NonAdjacent(v), NonAdjacent(o)) => v.eq(o),
             (Adjacent(s), Adjacent(o)) => s.eq(o),
             ( _, _ ) => panic!(),
         }
@@ -471,26 +395,6 @@ impl<'a, T> PartialEq<Self> for VirtualSlice<'a, T> where T: Ord  + Debug {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    #[should_panic]
-    fn test_virtual_slice_impose_negative_1() {
-        let s1 = &mut [5, 6, 7];
-        let mut vs = VirtualSlice::new();
-        vs.attach(s1);
-        vs.superimpose_state();      // there is no index_reflector yet, should do nothing
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_virtual_slice_impose_negative_2() {
-        let [(s1, s2)]: [(&mut [i32], &mut [i32]); 1] = [(&mut [5, 6, 7], &mut [1, 2, 3, 4])];
-        let mut vs = VirtualSlice::new();
-
-        vs.attach(s1);
-        vs.merge(s2);                // deep merge creates a reflector
-        vs.superimpose_state(); // it should do nothing as the vs is already ordered
-    }
 
     #[test]
     #[should_panic]
@@ -533,33 +437,6 @@ mod test {
         assert_eq!(vs, Adjacent(&mut [11, 3, 5, 7, 9, 9, 4, 6, 8, 10]));
         assert_eq!(s1, &mut [11, 3, 5, 7, 9]);
         assert_eq!(s2, &mut [9, 4, 6, 8, 10]);
-    }
-
-    #[test]
-    fn test_virtual_slice_swap_shallow() {
-        let s1 = &mut [1, 3, 5, 7, 9];
-        let s2 = &mut [2, 4, 6, 8, 10];
-
-        let mut vs = VirtualSlice::new();
-        vs.attach(s1);
-        vs.attach(s2);
-        vs[0] = 11;
-        vs[5] = 22;
-        println!("{:?}", vs);
-        assert_eq!(vs, NonAdjacent(
-            vec![&mut 11, &mut 3, &mut 5, &mut 7, &mut 9, &mut 22, &mut 4, &mut 6, &mut 8, &mut 10],
-            None
-        ));
-
-        vs.swap_shallow(0, 5);
-        // references have been swapped
-        assert_eq!(vs, NonAdjacent(
-            vec![&mut 22, &mut 3, &mut 5, &mut 7, &mut 9, &mut 11, &mut 4, &mut 6, &mut 8, &mut 10],
-            None
-        ));
-        // however segments haven't been affected
-        assert_eq!(s1, &mut [11, 3, 5, 7, 9]);
-        assert_eq!(s2, &mut [22, 4, 6, 8, 10]);
     }
 
     #[test]
@@ -648,5 +525,4 @@ mod test {
         assert_eq!(s1, &mut [9, 12, 12, 12, 12]);
         assert_eq!(s2, &mut [11, 12, 12, 12, 12]);
     }
-
 }

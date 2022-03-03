@@ -87,40 +87,12 @@ impl<I> Iterator for MergeIterator<I>
 
 /// Merge capabilities for generic type arrays
 pub trait Merge<T> where T: Ord + Debug {
-    fn merge_lazy<'a>(&'a mut self, s:&'a mut[T]) -> VirtualSlice<T>;
     fn merge_mut_adjacent(&mut self, s:&mut[T]) -> usize;
     fn merge_mut(&mut self, s:&mut[T]) -> usize;
 }
 
 impl<T> Merge<T> for [T]
     where T: Ord + Debug  {
-
-    /// Returns a merged representation (virtual slice) that attaches onto `self` with another slice without mutating their contents
-    /// The virtual slice can then be used for further ordered operations across the attached slices,
-    /// Using its `superimpose_state()` method you can mutate the order back to the attached slices.
-    /// ```
-    /// use csx3::merge::Merge;
-    ///
-    /// let s1 = &mut [5,6,7];
-    /// let s2 = &mut [1,2,3,4];
-    ///
-    /// let mut mask = s1.merge_lazy(s2); // mask mutably borrows s1 & s2
-    ///
-    /// mask.iter()                          // iterate over merged contents
-    ///     .enumerate()                     // while s1 and s2 are unaffected
-    ///     .for_each(|(i,x)| assert_eq!(*x,i+1) );
-    ///
-    /// mask.superimpose_state();   // mutate the order back to s1 and s2
-    ///                                     // and drop mutable references
-    /// assert_eq!(s1, &[1,2,3]);
-    /// assert_eq!(s2, &[4,5,6,7]);
-    /// ```
-    fn merge_lazy<'a>(&'a mut self, s: &'a mut [T]) -> VirtualSlice<T> {
-        let mut vs = VirtualSlice::new();
-        vs.attach(self);
-        vs.merge_lazy(s);
-        vs
-    }
 
     /// Applies memory efficient in-place merging when two slices are adjacent to each other.
     /// ```
@@ -176,40 +148,6 @@ impl<T> Merge<T> for [T]
 mod test {
     use super::*;
 
-    #[test]
-    fn test_merge_shallow() {
-        let s1 = &mut [1, 3, 5, 7, 9];
-        let s2 = &mut [2, 4, 6, 8, 10];
-
-        let vs = s1.merge_lazy(s2);
-
-        assert_eq!( vs, VirtualSlice::NonAdjacent(
-            vec![&mut 1, &mut 2, &mut 3, &mut 4, &mut 5, &mut 6, &mut 7, &mut 8, &mut 9,&mut 10],
-            None
-        ));
-        vs.iter()
-            .enumerate()
-            .for_each(|(i,x)| assert_eq!(*x,i+1) );
-
-        assert_eq!( s1, &mut [1, 3, 5, 7, 9] );
-        assert_eq!( s2, &mut [2, 4, 6, 8, 10] );
-    }
-    #[test]
-    fn test_merge_superimpose() {
-        let data: [(&mut[i32], &mut[i32], &[i32],&[i32]); 3] = [
-            (&mut [-88,-29,4,84], &mut [-127,-113,-71,-54], &[-127, -113, -88, -71], &[-54, -29, 4, 84]),
-            (&mut [5,6,7], &mut[1,2,3,4], &[1,2,3], &[4,5,6,7]),
-            (&mut [1,2,3,4], &mut[5,6,7], &[1,2,3,4], &[5,6,7]),
-        ];
-
-        for (s1,s2, o1, o2) in data {
-            let mut vs = s1.merge_lazy(s2);
-            vs.superimpose_state();
-            println!("{:?}",vs);
-            assert_eq!(s1, o1);
-            assert_eq!(s2, o2);
-        }
-    }
     #[test]
     fn test_merge() {
         let s1 = &[34, 36, 80, 127];

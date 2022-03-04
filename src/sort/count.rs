@@ -39,19 +39,17 @@ impl<T> CountSort for [T]
             });
 
         // play back onto the input slice the counts collected with Sum of all counts == slice.len()
-        let mut s_idx = 0;
+        let iter = &mut self.iter_mut();
         count.into_iter()
             .enumerate()
             .filter(|(_, x)| *x > 0)
-            .for_each(|(i, mut x)| {
+            .for_each(|(i, x)| {
                 // reverse index offset mapping
                 // hence, output[i] = Min + i
-                let val = min.add_index(i );
-                while x > 0 {
-                    self[s_idx] = val;
-                    s_idx += 1;
-                    x -= 1;
-                }
+                iter.map(|n| {
+                    *n = min.add_index(i )
+                })
+                    .take(x).for_each(|_|{});
             });
     }
 }

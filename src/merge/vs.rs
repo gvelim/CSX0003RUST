@@ -100,7 +100,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         if let NonAdjacent(v) = self {
             v.swap(a, b);
         } else {
-            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
+            panic!("swap_shallow(): Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
         }
     }
     /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values.
@@ -205,12 +205,13 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
             // | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------
-            // translate index_reflector[c] --> vs[c']
-            // where index_reflector[c] predicts position of c' in ws[] given current iteration
-            cc = idx_rfl[c];
-            // translate index_reflector[i] --> index_reflector[i']
-            // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
-            ii = idx_rfl[i];
+            unsafe {// translate index_reflector[c] --> vs[c']
+                // where index_reflector[c] predicts position of c' in ws[] given current iteration
+                cc = *idx_rfl.get_unchecked(c);
+                // translate index_reflector[i] --> index_reflector[i']
+                // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
+                ii = *idx_rfl.get_unchecked(i);
+            }
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent number of inversions
@@ -346,8 +347,12 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
         match self {
             // syntactic overkill as rust will automatically dereference the chain of references
             // but it feels good to be explicit!!
-            NonAdjacent(vv) => &(*vv[index]),
-            Adjacent(s) => &s[index],
+            NonAdjacent(vv) => unsafe {
+                &(**vv.get_unchecked(index))
+            },
+            Adjacent(s) => unsafe {
+                &*s.get_unchecked(index)
+            },
         }
     }
 }
@@ -357,9 +362,11 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!
-        match self {
-            NonAdjacent(vv) => &mut (*vv[index]),
-            Adjacent(s) => &mut s[index],
+        unsafe {
+            match self {
+                NonAdjacent(vv) => &mut (**vv.get_unchecked_mut(index)),
+                Adjacent(s) => &mut *s.get_unchecked_mut(index),
+            }
         }
     }
 }

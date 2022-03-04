@@ -46,10 +46,9 @@ impl<T> CountSort for [T]
             .for_each(|(i, x)| {
                 // reverse index offset mapping
                 // hence, output[i] = Min + i
-                iter.map(|n| {
-                    *n = min.add_index(i )
-                })
-                    .take(x).for_each(|_|{});
+                iter.take(x)
+                    .map(|n| { *n = min.add_index(i ) })
+                    .for_each(|_|());
             });
     }
 }

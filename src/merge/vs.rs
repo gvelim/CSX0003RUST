@@ -75,10 +75,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     pub fn attach(&mut self, s: &'a mut [T]) {
         match self {
             NonAdjacent(v) => {
-                s.iter_mut()
-                    .for_each(|item| {
-                        v.push(item);
-                    });
+                v.extend(s.iter_mut());
             }
             Adjacent(s0) => {
                 let fs: &mut [T];
@@ -91,6 +88,27 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                 *self = VirtualSlice::new_adjacent(fs);
             }
         }
+    }
+    /// Perform a deep merge by ordering the referred values hence mutating the slice segments
+    pub fn merge(&mut self, s: &'a mut [T]) -> usize
+        where T: Ord  {
+        self._merge(s, VirtualSlice::swap)
+    }
+    /// Shallow swap; swaps the references of the underlying slice segments. The segments aren't affected
+    /// Operates only with non-adjacent slices
+    pub fn swap_shallow(&mut self, a: usize, b:usize) {
+        if let NonAdjacent(v) = self {
+            v.swap(a, b);
+        } else {
+            panic!("Not applicable for Adjacent VirtualSlices; use with VirtualSlice::new() instead");
+        }
+    }
+    /// Perform a shallow merge by ordering the VirtualSlice's references and not the referred values.
+    /// The VirtualSlice can be used as sort-mask layer above the slice segments, which later can be superimposed over
+    /// In case of non-adjacent slices only.
+    pub fn merge_lazy(&mut self, s: &'a mut [T]) -> usize
+        where T: Ord  {
+        self._merge(s, VirtualSlice::swap_shallow)
     }
     /// Deep swap; swaps the two references to the positions of the underlying slice segments
     /// Operates at both adjacent and non-adjacent slices
@@ -136,8 +154,9 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// assert_eq!(s1, &[1,2,3]);
     /// assert_eq!(s2, &[4,5,6,7]);
     /// ```
-    pub fn merge(&mut self, s: &'a mut [T]) -> usize
-        where T: Ord {
+    fn _merge<F>(&mut self, s: &'a mut [T], mut f_swap: F) -> usize
+        where T: Ord ,
+              F: FnMut(&mut Self, usize, usize) {
 
         if self.is_empty() {
             self.attach(s);
@@ -162,7 +181,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl = Vec::<usize>::from_iter(0..ws_len);
+        let mut idx_rfl : Vec::<usize> = (0..ws_len).collect();
 
         //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 
@@ -171,7 +190,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         //let c_bound = idx_rfl.len()-1;
         let i_bound = ws_len-1;
         let mut cc;
-        let mut idx;
+        let mut ii;
         loop {
             // Flattening/de-normalising the workflow logic
             // ============================================
@@ -181,29 +200,32 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
             // |   A  |   B   | if Guard | Action
             // +------+-------+----------+---------------------------------------
             // | true |  true |   l > r  | Phase 1: swap right with pivot
+            // | true |  true |    N/A   | Phase 1: l<=r implied; swap left with pivot
+            // |false |  true |    ANY   | Phase 2: finishing moving/reordering remaining items
             // | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
-            // | true |  true |   l > r  | Phase 1: l<=r implied; swap left with pivot
-            // |false |  true |    ANY   | Phase 2: finish remaining left items
             // |false | false |    N/A   | Exit: Merge completed
             // +------+-------+----------+---------------------------------------
-            // translate c --> c'
+            // translate index_reflector[c] --> vs[c']
+            // where index_reflector[c] predicts position of c' in ws[] given current iteration
             cc = idx_rfl[c];
-            // translate i --> i'
-            idx = idx_rfl[i];
+            // translate index_reflector[i] --> index_reflector[i']
+            // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
+            ii = idx_rfl[i];
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
-                    // count the equivalent inversions
+                    // count the equivalent number of inversions
                     inv_count += j - i;
 
-                    // swap right slice's item in the working slice with merged partition edge ws[i]
+                    // swap data, right slice's item in the working slice with merged partition edge ws[i]
                     // swap( ws[i] with ws[j'] where j' = index_reflector[j], but j' == j so
-                    self.swap(i, j);
+                    f_swap(self, i, j);
 
-                    // swap index_reflect[j] with index_reflector[i']
-                    // or since always j == j' we just copy the value over no need to swap
-                    idx_rfl.swap(idx, j);
-                    // Store i' at position [j]
-                    idx_rfl[j] = idx;
+                    // swap indexes, index_reflect[j] with index_reflector[i']
+                    // since we don't use the index reflector property for superimposing just copy j over to i'
+                    idx_rfl[ii] = j;
+                    // Store i' at position [j] to use when i reaches j value
+                    // e.g. if j = 10, [i'] = 4, then when i becomes 10, index_reflector[10] will move i' to 4
+                    idx_rfl[j] = ii;
                     //print!("\tr:");
                     // point to the next in order position (right slice)
                     j += 1;
@@ -214,12 +236,15 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                     if i != cc {
                         // swap left slice's item in the working slice with merged partition edge ws[i]
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                        self.swap(i, cc);
+                        f_swap(self, i, cc);
 
-                        // Store i' at position [c]
-                        idx_rfl[cc] = idx;
+                        // Store i' at position [c'] to use when i == c'
+                        // for example, with c' = [c] and i' = [i]
+                        // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
+                        // that means when i becomes 9, the i' will have position 5
+                        idx_rfl[cc] = ii;
                         // swap index_reflect[c] with index_reflector[i']
-                        idx_rfl.swap(idx, c);
+                        idx_rfl.swap(ii, c);
                         //print!("\tl:");
                     }
                     // point to the next in order position (left slice)
@@ -438,7 +463,30 @@ mod test {
         assert_eq!(s1, &mut [11, 3, 5, 7, 9]);
         assert_eq!(s2, &mut [9, 4, 6, 8, 10]);
     }
+    #[test]
+    fn test_virtual_slice_swap_shallow() {
+        let s1 = &mut [1, 3, 5, 7, 9];
+        let s2 = &mut [2, 4, 6, 8, 10];
 
+        let mut vs = VirtualSlice::new();
+        vs.attach(s1);
+        vs.attach(s2);
+        vs[0] = 11;
+        vs[5] = 22;
+        println!("{:?}", vs);
+        assert_eq!(vs, NonAdjacent(
+            vec![&mut 11, &mut 3, &mut 5, &mut 7, &mut 9, &mut 22, &mut 4, &mut 6, &mut 8, &mut 10]
+        ));
+
+        vs.swap_shallow(0, 5);
+        // references have been swapped
+        assert_eq!(vs, NonAdjacent(
+            vec![&mut 22, &mut 3, &mut 5, &mut 7, &mut 9, &mut 11, &mut 4, &mut 6, &mut 8, &mut 10]
+        ));
+        // however segments haven't been affected
+        assert_eq!(s1, &mut [11, 3, 5, 7, 9]);
+        assert_eq!(s2, &mut [22, 4, 6, 8, 10]);
+    }
     #[test]
     fn test_virtual_slice_merge() {
         let test_data: [(&mut [i32], &mut [i32], &[i32], &[i32]); 8] = [

@@ -1,4 +1,3 @@
-use rand::Rng;
 use super::Partition;
 
 // ANCHOR: sort_quick
@@ -26,7 +25,7 @@ impl<T> QuickSort for [T]
             return;
         }
         // pick an index at random based on a uniform distribution
-        let idx = rand::thread_rng().gen_range(0..(self.len()-1) );
+        let idx = self.len() >> 1;
         // partition the array into to mutable slices for further sorting
         let (left_partition,_ , right_partition) = self.partition_at_idx(idx);
 

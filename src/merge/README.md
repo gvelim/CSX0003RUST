@@ -8,7 +8,12 @@ Merge trait offering in-place & out-of-place merge capability between two or mor
 4. Pattern matching: De-normalising control flow
 
 For more details visit https://gvelim.github.io/CSX0003RUST/merge.html
-
+### Benchmarks
+```
+test bench_merge_lazy         ... bench:      80,672 ns/iter (+/- 313)
+test bench_merge_mut          ... bench:      98,679 ns/iter (+/- 3,988)
+test bench_merge_mut_adjacent ... bench:      65,436 ns/iter (+/- 951)
+```
 ### Examples
 Out of place merge using iterators
 ```rust

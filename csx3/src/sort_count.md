@@ -88,7 +88,7 @@ Recall that the `max(index) == distance` and `distance`
      min                    max        value = (Min: -123 + index: 245)
                                        ^^^^^ ** OVERFLOW **
 ```
-For example, `i8` has `i8::MIN` value of `-128` plus and `index` with value `245` will cause an overflow of `-11`; this is equivalent to `245 % i8::MIN`.
+For example, `i8` has `i8::MIN` value of `-128`, and by adding `index` with value `245` will cause an overflow of `-11`; this is equivalent to `245 % i8::MIN`.
 However, the trick here is that by adding `-11` to `min` and wrapping around, will yield the desired `value`.
 
 Therefore, the steps  to translate `index/unsigned` to `value/signed` are

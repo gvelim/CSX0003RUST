@@ -185,10 +185,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
 
         //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 
-        let c_bound = p-1;
-        // Memory Optimisation: if idx_len() = s1.len() then use:
-        //let c_bound = idx_rfl.len()-1;
-        let i_bound = ws_len-1;
         let mut cc;
         let mut ii;
         let base : *mut usize = idx_rfl.as_mut_ptr();
@@ -213,7 +209,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                 // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
                 ii = *base.add(i);
             }
-            match (j < ws_len && i != j, i < i_bound && c < c_bound) {
+            match (j < ws_len && i != j, i < ws_len-1 && c < p-1) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
                     // count the equivalent number of inversions
                     inv_count += j - i;
@@ -242,11 +238,11 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
                         f_swap(self, i, cc);
 
+                        unsafe {
                         // Store i' at position [c'] to use when i == c'
                         // for example, with c' = [c] and i' = [i]
                         // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
                         // that means when i becomes 9, the i' will have position 5
-                        unsafe {
                             base.add(cc).replace(ii);
                         // swap index_reflect[c] with index_reflector[i']
                             std::ptr::swap( base.add(ii), base.add(c) );
@@ -349,15 +345,13 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
 
     /// Index implementation so that VirtualSlice[x] will return a &T to the underlying slice segment
     fn index(&self, index: usize) -> &Self::Output {
-        match self {
-            // syntactic overkill as rust will automatically dereference the chain of references
-            // but it feels good to be explicit!!
-            NonAdjacent(vv) => unsafe {
-                &(**vv.get_unchecked(index))
-            },
-            Adjacent(s) => unsafe {
-                &*s.get_unchecked(index)
-            },
+        unsafe {
+            match self {
+                // syntactic overkill as rust will automatically dereference the chain of references
+                // but it feels good to be explicit!!
+                NonAdjacent(vv) => &(**vv.get_unchecked(index)),
+                Adjacent(s) => &*s.get_unchecked(index),
+            }
         }
     }
 }

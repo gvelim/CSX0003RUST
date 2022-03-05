@@ -106,7 +106,7 @@ loop {
     let b = left_index < array_length-1 && pivot < array_length-1
 
     match (a, b) {
-        (true, _) => if array[left_index] > array[right_index] {
+        (true, _) if array[left_index] > array[right_index] => {
             
             // Phase 1: swap right with pivot
         }  

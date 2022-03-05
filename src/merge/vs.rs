@@ -21,7 +21,7 @@ use std::ops::{Index, IndexMut, Range};
 /// assert_eq!(s1, &mut [1, 2, 3, 4, 5]);
 /// assert_eq!(s2, &mut [6, 7, 8, 9, 10]);
 ///
-/// let mut v = VirtualSlice::new();
+/// let mut v = VirtualSlice::new( s1.len() + s2.len() );
 /// v.attach(s1);
 /// v.attach(s4);
 /// v[0] = 11;
@@ -43,8 +43,8 @@ use VirtualSlice::{NonAdjacent, Adjacent};
 
 impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// Create a new VirtualSlice for use with non-adjacent slice segments
-    pub fn new() -> VirtualSlice<'a, T> {
-        NonAdjacent( Vec::new() )
+    pub fn new(length :usize) -> VirtualSlice<'a, T> {
+        NonAdjacent( Vec::with_capacity(length) )
     }
     /// Create a new VirtualSlice for use with adjacent slice segments
     pub fn new_adjacent(s: &'a mut[T]) -> VirtualSlice<'a, T> {
@@ -146,7 +146,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
     /// let _s = &[0,0,0,0,0,0]; // wedge to break adjacency
     /// let s2 = &mut [1,2,3,4];
     ///
-    /// let mut vs = VirtualSlice::new();
+    /// let mut vs = VirtualSlice::new( s1.len() + s2.len());
     ///
     /// vs.merge(s1);
     /// vs.merge(s2);
@@ -191,6 +191,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         let i_bound = ws_len-1;
         let mut cc;
         let mut ii;
+        let base : *mut usize = idx_rfl.as_mut_ptr();
         loop {
             // Flattening/de-normalising the workflow logic
             // ============================================
@@ -207,10 +208,10 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
             // +------+-------+----------+---------------------------------------
             unsafe {// translate index_reflector[c] --> vs[c']
                 // where index_reflector[c] predicts position of c' in ws[] given current iteration
-                cc = *idx_rfl.get_unchecked(c);
+                cc = *base.add(c);
                 // translate index_reflector[i] --> index_reflector[i']
                 // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
-                ii = *idx_rfl.get_unchecked(i);
+                ii = *base.add(i);
             }
             match (j < ws_len && i != j, i < i_bound && c < c_bound) {
                 (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
@@ -221,12 +222,14 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                     // swap( ws[i] with ws[j'] where j' = index_reflector[j], but j' == j so
                     f_swap(self, i, j);
 
-                    // swap indexes, index_reflect[j] with index_reflector[i']
-                    // since we don't use the index reflector property for superimposing just copy j over to i'
-                    idx_rfl[ii] = j;
-                    // Store i' at position [j] to use when i reaches j value
-                    // e.g. if j = 10, [i'] = 4, then when i becomes 10, index_reflector[10] will move i' to 4
-                    idx_rfl[j] = ii;
+                    unsafe {
+                        // swap indexes, index_reflect[j] with index_reflector[i']
+                        // since we don't use the index reflector property for superimposing just copy j over to i'
+                        base.add(ii).replace(j);
+                        // Store i' at position [j] to use when i reaches j value
+                        // e.g. if j = 10, [i'] = 4, then when i becomes 10, index_reflector[10] will move i' to 4
+                        base.add(j).replace(ii);
+                    }
                     //print!("\tr:");
                     // point to the next in order position (right slice)
                     j += 1;
@@ -243,9 +246,11 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                         // for example, with c' = [c] and i' = [i]
                         // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
                         // that means when i becomes 9, the i' will have position 5
-                        idx_rfl[cc] = ii;
+                        unsafe {
+                            base.add(cc).replace(ii);
                         // swap index_reflect[c] with index_reflector[i']
-                        idx_rfl.swap(ii, c);
+                            std::ptr::swap( base.add(ii), base.add(c) );
+                        }
                         //print!("\tl:");
                     }
                     // point to the next in order position (left slice)
@@ -324,7 +329,7 @@ impl<'b, T> Iterator for VSIterMut<'b, T>
 
 impl<T> Default for VirtualSlice<'_, T> where T: Ord + Debug {
     fn default() -> Self {
-        VirtualSlice::new()
+        VirtualSlice::new(50)
     }
 }
 impl<T> Debug for VirtualSlice<'_, T> where T : Ord + Debug {
@@ -475,7 +480,7 @@ mod test {
         let s1 = &mut [1, 3, 5, 7, 9];
         let s2 = &mut [2, 4, 6, 8, 10];
 
-        let mut vs = VirtualSlice::new();
+        let mut vs = VirtualSlice::new(s1.len()+s2.len());
         vs.attach(s1);
         vs.attach(s2);
         vs[0] = 11;
@@ -516,7 +521,7 @@ mod test {
         ];
 
         for (s1, s2, c1, c2) in test_data {
-            let mut vs = VirtualSlice::new();
+            let mut vs = VirtualSlice::new(s1.len()+s2.len());
             vs.merge(s1);
             vs.merge(s2);
             assert_eq!(s1, c1);
@@ -535,7 +540,7 @@ mod test {
         let _z = &[0, 0, 0, 0, 0, 0]; // wedge to break adjacency
         let s4 = &mut [8, 9, 15, 16];
 
-        let mut vs = VirtualSlice::new();
+        let mut vs = VirtualSlice::new(s1.len()+s2.len()+s3.len()+s4.len());
         vs.merge(s1);
         vs.merge(s2);
         vs.merge(s3);
@@ -553,7 +558,7 @@ mod test {
         let s2 = &mut [2, 4, 6, 8 , 10];
 
         {
-            let mut v = VirtualSlice::new();
+            let mut v = VirtualSlice::new(s1.len()+s2.len());
             v.attach(s1);
             v.attach(s2);
 
@@ -563,7 +568,7 @@ mod test {
                 });
         }
         {
-            let mut v = VirtualSlice::new();
+            let mut v = VirtualSlice::new(s1.len()+s2.len());
             v.attach(s1);
             v.attach(s2);
             v[0] = 11;
@@ -572,7 +577,7 @@ mod test {
         assert_eq!(s1, &mut [11, 12, 12, 12, 12]);
         assert_eq!(s2, &mut [9, 12, 12, 12, 12]);
         {
-            let mut v = VirtualSlice::new();
+            let mut v = VirtualSlice::new(s1.len()+s2.len());
             v.attach(s1);
             v.attach(s2);
             v.swap(0, 5);

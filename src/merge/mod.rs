@@ -113,7 +113,7 @@ impl<T> Merge<T> for [T]
     /// assert_eq!(s2, &[1,2,3,4]);
     /// ```
     fn merge_lazy<'a>(&'a mut self, s: &'a mut [T]) -> (usize, VirtualSlice<T>) {
-        let mut vs = VirtualSlice::new();
+        let mut vs = VirtualSlice::new(self.len()+s.len());
         vs.attach(self);
         (vs.merge_lazy(s), vs)
     }
@@ -160,7 +160,7 @@ impl<T> Merge<T> for [T]
     /// assert_eq!(s2, &[4,5,6,7]);
     /// ```
     fn merge_mut(&mut self, s:&mut[T]) -> usize {
-        let mut ws = VirtualSlice::new();
+        let mut ws = VirtualSlice::new(self.len()+s.len());
         ws.attach(self);
         ws.merge(s)
     }

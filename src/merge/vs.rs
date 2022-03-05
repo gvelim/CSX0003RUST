@@ -349,8 +349,8 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
             match self {
                 // syntactic overkill as rust will automatically dereference the chain of references
                 // but it feels good to be explicit!!
-                NonAdjacent(vv) => &(**vv.get_unchecked(index)),
-                Adjacent(s) => &*s.get_unchecked(index),
+                NonAdjacent(vv) => &(*vv.as_ptr().add(index)),
+                Adjacent(s) => &*s.as_ptr().add(index),
             }
         }
     }
@@ -363,8 +363,8 @@ impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
         // but it feels good to be explicit!!
         unsafe {
             match self {
-                NonAdjacent(vv) => &mut (**vv.get_unchecked_mut(index)),
-                Adjacent(s) => &mut *s.get_unchecked_mut(index),
+                NonAdjacent(vv) => *vv.as_mut_ptr().add(index) as &mut T,
+                Adjacent(s) => &mut *s.as_mut_ptr().add(index) as &mut T,
             }
         }
     }

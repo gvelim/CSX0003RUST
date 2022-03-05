@@ -181,7 +181,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl : Vec::<usize> = (0..ws_len).collect();
+        let mut idx_rfl: Vec<usize> = (0..ws_len).collect();
 
         //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 

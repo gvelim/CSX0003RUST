@@ -53,23 +53,16 @@ impl<I> Iterator for MergeIterator<I>
     /// tuple = ( inversions at position, value at position)
     fn next(&mut self) -> Option<Self::Item> {
         match (self.left.peek(), self.right.peek()) {
-            // left & right parts remain within their bounds
-            (Some(l), Some(r)) => {
-                match l.cmp(r) {
-                    // left is smaller hence move to output
-                    // there are no inversions to count
-                    // keep count of current position
-                    Ordering::Less | Ordering::Equal=> {
-                        self.left_count += 1;
-                        Some((0, self.left.next().unwrap()))
-                    },
-                    // right is smaller hence move to output
-                    // inversions are equal to left items remain to iterate over
-                    Ordering::Greater => {
-                        let inv = self.left_len - self.left_count;
-                        Some( (inv as usize, self.right.next().unwrap()) )
-                    },
-                }
+            // slices within bounds; right > left
+            (Some(l),
+                Some(r)) if l.cmp(r) == Ordering::Greater => {
+                    let inv = self.left_len - self.left_count;
+                    Some( (inv as usize, self.right.next().unwrap()) )
+                },
+            // slices within bounds; right <= left
+            (Some(_), Some(_)) => {
+                self.left_count += 1;
+                Some((0, self.left.next().unwrap()))
             },
             // right part out of bounds, hence move left item to output
             (Some(_), None) => {

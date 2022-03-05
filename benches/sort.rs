@@ -11,7 +11,7 @@ use csx3::{
     merge::Merge};
 use test::Bencher;
 
-const LENGTH:usize = 5000;
+const LENGTH:usize = 50000;
 
 #[bench]
 fn bench_mergesort_mut_adjacent(b: &mut Bencher) {

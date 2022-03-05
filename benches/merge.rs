@@ -5,7 +5,7 @@ use csx3::random_sequence;
 use csx3::merge::{Merge, MergeIterator};
 use test::Bencher;
 
-const LENGTH: usize = 2500;
+const LENGTH: usize = 25000;
 
 #[bench]
 fn bench_merge_iterator(b:&mut Bencher) {

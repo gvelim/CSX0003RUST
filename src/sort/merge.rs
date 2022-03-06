@@ -160,8 +160,10 @@ mod test {
     #[test]
     fn test_mergesort_head_to_head()
     {
-        for _ in 0..127 {
-            let v1: Vec<i16> = random_sequence(512);
+        let runs = 255usize;
+        let size = random_sequence::<u8, Vec::<u8>>(runs);
+        for i in 0..runs {
+            let v1: Vec<i8> = random_sequence( size[i].into() );
             let mut v2 = v1.clone();
 
             let inv = v2.mergesort_mut(Merge::merge_mut_adjacent);

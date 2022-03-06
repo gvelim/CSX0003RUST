@@ -53,11 +53,9 @@ impl<T> Partition<T> for [T]
                     // We extract a ptr before entering the loop to use for swapping the item
                     // and unless we find a better way that doesn't need unsafe neither use of while or for loops
                     unsafe {
-                        std::ptr::swap::<T>(
-                            ptr.wrapping_add(i),
-                            ptr.wrapping_add(j)
-                        );
-                    } }
+                        std::ptr::swap::<T>(ptr.add(i), ptr.add(j) );
+                    }
+                }
             });
         // we found the correct order for pivot
         // hence swap v[i] with v[0]

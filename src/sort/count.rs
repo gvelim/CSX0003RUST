@@ -21,6 +21,10 @@ impl<T> CountSort for [T]
     where T: Distance<T> + Copy + Ord + Debug{
 
     fn count_sort(&mut self) {
+
+        if self.len() < 2 {
+            return;
+        }
         // find min and max elements
         // so we can construct the boundaries of the counting array
         // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
@@ -44,9 +48,10 @@ impl<T> CountSort for [T]
             .enumerate()
             .filter(|(_, x)| *x > 0)
             .for_each(|(i, x)| {
-                // reverse index offset mapping
-                // hence, output[i] = Min + i
+                // place value at `x` positions
                 iter.take(x)
+                    // translate index -> value
+                    // given value = Min + index
                     .for_each(|n| { *n = min.add_index(i ) });
             });
     }
@@ -101,8 +106,10 @@ mod test {
     #[test]
     fn test_countsort_head_to_head()
     {
-        for _i in 0..127 {
-            let mut v1: Vec<i16> = random_sequence(512);
+        let runs = 255usize;
+        let size = random_sequence::<u8, Vec::<u8>>(runs);
+        for i in 0..runs {
+            let mut v1: Vec<i8> = random_sequence( size[i].into() );
             let mut v2 = v1.clone();
 
             v2.as_mut_slice().count_sort();

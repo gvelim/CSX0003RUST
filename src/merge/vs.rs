@@ -57,6 +57,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
             Adjacent(s) => s.len(),
         }
     }
+    #[inline]
     pub fn is_empty(&self) -> bool {
         match self {
             NonAdjacent(v) => v.is_empty(),
@@ -72,6 +73,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         VSIter::new(self)
     }
     /// Attach a slice segment onto the VirtualSlice
+    #[inline]
     pub fn attach(&mut self, s: &'a mut [T]) {
         match self {
             NonAdjacent(v) => {
@@ -181,7 +183,8 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl: Vec<usize> = (0..ws_len).collect();
+        let mut idx_rfl: Vec<usize> = Vec::with_capacity(0);
+        idx_rfl.extend(0usize..ws_len);
 
         //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 
@@ -344,6 +347,7 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
     type Output = T;
 
     /// Index implementation so that VirtualSlice[x] will return a &T to the underlying slice segment
+   #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         unsafe {
             match self {
@@ -358,6 +362,7 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
 impl<T> IndexMut<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
 
     /// Index implementation so that VirtualSlice[x] will return a &mut T to the underlying slice segment
+    #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // syntactic overkill as rust will automatically dereference the chain of references
         // but it feels good to be explicit!!

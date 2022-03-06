@@ -42,7 +42,7 @@ fn main() {
     println!("3rd order stat= {:?}", arr.r_selection(3));
 
     println!("MergeSort Immut: {:?}", v.mergesort());
-    println!("MergeSort Mut  : ({}, {:?})", v.mergesort_mut(Merge::merge_mut), v);
+    println!("MergeSort Mut  : ({}, {:?})", v.mergesort_mut(Merge::merge_mut_adjacent), v);
     v.quick_sort();
     println!("Quick Sort     : {:?}", v);
 

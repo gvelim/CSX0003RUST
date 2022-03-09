@@ -138,7 +138,7 @@ Left Array       Right Array
 +----+----+----+----+----+----+  i.e. &2 = pointer/reference to left array[0]
  p/c             j
 ```
-The VirtualSlice enables transparent operation over the array fragments, hence enable us to retain index consistency, we still need to tackle eliminating the costly rotations. For more detail go to the [internals and sequential access section](merge_sequencial_access.md) 
+The VirtualSlice enables transparent operation over the array fragments, hence enable us to retain index consistency, we still need to tackle eliminating the costly rotations. For more detail go to the [internals and sequential access section](merge_sequencial_access.md)
 
 ## Index Reflector - from absolute to derived indexing
 We know that `[c]` and `[p]` indexes are getting mixed up, as right swaps tend to move `[c]` non-sequentially causing left merge to go **_out-of-order_**.
@@ -162,7 +162,7 @@ Left Array       Right Array
  p/c'        |   j'    |    |
          ... | ...     |    |
 +----+----+----+----+----+----+
-| 1  | 2  | 3  | 4  | 5  | 6  |  Index Reflector captures VirtualSlice's elements latest  positions against their starting position
+| 1  | 2  | 3  | 4  | 5  | 6  |  Index Reflector captures VirtualSlice's elements latest positions against their starting position
 +----+----+----+----+----+----+  i.e. if IndexReflector[3] == 4, it would imply that VirtualSlice[4] was in the 3rd position
  p'/c            j               [p'] = x, such that Index Reflector[x] == p, where x E {c..j} 
                                  i.e. if p == 3 given IndexReflector[x] == 3, then p' == 5 if IndexReflector[5] == 3
@@ -230,7 +230,7 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 4. Always `[j'] == [j]`
 
 ## Scaling up performance
-It is important that for each iteration, we translate `p` **current position** onto the `p'` position and its resulting non-sequential movement. Therefore, to find `p'` and for less than 500 elements, we can map `p -> p'` by searching serially within the `[c .. left_array.len()]` range; use of 3rd property. However, this approach has an `O(n^2)` time complexity as the datasets grow larger, as it renders the serial search approach into a nested loop. Eliminating such loop will retain the linearity of the algorithm. 
+It is important that for each iteration, we translate `p` **current position** onto the `p'` position with its resulting non-sequential movement. Therefore, to find `p'` and for less than 500 elements, we can map `p -> p'` by searching serially within the `[c .. left_array.len()]` range; use of 3rd property. However, this approach has an `O(n^2)` time complexity as the datasets grow larger, as it renders the serial search approach into a nested loop. Eliminating such loop will retain the linearity of the algorithm.
 
 Given that `p'` position is derived somehow always in relation to `c` and `p`, can we **pre-calculate `p'` movement ahead of time** rather calculating for current `p` ?
 
@@ -253,7 +253,7 @@ Left Arr      Rght Arr       VirtualSlice                     Index Reflector   
 ```
 Very interesting! `index_reflector[p]` gives us the position of `p'` !
 
-For example in the last iteration, when `p = 5`, `index_reflector[5] = 2` therefore `p' = index_reflector[2]`. This also explains the workings of property No 3 where `p'` is constrained within the `[c..left_array.len()]` range.
+For example in the last iteration, when `p = 5`, `index_reflector[5] = 2 = p'` therefore `p' == index_reflector[2]`. This also explains the workings of property No 3 where `p'` is constrained within the `[c..left_array.len()]` range.
 
 Let's carry on this example to the end and watch closely...
 ```
@@ -273,7 +273,7 @@ Hold on! Where did this `index_reflector[c]=[p]` come from?
 Et Voilà! This is the trick that predicts `p'` position at certain values of `p`. So here is what happens per above iteration:
 1. Complete left swap action & store future index `p'`, that is, with `[c] = 7`,`p = 5` and `[p] = 2` we say that when `p == (7 = [c])` then `p'` should be found at position `2 == [p]`
 2. Complete left swap action & store future index `p'`, that is, with `[c] = 7`,`p = 6` and `[p] = 3` we say that when `p == (7 = [c])` then `p'` should be found at position `3 == [p]`
-3. We finished! 
+3. We finished!
 
 For completeness, when a right action occurs (`j` and `p` swap) similarly we need to ensure `index_reflector[j] = [i]`.
 

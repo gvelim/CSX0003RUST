@@ -229,11 +229,62 @@ Phase 2 is now complete. **As if by magic** everything is now in position and or
 3. `[p']` index is bound by `[c .. left array.len]` range
 4. Always `[j'] == [j]`
 
-## Optimisations & other uses
-1. Given the non-sequential movement of `p'` and for less than 500 elements we can map `p -> p'` by searching serially within the `[c .. left_array.len()]` range. However, this approach and under larger sets, has O(n^2) performance hence an alternative is to forward pre-calculate `p'` during each swap. This eliminates the nested search loop which results to 10x increase of performance (current implementation)
-2. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirementsfrom 2(n+m) to (2n+m) in case of mergesort
-3. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes O(n) * sizeof(usize)
-4. Given the 1st property we can
+## Scaling up performance
+It is important that for each iteration, we translate `p` **current position** onto the `p'` position and its resulting non-sequential movement. Therefore, to find `p'` and for less than 500 elements, we can map `p -> p'` by searching serially within the `[c .. left_array.len()]` range; use of 3rd property. However, this approach has an `O(n^2)` time complexity as the datasets grow larger, as it renders the serial search approach into a nested loop. Eliminating such loop will retain the linearity of the algorithm. 
+
+Given that `p'` position is derived somehow always in relation to `c` and `p`, can we **pre-calculate `p'` movement ahead of time** rather calculating for current `p` ?
+
+Let's use out last example and add `p` also on the index reflector and see how this plays out
+```
+Phase 1: Merge the two arrays until a comparison index goes out of bounds 
+
+Left Arr      Rght Arr       VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                             c'/p          j'                c/p'/p         j                  [c'] > [j']
+[ 5, 6, 7] <> [ 1, 2, 3, 4]  [(5 , 6 , 7),(1 , 2 , 3 , 4)]    [(1 , 2 , 3),(4 , 5 , 6 , 7)]      5      1     swap(j', p), swap(j, p'), incr(p,j)
+                                   p       c'  j'               c  p/p'         j                             
+[ 1, 6, 7] <> [ 5, 2, 3, 4]  [ 1 ,(6 , 7 , 5),(2 , 3 , 4)]    [(4 , 2 , 3),(1 , 5 , 6 , 7)]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+                                       p   c'      j'           c      p/p'         j                             
+[ 1, 2, 7] <> [ 5, 6, 3, 4]  [ 1 , 2 ,(7 , 5 , 6),(3 , 4)]    [(4 , 5 , 3),(1 , 2 , 6 , 7)]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+                                          c'/p         j'      c/p'         p           j                             
+[ 1, 2, 3] <> [ 5, 6, 7, 4]  [ 1 , 2 , 3 ,(5 , 6 , 7),(4)]    [(4 , 5 , 6),(1 , 2 , 3 , 7)]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+                                               p       c'  j'   c   p'          p           j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     <-- j'/j got out of bounds ! Phase 1 completed
+```
+Very interesting! `index_reflector[p]` gives us the position of `p'` !
+
+For example in the last iteration, when `p = 5`, `index_reflector[5] = 2` therefore `p' = index_reflector[2]`. This also explains the workings of property No 3 where `p'` is constrained within the `[c..left_array.len()]` range.
+
+Let's carry on this example to the end and watch closely...
+```
+Phase 2: Finishing off the remainder unmerged partition
+
+Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                                               p       c'  j'   c   p'          p           j                             
+[ 1, 2, 3] <> [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 2)]      x      x     swap(c', p), swap(c, p'), ** index_reflector[c]=[p] ** incr(i,c)
+                                                   p   c'  j'       c   p'          p       j                             
+[ 1, 2, 3] <> [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 3)]      x      x     swap(c', p), swap(c, p'), ** index_reflector[c]=[p] ** incr(i,c)
+                                                     c'/p  j'          c/p'             p   j                             
+[ 1, 2, 3] <> [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 3)]      x      x     <-- We finished ! c' and p are both on the last position
+```
+Hold on! Where did this `index_reflector[c]=[p]` come from?
+
+Et Voilà! This is the trick that predicts `p'` position at certain values of `p`. So here is what happens per above iteration:
+1. Complete left swap action & store future index `p'`, that is, with `[c] = 7`,`p = 5` and `[p] = 2` we say that when `p == (7 = [c])` then `p'` should be found at position `2 == [p]`
+2. Complete left swap action & store future index `p'`, that is, with `[c] = 7`,`p = 6` and `[p] = 3` we say that when `p == (7 = [c])` then `p'` should be found at position `3 == [p]`
+3. We finished! 
+
+For completeness, when a right action occurs (`j` and `p` swap) similarly we need to ensure `index_reflector[j] = [i]`.
+
+With this pre-calculation trick we are now able to eliminate the hidden loop which results in up to 10x increase in performance and keeps the algorithm linear.
+
+Reusing the `index_reflector` for this optimisation has rendered property No 1 invalid. If we need to retain property No 1 a separate `index_reflector` for `p`/`p'` will be required.
+
+## Further optimisations & other uses
+1. Given the 4th property we can reduce the Index Reflector to `left_array.len()` reducing the memory requirements from 2(n+m) to (2n+m) in case of mergesort
+2. In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes O(n) * sizeof(usize)
+3. Given the 1st property and with a separate index reflector for `p'` optimisation, we can
    1. Develop a "sort mask array" through which we can access the source array segments in order and without the need of permanently mutating them
       1. [VirtualSlice::merge_shallow](./merge_lazy.md)
    2. Such "sort mask" can be imposed or "played onto" the source segments hence mutating them only when is needed

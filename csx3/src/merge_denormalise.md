@@ -14,10 +14,10 @@ Remember that we make use of a `pivot` point where
 A common approach will be ... 
 ```rust
 // Phase 1 : Exit Conditions
-// left_index == total_length => right part has been exhausted
+// right_index == total_length => right part has been exhausted
 // pivot == left_index => everything in array[...pivot] << array[right index...], no more comparisons needed
 
-while left_index < total_length && pivot != left_index {
+while right_index < total_length && pivot != right_index {
 
     if ( array[left_index] <= array[right_index] ) {
 
@@ -37,10 +37,10 @@ while left_index < total_length && pivot != left_index {
 }
 
 // Phase 2 : Exit Conditions
-// left_index == array_length => copied/swapped over the left side
-// pivot == array_length => 
+// left_index == left_array_length => copied/swapped over the left side
+// pivot == total_length => 
 
-while left_index < array_length-1 && pivot < array_length-1 {
+while left_index < left_array_length-1 && pivot < total_length-1 {
 
     // C: swap left item with partition pivot position
     // point to the next in order left position
@@ -57,10 +57,10 @@ We can unroll the execution flow in the following table
 ```
 Conditions Definition
 =====================
-A: (left_index < total_length && pivot != left_index ) 
+A: (right_index < total_length && pivot != right_index ) 
    => Any more comparisons required ? have we run out of elements to compare ?
 
-B: (left_index < array_length-1 && pivot < array_length-1 )
+B: (left_index < left_array_length-1 && pivot < total_length-1 )
    => Have all left slice elements been processed ? Have we reached the end where i == [c] ?
    
   +------+-------+----------+------------------------------------------------
@@ -68,7 +68,7 @@ B: (left_index < array_length-1 && pivot < array_length-1 )
   +------+-------+----------+------------------------------------------------
 1 | true |  true |   l > r  | Phase 1: swap right with pivot
 2 | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
-3 | true |  true |   l < r  | Phase 1: l<=r implied; swap left with pivot
+3 | true |  true |    N/A   | Phase 1: l<=r implied; swap left with pivot
 4 |false |  true |    N/A   | Phase 2: move remaining items; swap with pivot
 5 |false | false |    N/A   | Exit: Merge completed; we have reached the end
   +------+-------+----------+------------------------------------------------
@@ -83,7 +83,7 @@ As a result we make the following observations
 * Paths (3) & (4) only differ by condition `A` while the `Guard` condition is not relevant
 * Paths (2) & (5) only differ by condition `A`
 
-So the table can be re-prioritise the table matching order and can further simplify as follows
+So we can re-prioritise the table's matching order and hence we can further simplify in the following way
 ```gitignore
   +------+-------+----------+------------------------------------------------
   |   A  |   B   | if Guard | Action
@@ -98,12 +98,12 @@ So the table can be re-prioritise the table matching order and can further simpl
   +------+-------+----------+------------------------------------------------
 ```
 
-With `match` realising a powerful matching expression mechanism we express the above table in the following way
+With `match` offering a powerful matching expression mechanism we can use it to write the above table in the following way
 
 ```rust
 loop {
-    let a = left_index < total_length && pivot != left_index;
-    let b = left_index < array_length-1 && pivot < array_length-1
+    let a = right_index < total_length && pivot != right_index;
+    let b = left_index < left_array_length-1 && pivot < total_length-1
 
     match (a, b) {
         (true, _) if array[left_index] > array[right_index] => {
@@ -123,7 +123,7 @@ loop {
 As a result of this analysis 
 * all execution paths have been understood
 * we have eliminated duplication of logic across the paths
-* have been documented in an ease to understand way
+* we have been documented the logic in an easily to understand way
 
 
 

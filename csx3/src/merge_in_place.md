@@ -275,7 +275,7 @@ Et Voilà! This is the trick that predicts `p'` position at certain values of `p
 2. Complete left swap action & store future index `p'`, that is, with `[c] = 7`,`p = 6` and `[p] = 3` we say that when `p == (7 = [c])` then `p'` should be found at position `3 == [p]`
 3. We finished!
 
-For completeness, when a right action occurs (`j` and `p` swap) similarly we need to ensure `index_reflector[j] = [i]`.
+For completeness, when a right action occurs (`j` and `p` swap) similarly we need to ensure `index_reflector[j] = [p]` which is what the swap action does.
 
 With this pre-calculation trick we are now able to eliminate the hidden loop which results in up to 10x increase in performance and keeps the algorithm linear.
 

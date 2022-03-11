@@ -173,21 +173,24 @@ fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
     let mut cc;
     let mut ii;
 
-    while j < ws.len() && j != i {
-
+    loop {
         cc = idx_rfl[c];
         ii = idx_rfl[i];
-
-        if ws[cc].cmp( &ws[j]) == Ordering::Greater {
-            ws.swap(i,j);
-            idx_rfl.swap(i,j );
-            j += 1;
-        } else {
-            ws.swap(i, cc);
-            idx_rfl.swap(ii, c);
-            idx_rfl[cc] = i;
-            c += 1;
-        }
+        match (j < ws.len() && j != i, i < ws.len()-1 && c < p-1) {
+            (true, _) if ws[cc].cmp(&ws[j]) == Ordering::Greater => {
+                ws.swap(i, j);
+                idx_rfl[i] = j;
+                idx_rfl[j] = ii;
+                j += 1;
+            },
+            (_, true) => {
+                ws.swap(i, cc);
+                idx_rfl[cc] = ii;
+                idx_rfl.swap(ii, c);
+                c += 1;
+            },
+            (_,_) => break,
+        };
         i += 1;
         println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
     }

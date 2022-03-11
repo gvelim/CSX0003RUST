@@ -190,77 +190,70 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
 
         let mut cc;
         let mut ii;
-        let base : *mut usize = idx_rfl.as_mut_ptr();
-        loop {
-            // Flattening/de-normalising the workflow logic
-            // ============================================
-            // A: (i != j or j < ws_len ) => Any more comparisons required ? is everything in ws[..i] << ws[j] ?
-            // B: ( i != [c] where i < ws_len-1, c < p-1 ) => Have all left slice elements been processed ? Have we reached the end where i == [c] ?
-            // +------+-------+----------+---------------------------------------
-            // |   A  |   B   | if Guard | Action
-            // +------+-------+----------+---------------------------------------
-            // | true |  true |   l > r  | Phase 1: swap right with pivot
-            // | true |  true |    N/A   | Phase 1: l<=r implied; swap left with pivot
-            // |false |  true |    ANY   | Phase 2: finishing moving/reordering remaining items
-            // | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
-            // |false | false |    N/A   | Exit: Merge completed
-            // +------+-------+----------+---------------------------------------
-            unsafe {// translate index_reflector[c] --> vs[c']
+        let idxp: *mut usize = idx_rfl.as_mut_ptr();
+        unsafe {
+            loop {
+                // Flattening/de-normalising the workflow logic
+                // ============================================
+                // A: (i != j or j < ws_len ) => Any more comparisons required ? is everything in ws[..i] << ws[j] ?
+                // B: ( i != [c] where i < ws_len-1, c < p-1 ) => Have all left slice elements been processed ? Have we reached the end where i == [c] ?
+                // +------+-------+----------+---------------------------------------
+                // |   A  |   B   | if Guard | Action
+                // +------+-------+----------+---------------------------------------
+                // | true |  true |   l > r  | Phase 1: swap right with pivot
+                // | true |  true |    N/A   | Phase 1: l<=r implied; swap left with pivot
+                // |false |  true |    ANY   | Phase 2: finishing moving/reordering remaining items
+                // | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
+                // |false | false |    N/A   | Exit: Merge completed
+                // +------+-------+----------+---------------------------------------
+                // translate index_reflector[c] --> vs[c']
                 // where index_reflector[c] predicts position of c' in ws[] given current iteration
-                cc = *base.add(c);
+                cc = *idxp.add(c);
                 // translate index_reflector[i] --> index_reflector[i']
                 // where index_reflector[i] predicts position of i' in index_reflector[] given current iteration
-                ii = *base.add(i);
-            }
-            match (j < ws_len && i != j, i < ws_len-1 && c < p-1) {
-                (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
-                    // count the equivalent number of inversions
-                    inv_count += j - i;
+                ii = *idxp.add(i);
+                match (j < ws_len && i != j, i < ws_len-1 && c < p-1) {
+                    (true, _) if self[cc].cmp(&self[j]) == Ordering::Greater => {
+                        // count the equivalent number of inversions
+                        inv_count += j - i;
 
-                    // swap data, right slice's item in the working slice with merged partition edge ws[i]
-                    // swap( ws[i] with ws[j'] where j' = index_reflector[j], but j' == j so
-                    f_swap(self, i, j);
+                        // swap data, right slice's item in the working slice with merged partition edge ws[i]
+                        // swap( ws[i] with ws[j'] where j' = index_reflector[j], but j' == j so
+                        f_swap(self, i, j);
 
-                    unsafe {
                         // swap indexes, index_reflect[j] with index_reflector[i']
                         // since we don't use the index reflector property for superimposing just copy j over to i'
-                        base.add(ii).replace(j);
+                        idxp.add(ii).write(j);
                         // Store i' at position [j] to use when i reaches j value
                         // e.g. if j = 10, [i'] = 4, then when i becomes 10, index_reflector[10] will move i' to 4
-                        base.add(j).replace(ii);
-                    }
-                    //print!("\tr:");
-                    // point to the next in order position (right slice)
-                    j += 1;
-                },
-                (_, true) => {
-                    // condition saves cpu-cycles from zero-impact operations when i == c' (no swap)
-                    // otherwise it has no algorithmic impact
-                    if i != cc {
+                        idxp.add(j).write(ii);
+                        //print!("\tr:");
+                        // point to the next in order position (right slice)
+                        j += 1;
+                    },
+                    (_, true) => {
                         // swap left slice's item in the working slice with merged partition edge ws[i]
                         // swap( ws[i] with ws[c'] where c' = index_reflector[c]
                         f_swap(self, i, cc);
 
-                        unsafe {
                         // Store i' at position [c'] to use when i == c'
                         // for example, with c' = [c] and i' = [i]
                         // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
                         // that means when i becomes 9, the i' will have position 5
-                            base.add(cc).replace(ii);
+                        idxp.add(cc).write(ii);
                         // swap index_reflect[c] with index_reflector[i']
-                            std::ptr::swap( base.add(ii), base.add(c) );
-                        }
+                        idxp.add(ii).swap( idxp.add(c));
                         //print!("\tl:");
-                    }
-                    // point to the next in order position (left slice)
-                    c += 1;
-                },
-                (_, _) => break,
+                        // point to the next in order position (left slice)
+                        c += 1;
+                    },
+                    (_, _) => break,
+                };
+                // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
+                i += 1;
+                //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
             };
-            // Move partition by one so that [merged partition] < ws[i] < [unmerged partition]
-            i += 1;
-            //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
-        };
+        }
 
         //println!("Merge Done");
         inv_count

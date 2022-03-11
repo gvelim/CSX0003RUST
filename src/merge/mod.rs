@@ -161,53 +161,69 @@ impl<T> Merge<T> for [T]
         ws.merge(s)
     }
 }
-
-pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord+Debug {
+// ANCHOR: merge_adjacent
+/// Applies memory efficient in-place merging when two slices are adjacent to each other.
+/// ```
+/// use csx3::merge::merge_mut_fast;
+///
+/// let mut input = vec![1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
+/// let (s1,s2) = input.split_at_mut(5);
+///
+/// merge_mut_fast(s1,s2);
+/// assert_eq!(input, vec![1,2,3,4,5,6,7,8,9,10]);
+/// ```
+/// Panics in case the two slices are found not to be adjacent. For safety, always use *ONLY* against slices that have been mutable split from an existing slice
+pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord + Debug {
     let ws: &mut [T];
+
     unsafe {
         ws = from_raw_parts_mut(s1.as_mut_ptr(), s1.len() + s2.len());
+        assert!(s2[0] == ws[s1.len()]);
     }
-    let (mut i, mut c, mut j, p) = (0usize, 0usize, s1.len(), s1.len());
-    let mut idx_rfl: Vec<usize> = Vec::with_capacity(ws.len());
-    idx_rfl.extend( 0..ws.len());
+
+    let (mut p, mut c, mut j, llen, mut inversion ) = (0usize, 0usize, s1.len(), s1.len(), 0usize);
+    let mut idx_rfl: Vec<usize> = Vec::from_iter( 0..ws.len());
+    let len = idx_rfl.len();
 
     //println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
-    let mut cc;
-    let mut ii;
-    let base:*mut usize = idx_rfl.as_mut_ptr();
-    let wsp = ws.as_mut_ptr();
-    let len = idx_rfl.len();
-    let mut inv = 0usize;
+
     unsafe {
+        let idxp = idx_rfl.as_mut_ptr();
+        let wsp = ws.as_mut_ptr();
+
+        let mut cc; // c' definition
+        let mut pp; // p' definition
+
         loop {
-            cc = *base.add(c);
-            ii = *base.add(i);
-            match (j < len && j != i, i < len-1 && c < p-1) {
+            cc = *idxp.add(c);
+            pp = *idxp.add(p);
+            match (j < len && j != p, p < len-1 && c < llen -1) {
                 (true, _) if (*wsp.add(cc)).cmp(&(*wsp.add(j))) == Ordering::Greater => {
-                    inv += j - i;
-                    wsp.add(i).swap( wsp.add(j));
+                    inversion += j - p;
+                    wsp.add(p).swap( wsp.add(j));
                     //idx_rfl.swap(ii, j);
-                    base.add(ii).swap( base.add(j) );
+                    idxp.add(pp).write(j);
+                    idxp.add(j).write(pp);
                     j += 1;
                 },
                 (_, true) => {
-                    wsp.add(i).swap( wsp.add(cc));
+                    wsp.add(p).swap( wsp.add(cc));
                     //idx_rfl[cc] = ii;
-                    base.add(cc).replace(ii);
+                    idxp.add(cc).write(pp);
                     //idx_rfl.swap(ii, c);
-                    base.add(ii).swap( base.add(c));
+                    idxp.add(pp).swap( idxp.add(c));
                     c += 1;
                 },
                 (_,_) => break,
             };
-            i += 1;
+            p += 1;
             //println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
         }
     }
     //println!("Merge Done!");
-    inv
+    inversion
 }
-
+// ANCHOR_END: merge_adjacent
 #[cfg(test)]
 mod test {
     use super::*;
@@ -270,6 +286,29 @@ mod test {
             })
     }
     #[test]
+    fn test_merge_mut_adjacent_fast() {
+        let arr:[(&mut[i32],&[i32]);11] = [
+            (&mut [34, 36, 80, 127, -36, -22, -3, 109], &[-36, -22, -3, 34, 36, 80, 109, 127]),
+            (&mut [2,4,6,1,3,5], &[1,2,3,4,5,6]),
+            (&mut [1,3,5,2,4,6], &[1,2,3,4,5,6]),
+            (&mut [2,4,1,3,5], &[1,2,3,4,5]),
+            (&mut [1,3,2,4,5], &[1,2,3,4,5]),
+            (&mut [1,2,3,4,5], &[1,2,3,4,5]),
+            (&mut [2,1,4], &[1,2,4]),
+            (&mut [3,1,2], &[1,2,3]),
+            (&mut [1,2,3], &[1,2,3]),
+            (&mut [2,1], &[1,2]),
+            (&mut [1,2], &[1,2]),
+        ];
+        arr.into_iter()
+            .for_each(| (input, output) | {
+                let len = input.len();
+                let (s1, s2) = input.split_at_mut(len >> 1);
+                merge_mut_fast(s1,s2);
+                assert_eq!(input, output);
+            })
+    }
+    #[test]
     #[should_panic]
     fn test_merge_mut_panic() {
         let s1 = &mut [3, 5, 7];
@@ -300,7 +339,7 @@ mod test {
             .for_each(| (input, output) | {
                 let len = input.len();
                 let (s1, s2) = input.split_at_mut(len >> 1);
-                merge_mut_fast(s1, s2);
+                s1.merge_mut(s2);
                 assert_eq!(input, output);
             })
     }

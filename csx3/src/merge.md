@@ -11,11 +11,16 @@ The following benchmarks provide an indicative performance comparison between th
 ```
 Out of place merge function
 ===========================
-test bench_merge_iterator     ... bench:      52,403 ns/iter (+/- 1,824)
+test bench_merge_iterator          ... bench:      61,250 ns/iter (+/- 5,708)
 
 In place merge functions
 ========================
-test bench_merge_lazy         ... bench:      51,617 ns/iter (+/- 1,391)
-test bench_merge_mut          ... bench:      57,116 ns/iter (+/- 2,133)
-test bench_merge_mut_adjacent ... bench:      45,202 ns/iter (+/- 1,340)
+test bench_merge_lazy              ... bench:      80,606 ns/iter (+/- 2,367)
+test bench_merge_mut               ... bench:      68,282 ns/iter (+/- 8,597)
+test bench_merge_mut_adjacent      ... bench:      43,533 ns/iter (+/- 655)
+```
+### Implementation 
+The chapters that follow, provide a detailed explanation on how the below implementation works
+```rust,no_run,noplayground
+{{#include ../../src/merge/mod.rs:merge_adjacent}}
 ```

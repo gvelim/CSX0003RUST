@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::iter::Peekable;
 use vs::VirtualSlice;
 use std::fmt::Debug;
+use std::slice::from_raw_parts_mut;
 
 /// Takes two iterators as input with each iteration returning
 /// the next in order item out of the two, plus its inversions' count
@@ -159,6 +160,39 @@ impl<T> Merge<T> for [T]
     }
 }
 
+fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
+    let ws: &mut [T];
+    unsafe {
+        ws = from_raw_parts_mut(s1.as_mut_ptr(), s1.len() + s2.len());
+    }
+    let (mut i, mut c, mut j, p) = (0usize, 0usize, s1.len(), s1.len());
+    let mut idx_rfl: Vec<usize> = Vec::with_capacity(ws.len());
+    idx_rfl.extend( 0..ws.len());
+
+    println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
+    let mut cc;
+    let mut ii;
+
+    while j < ws.len() && j != i {
+
+        cc = idx_rfl[c];
+        ii = idx_rfl[i];
+
+        if ws[cc].cmp( &ws[j]) == Ordering::Greater {
+            ws.swap(i,j);
+            idx_rfl.swap(i,j );
+            j += 1;
+        } else {
+            ws.swap(i, cc);
+            idx_rfl.swap(ii, c);
+            idx_rfl[cc] = i;
+            c += 1;
+        }
+        i += 1;
+        println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
+    }
+    println!("Merge Done!");
+}
 
 #[cfg(test)]
 mod test {
@@ -252,7 +286,7 @@ mod test {
             .for_each(| (input, output) | {
                 let len = input.len();
                 let (s1, s2) = input.split_at_mut(len >> 1);
-                s1.merge_mut(s2);
+                merge_mut_fast(s1, s2);
                 assert_eq!(input, output);
             })
     }

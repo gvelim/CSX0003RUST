@@ -180,12 +180,13 @@ fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
 
         if ws[cc].cmp( &ws[j]) == Ordering::Greater {
             ws.swap(i,j);
-            idx_rfl.swap(i,j );
+            idx_rfl[i] = j;
+            idx_rfl[j] = ii;
             j += 1;
         } else {
             ws.swap(i, cc);
             idx_rfl.swap(ii, c);
-            idx_rfl[cc] = i;
+            idx_rfl[cc] = ii;
             c += 1;
         }
         i += 1;

@@ -179,8 +179,7 @@ fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
         match (j < ws.len() && j != i, i < ws.len()-1 && c < p-1) {
             (true, _) if ws[cc].cmp(&ws[j]) == Ordering::Greater => {
                 ws.swap(i, j);
-                idx_rfl[i] = j;
-                idx_rfl[j] = ii;
+                idx_rfl.swap(ii, j);
                 j += 1;
             },
             (_, true) => {

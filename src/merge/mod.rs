@@ -136,8 +136,10 @@ impl<T> Merge<T> for [T]
     /// s1.merge_mut_adjacent(s3); // this may not always work
     ///
     fn merge_mut_adjacent(&mut self, s:&mut[T]) -> usize {
-        let mut ws = VirtualSlice::new_adjacent(self);
-        ws.merge(s)
+        //let mut ws = VirtualSlice::new_adjacent(self);
+        //ws.merge(s)
+
+        merge_mut_fast(self, s)
     }
 
     /// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
@@ -160,7 +162,7 @@ impl<T> Merge<T> for [T]
     }
 }
 
-fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
+pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord+Debug {
     let ws: &mut [T];
     unsafe {
         ws = from_raw_parts_mut(s1.as_mut_ptr(), s1.len() + s2.len());
@@ -169,31 +171,41 @@ fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) where T: Ord+Clone+Copy+Debug {
     let mut idx_rfl: Vec<usize> = Vec::with_capacity(ws.len());
     idx_rfl.extend( 0..ws.len());
 
-    println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
+    //println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
     let mut cc;
     let mut ii;
-
-    loop {
-        cc = idx_rfl[c];
-        ii = idx_rfl[i];
-        match (j < ws.len() && j != i, i < ws.len()-1 && c < p-1) {
-            (true, _) if ws[cc].cmp(&ws[j]) == Ordering::Greater => {
-                ws.swap(i, j);
-                idx_rfl.swap(ii, j);
-                j += 1;
-            },
-            (_, true) => {
-                ws.swap(i, cc);
-                idx_rfl[cc] = ii;
-                idx_rfl.swap(ii, c);
-                c += 1;
-            },
-            (_,_) => break,
-        };
-        i += 1;
-        println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
+    let base:*mut usize = idx_rfl.as_mut_ptr();
+    let wsp = ws.as_mut_ptr();
+    let len = idx_rfl.len();
+    let mut inv = 0usize;
+    unsafe {
+        loop {
+            cc = *base.add(c);
+            ii = *base.add(i);
+            match (j < len && j != i, i < len-1 && c < p-1) {
+                (true, _) if (*wsp.add(cc)).cmp(&(*wsp.add(j))) == Ordering::Greater => {
+                    inv += j - i;
+                    wsp.add(i).swap( wsp.add(j));
+                    //idx_rfl.swap(ii, j);
+                    base.add(ii).swap( base.add(j) );
+                    j += 1;
+                },
+                (_, true) => {
+                    wsp.add(i).swap( wsp.add(cc));
+                    //idx_rfl[cc] = ii;
+                    base.add(cc).replace(ii);
+                    //idx_rfl.swap(ii, c);
+                    base.add(ii).swap( base.add(c));
+                    c += 1;
+                },
+                (_,_) => break,
+            };
+            i += 1;
+            //println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
+        }
     }
-    println!("Merge Done!");
+    //println!("Merge Done!");
+    inv
 }
 
 #[cfg(test)]

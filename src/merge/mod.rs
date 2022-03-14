@@ -182,7 +182,7 @@ pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord + Deb
     }
 
     let (mut p, mut c, mut j, llen, mut inversion ) = (0usize, 0usize, s1.len(), s1.len(), 0usize);
-    let mut idx_rfl: Vec<usize> = Vec::from_iter( 0..ws.len());
+    let mut idx_rfl: Vec<usize> = Vec::from_iter(0..ws.len());
     let len = idx_rfl.len();
 
     //println!("{ws:?}::{idx_rfl:?}, ({i},{c},{j})");
@@ -208,10 +208,9 @@ pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord + Deb
                 },
                 (_, true) => {
                     wsp.add(p).swap( wsp.add(cc));
-                    //idx_rfl[cc] = ii;
+                    //idx_rfl.swap(pp, c);
                     idxp.add(cc).write(pp);
-                    //idx_rfl.swap(ii, c);
-                    idxp.add(pp).swap( idxp.add(c));
+                    idxp.add(pp).write( cc);
                     c += 1;
                 },
                 (_,_) => break,

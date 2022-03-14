@@ -242,7 +242,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                         // that means when i becomes 9, the i' will have position 5
                         idxp.add(cc).write(ii);
                         // swap index_reflect[c] with index_reflector[i']
-                        idxp.add(ii).swap( idxp.add(c));
+                        idxp.add(ii).write(cc);
                         //print!("\tl:");
                         // point to the next in order position (left slice)
                         c += 1;
@@ -254,7 +254,6 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                 //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
             };
         }
-
         //println!("Merge Done");
         inv_count
     }

@@ -121,10 +121,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         // we cannot use vv.swap as this will simply swap the position of the pointers
         // rather where the pointers point to. Hence we use the pointers to swap the memory contents
         unsafe {
-            std::ptr::swap::<T>(
-                &mut self[a] as *mut T,
-                &mut self[b] as *mut T
-            )
+            std::ptr::swap::<T>(&mut self[a], &mut self[b] )
         }
     }
     /// Merge Self with another non-adjacent slice using in-place memory swaps
@@ -183,8 +180,7 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
         // Memory Optimisation: we could build the index reflector of size [ 0 .. size of left slice] since the following properties apply
         // - c & i' will never exceed size of left slice
         // - j == j' always be the same position
-        let mut idx_rfl: Vec<usize> = Vec::with_capacity(0);
-        idx_rfl.extend(0usize..ws_len);
+        let mut idx_rfl: Vec<usize> = Vec::from_iter(0usize..ws_len);
 
         //println!("Merge:{self:?} :: {idx_rfl:?} (i:{i},j:{j},c:{c})");
 
@@ -232,19 +228,21 @@ impl<'a, T> VirtualSlice<'a, T> where T: Ord + Debug {
                         j += 1;
                     },
                     (_, true) => {
-                        // swap left slice's item in the working slice with merged partition edge ws[i]
-                        // swap( ws[i] with ws[c'] where c' = index_reflector[c]
-                        f_swap(self, i, cc);
+                        if cc != ii {
+                            // swap left slice's item in the working slice with merged partition edge ws[i]
+                            // swap( ws[i] with ws[c'] where c' = index_reflector[c]
+                            f_swap(self, i, cc);
 
-                        // Store i' at position [c'] to use when i == c'
-                        // for example, with c' = [c] and i' = [i]
-                        // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
-                        // that means when i becomes 9, the i' will have position 5
-                        idxp.add(cc).write(ii);
-                        // swap index_reflect[c] with index_reflector[i']
-                        idxp.add(ii).write(cc);
-                        //print!("\tl:");
-                        // point to the next in order position (left slice)
+                            // Store i' at position [c'] to use when i == c'
+                            // for example, with c' = [c] and i' = [i]
+                            // given [c=2]=9, [i=5]=2, then we store at idx_rfl[9] the value 5 as i is at position 5
+                            // that means when i becomes 9, the i' will have position 5
+                            idxp.add(cc).write(ii);
+                            // swap index_reflect[c] with index_reflector[i']
+                            idxp.add(ii).write(cc);
+                            //print!("\tl:");
+                            // point to the next in order position (left slice)
+                        }
                         c += 1;
                     },
                     (_, _) => break,

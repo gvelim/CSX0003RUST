@@ -136,10 +136,10 @@ impl<T> Merge<T> for [T]
     /// s1.merge_mut_adjacent(s3); // this may not always work
     ///
     fn merge_mut_adjacent(&mut self, s:&mut[T]) -> usize {
-        //let mut ws = VirtualSlice::new_adjacent(self);
-        //ws.merge(s)
+        let mut ws = VirtualSlice::new_adjacent(self);
+        ws.merge(s)
 
-        merge_mut_fast(self, s)
+        //merge_mut_fast(self, s)
     }
 
     /// Merge two non-adjacent slices using in-place memory swaps and without use of rotations
@@ -207,10 +207,10 @@ pub fn merge_mut_fast<T>(s1: &mut [T], s2: &mut [T]) -> usize where T: Ord + Deb
                     j += 1;
                 },
                 (_, true) => {
-                    wsp.add(p).swap( wsp.add(cc));
+                    wsp.add(p).swap(wsp.add(cc));
                     //idx_rfl.swap(pp, c);
                     idxp.add(cc).write(pp);
-                    idxp.add(pp).write( cc);
+                    idxp.add(pp).write(cc);
                     c += 1;
                 },
                 (_,_) => break,

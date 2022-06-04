@@ -1,3 +1,5 @@
+extern crate core;
+
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 
@@ -10,6 +12,8 @@ pub mod select;
 pub mod linkedlists;
 /// utility objects used across libraries like 'VirtualSlice'
 pub mod merge;
+
+pub mod graphs;
 
 /// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait
 ///```

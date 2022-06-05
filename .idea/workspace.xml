@@ -4,11 +4,9 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="idea files">
-      <change afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/graphs/mod.rs" afterDir="false" />
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,7 +199,21 @@
       <option name="project" value="LOCAL" />
       <updated>1651749433171</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="graph min-cut WIP">
+      <created>1654343012240</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1654343012240</updated>
+    </task>
+    <task id="LOCAL-00003" summary="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
+      <created>1654433003431</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1654433003431</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -217,7 +229,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="idea files" />
-    <option name="LAST_COMMIT_MESSAGE" value="idea files" />
+    <MESSAGE value="graph min-cut WIP" />
+    <MESSAGE value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
+    <option name="LAST_COMMIT_MESSAGE" value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

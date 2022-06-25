@@ -213,7 +213,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654433003431</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
+      <created>1654464135723</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1654464135723</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

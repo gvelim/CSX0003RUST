@@ -20,6 +20,7 @@ impl Debug for Edge {
             .finish()
     }
 }
+/*
 impl Edge {
     fn starts_at(&self, e: &Self) -> bool {
         self.0 == e.1
@@ -37,6 +38,7 @@ impl Edge {
     fn end(&mut self, e: &Self) { self.1 = e.0; }
     fn reverse(&self) -> Edge { Edge(self.1, self.0) }
 }
+ */
 
 trait MinimumCut {
     fn min_cuts(&self) -> Option<Graph>;
@@ -54,7 +56,7 @@ impl MinimumCut for Graph {
         let mut super_edges = HashSet::<Edge>::new();
 
         // extract edges and nodes for constructing the supersets
-        let Graph { edges, nodes} = self;
+        let Graph { edges, nodes:_ } = self;
 
         // initialise super node & super edge
         edges.iter()
@@ -95,7 +97,7 @@ impl MinimumCut for Graph {
             super_edges.remove(&Edge(dst,src));
 
             // find all bad edges; the ones affected
-            let mut bad_edges = super_edges.iter()
+            let bad_edges = super_edges.iter()
                 // remove the reference
                 .copied()
                 // filter out those not affected
@@ -120,6 +122,7 @@ impl MinimumCut for Graph {
             println!("Super Edges: {:?}",super_edges);
         }
 
+
         None
     }
 }
@@ -134,7 +137,7 @@ mod test {
 /*
             expected result: 2
             cuts are [(1,7), (4,5)]
-
+*/
         let adj_list: [Vec<Node>;8] = [
             vec![1, 2, 3, 4, 7],
             vec![2, 1, 3, 4],
@@ -145,7 +148,7 @@ mod test {
             vec![7, 1, 5, 6, 8],
             vec![8, 5, 6, 7]
         ];
-
+/*
         let adj_list: [Vec<Node>;8] = [
             vec![1, 2, 4, 3],
             vec![2, 3, 1, 4, 5],
@@ -156,14 +159,14 @@ mod test {
             vec![7, 8, 6, 5],
             vec![8, 5, 3, 7, 6]
         ];
-*/
+
         let adj_list: [Vec<Node>;4] = [
             vec![1, 2, 4],
             vec![2, 3, 1, 4],
             vec![3, 4, 2],
             vec![4, 1, 3, 2]
         ];
-
+*/
         let g = Graph::import_edges( &adj_list ).expect("Error: Couldn't load edges");
         println!("{:?}",g.min_cuts());
     }

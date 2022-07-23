@@ -1,6 +1,43 @@
 use rand::{Rng, thread_rng};
 use super::*;
 
+#[derive(Clone,Copy,Hash)]
+struct Edge(Node,Node);
+impl PartialEq for Edge {
+    fn eq(&self, other: &Self) -> bool {
+        (self.0 == other.0 && self.1 == other.1) || (self.0 == other.1 && self.1 == other.0)
+    }
+    fn ne(&self, other: &Self) -> bool {
+        !self.eq(other)
+    }
+}
+impl Eq for Edge {}
+impl Debug for Edge {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("E")
+            .field(&self.0)
+            .field(&self.1)
+            .finish()
+    }
+}
+impl Edge {
+    fn starts_at(&self, e: &Self) -> bool {
+        self.0 == e.1
+    }
+    fn ends_at(&self, e: &Self) -> bool {
+        self.1 == e.0
+    }
+    fn is_adjacent(&self, other:&Self) -> bool {
+        (self.0 == other.0 || self.0 == other.1) || (self.1 == other.0 || self.1 == other.1)
+    }
+    fn is_loop(&self) -> bool {
+        self.0 == self.1
+    }
+    fn start(&mut self, e: &Self) { self.0 = e.1; }
+    fn end(&mut self, e: &Self) { self.1 = e.0; }
+    fn reverse(&self) -> Edge { Edge(self.1, self.0) }
+}
+
 trait MinimumCut {
     fn min_cuts(&self) -> Option<Graph>;
 }
@@ -11,55 +48,79 @@ impl MinimumCut for Graph {
         if self.edges.is_empty() {
             return None;
         }
-        let Graph { mut edges, mut nodes } = self.clone();
 
-        while nodes.len() > 2 {
-            // pick at random src node out of the nodes remaining
-            let s_node = thread_rng().gen_range(1..edges.len()) as Node;
+        // define super node and super edge structures
+        let mut super_nodes = HashMap::<Node,HashSet<Node>>::new();
+        let mut super_edges = HashSet::<Edge>::new();
 
-            // pick dst node out of the first edge in the adjacent list
-            // edge (src, dst)
-            let d_node = edges.get(&s_node).unwrap().clone().iter().nth(0).copied().unwrap();
-            println!("Edge({s_node},{d_node})");
+        // extract edges and nodes for constructing the supersets
+        let Graph { edges, nodes} = self;
 
-            // collect all incoming edges to src node
-            // remove src node from the adjacent list
-            let s_edges = edges.remove(&s_node).unwrap();
-            // collect all incoming edges ro dst node
-            // remove dst node from the adjacent list
-            let d_edges = edges.remove(&d_node).unwrap();
-            
-            // Collapsing src and dst into a new node
-            // the new node owns the collection of edges 
-            let mut col_edges: HashSet<Node> = s_edges.union(&d_edges).copied().collect();
+        // initialise super node & super edge
+        edges.iter()
+            .for_each(|(src, dests)| {
+                super_nodes
+                    .entry(*src)
+                    .or_insert( HashSet::new() )
+                    .insert(*src);
 
-            // clear edge collection from loops
-            col_edges.remove(&s_node);
-            col_edges.remove(&d_node);
+                dests.iter()
+                    .for_each(|dst| {
+                        super_edges.insert( Edge(*src,*dst));
+                    })
+            });
 
-            print!("src: {:?}->{:?} ", s_node, s_edges);
-            print!("dst: {:?}->{:?} ", d_node, d_edges);
-            println!("col->{:?}",col_edges);
+        println!("Super Nodes: {:?}",super_nodes);
+        println!("Super Edges: {:?}",super_edges);
 
-            // scan the remaining graph and remove edges with reference to src and dst nodes
-            // for each node, remove edges refer to dst and src nodes
-            // since we don't create a new node out of src and dst
-            // we keep src as the new and remove dst only
-            edges.iter_mut()
-                .for_each(| (_, edges)| {
-                    edges.remove(&d_node);
+        while super_nodes.len() > 2 {
+            // select a random edge
+            let len = super_edges.len();
+            let idx = thread_rng().gen_range(0..len-1);
+            println!("index: {idx}");
+            let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
+            let edge = Edge(src,dst);
+            println!("Random Edge: {:?}",Edge(src,dst) );
+
+            // merge nodes forming the random edge
+            let super_src = super_nodes.remove(&src).unwrap();
+            let super_dst = super_nodes.remove(&dst).unwrap();
+            let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
+
+            // adjust edges and collapse loops
+                // remove the obvious loops
+            super_edges.remove(&Edge(src,dst));
+            super_edges.remove(&Edge(dst,src));
+
+            println!("Merged super node: {src}->{:?}", super_node);
+            super_nodes.entry(src).or_insert(super_node);
+
+            // find all bad edges; the ones affected
+            let mut bad_edges:HashSet<Edge> = HashSet::new();
+            super_edges.iter()
+                .copied()
+                .for_each(|e| {
+                    if e.0 == dst || e.1 == dst {
+                        bad_edges.insert(e);
+                    }
                 });
+            // remove, fix and reinsert edges
+            for mut e in bad_edges {
+                if e.0 != dst && e.1 != dst { continue }
+                // remove the bad edge
+                print!("Remove:{:?}={} -- ",e,super_edges.remove(&e));
+                // fix the edge
+                if e.0 == dst { e.0 = src }
+                if e.1 == dst { e.1 = src }
+                // insert back the fixed edge
+                println!("Insert:{:?}={}",e,super_edges.insert(e));
+            }
 
-            // remove dst node; already removed from adjacent list
-            nodes.remove(&d_node);
-            
-            // add src back, however as the new node with merged edges 
-            edges.entry(s_node).or_insert(col_edges);
-            println!("Round Finish: \nEdges:{:?}\nNodes:{:?}\n",edges, nodes);
-
+            println!("Round done\n=======");
+            println!("Super Nodes: {:?}",super_nodes);
+            println!("Super Edges: {:?}",super_edges);
         }
-
-        Some( Graph{edges, nodes} )
+        None
     }
 }
 
@@ -73,6 +134,7 @@ mod test {
 /*
             expected result: 2
             cuts are [(1,7), (4,5)]
+
         let adj_list: [Vec<Node>;8] = [
             vec![1, 2, 3, 4, 7],
             vec![2, 1, 3, 4],
@@ -83,6 +145,7 @@ mod test {
             vec![7, 1, 5, 6, 8],
             vec![8, 5, 6, 7]
         ];
+
         let adj_list: [Vec<Node>;8] = [
             vec![1, 2, 4, 3],
             vec![2, 3, 1, 4, 5],

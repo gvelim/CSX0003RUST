@@ -101,7 +101,7 @@ impl MinimumCut for Graph {
                 // remove the reference
                 .copied()
                 // filter out those not affected
-                .filter_map(|e| if e.0 == dst || e.1 == dst { Some(e) } else { None } )
+                .filter(|e| if e.0 == dst || e.1 == dst { true } else { false } )
                 // collect any remaining
                 .collect::<HashSet<Edge>>();
 

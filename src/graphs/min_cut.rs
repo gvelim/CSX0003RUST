@@ -77,37 +77,36 @@ impl MinimumCut for Graph {
             // select a random edge
             let len = super_edges.len();
             let idx = thread_rng().gen_range(0..len-1);
-            println!("index: {idx}");
+            // get a copy rather a reference so we don't upset the borrow checker
             let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
-            let edge = Edge(src,dst);
-            println!("Random Edge: {:?}",Edge(src,dst) );
+            println!("Random Edge: ({src},{dst})");
 
-            // merge nodes forming the random edge
+            // remove nodes forming the random edge
             let super_src = super_nodes.remove(&src).unwrap();
             let super_dst = super_nodes.remove(&dst).unwrap();
+            // combine the nodes into a new super-node
+            // in this case we use the src we've just removed as the new super node
             let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
-
-            // adjust edges and collapse loops
-                // remove the obvious loops
-            super_edges.remove(&Edge(src,dst));
-            super_edges.remove(&Edge(dst,src));
-
             println!("Merged super node: {src}->{:?}", super_node);
             super_nodes.entry(src).or_insert(super_node);
 
+            // collapse / remove the obvious edge loops
+            super_edges.remove(&Edge(src,dst));
+            super_edges.remove(&Edge(dst,src));
+
             // find all bad edges; the ones affected
-            let mut bad_edges:HashSet<Edge> = HashSet::new();
-            super_edges.iter()
+            let mut bad_edges = super_edges.iter()
+                // remove the reference
                 .copied()
-                .for_each(|e| {
-                    if e.0 == dst || e.1 == dst {
-                        bad_edges.insert(e);
-                    }
-                });
-            // remove, fix and reinsert edges
+                // filter out those not affected
+                .filter_map(|e| if e.0 == dst || e.1 == dst { Some(e) } else { None } )
+                // collect any remaining
+                .collect::<HashSet<Edge>>();
+
+            // now just remove, fix and reinsert edges
             for mut e in bad_edges {
-                if e.0 != dst && e.1 != dst { continue }
-                // remove the bad edge
+                // we have only bad edges here hence this code does not have to deal with good edges
+                // hence go and remove the bad edge
                 print!("Remove:{:?}={} -- ",e,super_edges.remove(&e));
                 // fix the edge
                 if e.0 == dst { e.0 = src }
@@ -120,6 +119,7 @@ impl MinimumCut for Graph {
             println!("Super Nodes: {:?}",super_nodes);
             println!("Super Edges: {:?}",super_edges);
         }
+
         None
     }
 }

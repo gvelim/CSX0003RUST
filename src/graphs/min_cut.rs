@@ -1,6 +1,7 @@
+use super::*;
 use std::collections::{HashMap, HashSet};
 use rand::{Rng, thread_rng};
-use super::*;
+use hashbag::*;
 
 
 trait MinimumCut {
@@ -16,7 +17,7 @@ impl MinimumCut for Graph {
         }
 
         // define super node and super edge structures
-        let mut super_edges = self.export_edges();
+        let mut super_edges = self.export_edges().into_iter().collect::<HashBag<Edge>>();
         let mut super_nodes = self.nodes.iter()
             .fold( HashMap::<Node,HashSet<Node>>::new(), |mut super_nodes, node| {
                 super_nodes
@@ -38,20 +39,21 @@ impl MinimumCut for Graph {
             let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
             println!("Random Edge: ({src},{dst})");
 
-            // remove nodes forming the random edge
+            // remove both nodes that form the random edge and
+            // hold onto the incoming/outgoing edges
             let super_src = super_nodes.remove(&src).unwrap();
             let super_dst = super_nodes.remove(&dst).unwrap();
-            // combine the nodes into a new super-node
-            // in this case we use the src we've just removed as the new super node
+            // combine the incoming/outgoing edges for attaching onto the new super-node
             let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
             println!("Merged super node: {src}->{:?}", super_node);
+            // re-insert the src node as the new super-node and attach the resulting union
             super_nodes.entry(src).or_insert(super_node);
 
             // collapse / remove the obvious edge loops
-            super_edges.remove(&Edge(src,dst));
-            super_edges.remove(&Edge(dst,src));
+            while super_edges.remove(&Edge(src,dst)) != 0 { };
+            while super_edges.remove(&Edge(dst,src)) != 0 { };
 
-            // find all bad edges; the ones affected
+            // find all bad/invalid edges; the ones affected
             let bad_edges = super_edges.iter()
                 // remove the reference
                 .copied()
@@ -64,12 +66,16 @@ impl MinimumCut for Graph {
             for mut e in bad_edges {
                 // we have only bad edges here hence this code does not have to deal with good edges
                 // hence go and remove the bad edge
-                print!("Remove:{:?}={} -- ",e,super_edges.remove(&e));
+                print!("Remove:");
+                let mut count = 0;
+                while super_edges.remove(&e) != 0 { count += 1; print!("{:?}:{count},",e); }
                 // fix the edge
                 if e.0 == dst { e.0 = src }
                 if e.1 == dst { e.1 = src }
                 // insert back the fixed edge
-                println!("Insert:{:?}={}",e,super_edges.insert(e));
+                print!(" >> Insert:");
+                while count != 0 { print!("{:?}:{count},",e); super_edges.insert(e); count -= 1; }
+                println!("");
             }
 
             println!("Round done\n=======");

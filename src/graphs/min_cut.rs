@@ -121,7 +121,18 @@ impl MinimumCut for Graph {
             println!("Super Nodes: {:?}",super_nodes);
             println!("Super Edges: {:?}",super_edges);
         }
+        println!("Graph: {:?}",self);
 
+        // find the edges between the two super node sets
+        let (_, dst_set) = super_nodes.iter().last().unwrap();
+        let (_, src_set) = super_nodes.iter().next().unwrap();
+
+        src_set.into_iter()
+            .for_each( |node| {
+                let set = self.edges.get(&node).unwrap();
+                let edges = set.intersection(dst_set);
+                println!("Node: {node} -> {:?}",edges);
+            });
 
         None
     }

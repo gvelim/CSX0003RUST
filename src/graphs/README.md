@@ -1,6 +1,9 @@
 # Graphs
 Collection of common graph algorithms
 
+For more details visit here:
+https://gvelim.github.io/CSX0003RUST/graph.html
+
 ### Examples
 Minimum Cut - Karger Algorithm / Randomised
 ```rust,no_run,noplayground

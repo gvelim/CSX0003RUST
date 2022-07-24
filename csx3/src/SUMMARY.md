@@ -17,3 +17,6 @@
   - [Count sort](./sort_count.md)
 
 - [Selecting](./selection.md)
+
+- [Graphs](./graph.md)
+  - [Krager's Minimum Cut](./graph_min_cut.md)

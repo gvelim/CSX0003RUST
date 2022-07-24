@@ -4,8 +4,12 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster">
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection">
+      <change afterPath="$PROJECT_DIR$/csx3/src/graph.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/csx3/src/graph_min_cut.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/graphs/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/SUMMARY.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -16,7 +20,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="a0e816563f0fa9fba96519b9a90e2215df18ffe4" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,17 +37,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;terminal&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/csx3/src",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "terminal"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/csx3/src" />
+      <recent name="$PROJECT_DIR$/src/graphs" />
+    </key>
+  </component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="cargo bench" />
@@ -175,6 +186,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
       </list>
     </recent_temporary>
   </component>
@@ -227,7 +242,42 @@
       <option name="project" value="LOCAL" />
       <updated>1658650343516</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="vesion 6 - WIP - exports Graph with min-cut">
+      <created>1658679856676</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1658679856676</updated>
+    </task>
+    <task id="LOCAL-00007" summary="vesion 6 - WIP - exports Graph with min-cut">
+      <created>1658679860558</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1658679860558</updated>
+    </task>
+    <task id="LOCAL-00008" summary="vesion 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()">
+      <created>1658691766223</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1658691766223</updated>
+    </task>
+    <task id="LOCAL-00009" summary="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()">
+      <created>1658692029356</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1658692029356</updated>
+    </task>
+    <task id="LOCAL-00010" summary="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection">
+      <created>1658695900980</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1658695900980</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -258,7 +308,12 @@
     <MESSAGE value="graph min-cut WIP" />
     <MESSAGE value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
     <MESSAGE value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
-    <option name="LAST_COMMIT_MESSAGE" value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
+    <MESSAGE value="version 6 - WIP - exports Graph with min-cut" />
+    <MESSAGE value="vesion 6 - WIP - exports Graph with min-cut" />
+    <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
+    <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
+    <MESSAGE value="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection" />
+    <option name="LAST_COMMIT_MESSAGE" value="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

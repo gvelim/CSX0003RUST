@@ -34,7 +34,13 @@ let g = import_edges( &adj_list )
 let mut output = HashSet::<Edge>::new();
 output.insert( Edge(3, 8));
 output.insert( Edge(2, 5));
-
-assert_eq!( g.minimum_cuts(), Some(output) );       // Some({E(8, 3), E(5, 2)})
-
+                                                    // Iterations
+assert_eq!( g.minimum_cuts(), Some(output) );       // Edges: {E(2, 4), E(8, 3), E(2, 1), E(2, 3)} << Min Cut !!
+                                                    // Edges: {E(8, 6), E(7, 6), E(5, 6)} << Min Cut !!
+                                                    // Edges: {E(1, 2), E(1, 3), E(1, 4)}
+                                                    // Edges: {E(3, 1), E(2, 1), E(4, 1)}
+                                                    // Edges: {E(1, 3), E(1, 4), E(1, 2)}
+                                                    // Edges: {E(7, 6), E(7, 8), E(7, 5)}
+                                                    // Edges: {E(2, 1), E(8, 3), E(2, 4), E(2, 3)}
+                                                    // Edges: {E(2, 5), E(3, 8)} << Min Cut !!
 ```

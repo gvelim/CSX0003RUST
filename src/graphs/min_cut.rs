@@ -16,9 +16,11 @@ impl MinimumCut for Graph {
         let mut iterations = self.nodes.len();
         let mut min_cut = 100;
         let mut result = None;
+
         while iterations != 0 && min_cut > 2 {
             if let Some(edges) = self.contract_graph() {
                 print!("Edges: {:?}", edges);
+
                 if edges.len() < min_cut {
                     min_cut = edges.len();
                     result = Some(edges);
@@ -90,13 +92,16 @@ impl MinimumCut for Graph {
             // now just remove, fix and reinsert 1..* duplicate edges
             for mut e in bad_edges {
                 let mut edges = 0;
+
                 // we have only bad edges here hence this code does not have to deal with good edges
                 // hence go and remove the bad edges
                 // count how many duplicates have been removed
                 while super_edges.remove(&e) != 0 { edges += 1; }
+
                 // fix the edge
                 if e.0 == dst { e.0 = src }
                 if e.1 == dst { e.1 = src }
+
                 // insert back the fixed edge duplicates, if any
                 while edges != 0 {
                     super_edges.insert(e);

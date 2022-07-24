@@ -4,7 +4,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
     </list>
@@ -220,7 +220,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654464135723</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster">
+      <created>1658650343516</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1658650343516</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -250,7 +257,8 @@
     <MESSAGE value="idea files" />
     <MESSAGE value="graph min-cut WIP" />
     <MESSAGE value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
-    <option name="LAST_COMMIT_MESSAGE" value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
+    <MESSAGE value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
+    <option name="LAST_COMMIT_MESSAGE" value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

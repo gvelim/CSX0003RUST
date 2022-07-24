@@ -127,14 +127,23 @@ impl MinimumCut for Graph {
         let (_, dst_set) = super_nodes.iter().last().unwrap();
         let (_, src_set) = super_nodes.iter().next().unwrap();
 
-        src_set.into_iter()
-            .for_each( |node| {
-                let set = self.edges.get(&node).unwrap();
-                let edges = set.intersection(dst_set);
+        let min_cut = src_set.into_iter()
+            .fold(Graph::new(), | mut out,node| {
+                // get src_node's edges from the original graph
+                let set = self.edges.get(node).unwrap();
+                // Keep only the edges nodes found in the dst_set (intersection)
+                    // we need to clone the reference before we push them
+                    // into the output graph structure
+                let edges = set.intersection(dst_set).copied().collect::<HashSet<Node>>();
                 println!("Node: {node} -> {:?}",edges);
+                // add only edges connecting src & dst super node sets
+                if !edges.is_empty() {
+                    out.edges.insert(*node,edges);
+                }
+                out
             });
 
-        None
+        Some(min_cut)
     }
 }
 

@@ -42,6 +42,7 @@ impl Edge {
 
 trait MinimumCut {
     fn min_cuts(&self) -> Option<Graph>;
+    fn edges_across_node_sets(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Option<Graph>;
 }
 
 impl MinimumCut for Graph {
@@ -127,22 +128,26 @@ impl MinimumCut for Graph {
         let (_, dst_set) = super_nodes.iter().last().unwrap();
         let (_, src_set) = super_nodes.iter().next().unwrap();
 
+        self.edges_across_node_sets(src_set, dst_set)
+    }
+
+    fn edges_across_node_sets(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Option<Graph> {
         let min_cut = src_set.into_iter()
             .fold(Graph::new(), | mut out,node| {
                 // get src_node's edges from the original graph
                 let set = self.edges.get(node).unwrap();
                 // Keep only the edges nodes found in the dst_set (intersection)
-                    // we need to clone the reference before we push them
-                    // into the output graph structure
+                // we need to clone the reference before we push them
+                // into the output graph structure
                 let edges = set.intersection(dst_set).copied().collect::<HashSet<Node>>();
                 println!("Node: {node} -> {:?}",edges);
                 // add only edges connecting src & dst super node sets
                 if !edges.is_empty() {
+                    out.nodes.insert(*node);
                     out.edges.insert(*node,edges);
                 }
                 out
             });
-
         Some(min_cut)
     }
 }

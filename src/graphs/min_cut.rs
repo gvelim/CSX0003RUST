@@ -1,81 +1,35 @@
+use std::collections::{HashMap, HashSet};
 use rand::{Rng, thread_rng};
 use super::*;
 
-#[derive(Clone,Copy,Hash)]
-struct Edge(Node,Node);
-impl PartialEq for Edge {
-    fn eq(&self, other: &Self) -> bool {
-        (self.0 == other.0 && self.1 == other.1) || (self.0 == other.1 && self.1 == other.0)
-    }
-    fn ne(&self, other: &Self) -> bool {
-        !self.eq(other)
-    }
-}
-impl Eq for Edge {}
-impl Debug for Edge {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("E")
-            .field(&self.0)
-            .field(&self.1)
-            .finish()
-    }
-}
-/*
-impl Edge {
-    fn starts_at(&self, e: &Self) -> bool {
-        self.0 == e.1
-    }
-    fn ends_at(&self, e: &Self) -> bool {
-        self.1 == e.0
-    }
-    fn is_adjacent(&self, other:&Self) -> bool {
-        (self.0 == other.0 || self.0 == other.1) || (self.1 == other.0 || self.1 == other.1)
-    }
-    fn is_loop(&self) -> bool {
-        self.0 == self.1
-    }
-    fn start(&mut self, e: &Self) { self.0 = e.1; }
-    fn end(&mut self, e: &Self) { self.1 = e.0; }
-    fn reverse(&self) -> Edge { Edge(self.1, self.0) }
-}
- */
 
 trait MinimumCut {
-    fn min_cuts(&self) -> Option<Graph>;
-    fn edges_across_node_sets(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Option<Graph>;
+    fn min_cuts(&self) -> Option<HashSet<Edge>>;
+    fn edges_across_nodes(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Graph;
 }
 
 impl MinimumCut for Graph {
-    fn min_cuts(&self) -> Option<Graph> {
+    fn min_cuts(&self) -> Option<HashSet<Edge>> {
 
         if self.edges.is_empty() {
             return None;
         }
 
         // define super node and super edge structures
-        let mut super_nodes = HashMap::<Node,HashSet<Node>>::new();
-        let mut super_edges = HashSet::<Edge>::new();
-
-        // extract edges and nodes for constructing the supersets
-        let Graph { edges, nodes:_ } = self;
-
-        // initialise super node & super edge
-        edges.iter()
-            .for_each(|(src, dests)| {
+        let mut super_edges = self.export_edges();
+        let mut super_nodes = self.nodes.iter()
+            .fold( HashMap::<Node,HashSet<Node>>::new(), |mut super_nodes, node| {
                 super_nodes
-                    .entry(*src)
+                    .entry(*node)
                     .or_insert( HashSet::new() )
-                    .insert(*src);
-
-                dests.iter()
-                    .for_each(|dst| {
-                        super_edges.insert( Edge(*src,*dst));
-                    })
+                    .insert(*node);
+                super_nodes
             });
 
         println!("Super Nodes: {:?}",super_nodes);
         println!("Super Edges: {:?}",super_edges);
 
+        // run the min-cut algorithm, until 2 super nodes are left
         while super_nodes.len() > 2 {
             // select a random edge
             let len = super_edges.len();
@@ -128,11 +82,11 @@ impl MinimumCut for Graph {
         let (_, dst_set) = super_nodes.iter().last().unwrap();
         let (_, src_set) = super_nodes.iter().next().unwrap();
 
-        self.edges_across_node_sets(src_set, dst_set)
+        Some( self.edges_across_nodes(src_set, dst_set).export_edges() )
     }
 
-    fn edges_across_node_sets(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Option<Graph> {
-        let min_cut = src_set.into_iter()
+    fn edges_across_nodes(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
+        src_set.into_iter()
             .fold(Graph::new(), | mut out,node| {
                 // get src_node's edges from the original graph
                 let set = self.edges.get(node).unwrap();
@@ -147,8 +101,7 @@ impl MinimumCut for Graph {
                     out.edges.insert(*node,edges);
                 }
                 out
-            });
-        Some(min_cut)
+            })
     }
 }
 

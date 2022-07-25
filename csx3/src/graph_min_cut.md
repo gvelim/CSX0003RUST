@@ -23,3 +23,8 @@ The algorithm performs the following steps
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_contraction}}
 ```
+## Finding Graph Edges between two sets of Nodes
+The below function returns the edges of a graph given two sets of nodes
+```rust,no_run,noplayground
+{{#include ../../src/graphs/min_cut.rs:graphs_crossing}}
+```

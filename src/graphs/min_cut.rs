@@ -130,6 +130,7 @@ impl MinimumCut for Graph {
     }
     // ANCHOR_END: graphs_contraction
 
+    // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
         src_set.into_iter()
             .fold(Graph::new(), | mut out,node| {
@@ -150,6 +151,7 @@ impl MinimumCut for Graph {
                 out
             })
     }
+    // ANCHOR_END: graphs_crossing
 }
 
 #[cfg(test)]

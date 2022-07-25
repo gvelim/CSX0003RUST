@@ -15,9 +15,10 @@ The algorithm performs the following steps
 * **STEP 1**: INITIALISE temporary super node and super edge structures
 * **STEP 2**: CONTRACT the graph, until 2 super nodes are left
     * **STEP A**: select a random edge
-    * **STEP C** : Contract the edge by merging the edge's nodes
-    * **STEP D** : Collapse/Remove newly formed edge loops since src & dst is the new super node
-    * **STEP E** : Repoint bad edges to the new super node
+    * **STEP B** : Contract the edge by merging the edge's nodes
+    * **STEP C** : Collapse/Remove newly formed edge loops since src & dst is the new super node
+    * **STEP D** : Identify all edges affected due to the collapsing of nodes
+    * **STEP E** : Repoint affected edges to the new super node
 * **STEP 3** : find the edges between the two super node sets
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_contraction}}

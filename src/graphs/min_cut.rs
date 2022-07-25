@@ -83,7 +83,7 @@ impl MinimumCut for Graph {
             while super_edges.remove(&Edge(src,dst)) != 0 { };
             while super_edges.remove(&Edge(dst,src)) != 0 { };
 
-            // STEP B.3 : find all bad/invalid edges that still point to removed dst
+            // STEP D : Identify all edges affected due to the collapsing of nodes
             let bad_edges = super_edges.iter()
                 // remove the reference
                 .copied()
@@ -92,7 +92,7 @@ impl MinimumCut for Graph {
                 // collect any remaining
                 .collect::<HashSet<Edge>>();
 
-            // STEP D : Repoint bad edges to the new super node
+            // STEP E : Repoint affected edges to the new super node
             // We have to remove, fix and reinsert 1..* all edges incl. any **duplicate** ones
             for mut e in bad_edges {
                 let mut edges = 0;

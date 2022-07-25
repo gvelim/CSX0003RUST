@@ -7,7 +7,7 @@ use hashbag::*;
 trait MinimumCut {
     fn minimum_cut(&self) -> Option<HashSet<Edge>>;
     fn contract_graph(&self) -> Option<HashSet<Edge>>;
-    fn get_edges_across_nodes(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Graph;
+    fn get_crossing_edges(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Graph;
 }
 
 impl MinimumCut for Graph {
@@ -41,7 +41,7 @@ impl MinimumCut for Graph {
             return None;
         }
 
-        // define super node and super edge structures
+        // STEP 1: INITIALISE temporary super node and super edge structures
         let mut super_edges = self.export_edges().into_iter().collect::<HashBag<Edge>>();
         let mut super_nodes = self.nodes.iter()
             .fold( HashMap::<Node,HashSet<Node>>::new(), |mut super_nodes, node| {
@@ -55,15 +55,17 @@ impl MinimumCut for Graph {
         // println!("Super Nodes: {:?}",super_nodes);
         // println!("Super Edges: {:?}",super_edges);
 
-        // run the min-cut algorithm, until 2 super nodes are left
+        // STEP 2: CONTRACT the graph, until 2 super nodes are left
         while super_nodes.len() > 2 {
-            // select a random edge
+
+            // STEP A: select a random edge
             let len = super_edges.len();
             let idx = thread_rng().gen_range(0..len-1);
             // get a copy rather a reference so we don't upset the borrow checker
             let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
             // println!("Random Edge: ({src},{dst})");
 
+            // STEP B.1 : Contract the edge by merging the edge's nodes
             // remove both nodes that form the random edge and
             // hold onto the incoming/outgoing edges
             let super_src = super_nodes.remove(&src).unwrap();
@@ -75,12 +77,13 @@ impl MinimumCut for Graph {
             // re-insert the src node as the new super-node and attach the resulting union
             super_nodes.entry(src).or_insert(super_node);
 
-            // collapse / remove the obvious edge loops
-            // repeat until all duplicates have been removed
+
+            // STEP B.2 : Collapse/Remove newly formed edge loops since src & dst is the new super node
+            // Hint: repeat until all edge loops have been removed
             while super_edges.remove(&Edge(src,dst)) != 0 { };
             while super_edges.remove(&Edge(dst,src)) != 0 { };
 
-            // find all bad/invalid edges; the ones affected
+            // STEP B.3 : find all bad/invalid edges that still point to removed dst
             let bad_edges = super_edges.iter()
                 // remove the reference
                 .copied()
@@ -89,7 +92,8 @@ impl MinimumCut for Graph {
                 // collect any remaining
                 .collect::<HashSet<Edge>>();
 
-            // now just remove, fix and reinsert 1..* duplicate edges
+            // STEP B.3 : Repoint bad edges to the new super node
+            // We have to remove, fix and reinsert 1..* all edges incl. any **duplicate** ones
             for mut e in bad_edges {
                 let mut edges = 0;
 
@@ -115,27 +119,29 @@ impl MinimumCut for Graph {
         }
         // println!("Graph: {:?}",self);
 
-        // find the edges between the two super node sets
+        // STEP 3 : find the edges between the two super node sets
         let (_, dst_set) = super_nodes.iter().last().unwrap();
         let (_, src_set) = super_nodes.iter().next().unwrap();
 
         Some( self
-            .get_edges_across_nodes(src_set, dst_set)
+            .get_crossing_edges(src_set, dst_set)
             .export_edges()
         )
     }
     // ANCHOR_END: graphs_contraction
 
-    fn get_edges_across_nodes(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
+    fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
         src_set.into_iter()
             .fold(Graph::new(), | mut out,node| {
                 // get src_node's edges from the original graph
                 let set = self.edges.get(node).unwrap();
+
                 // Keep only the edges nodes found in the dst_set (intersection)
                 // we need to clone the reference before we push them
                 // into the output graph structure
                 let edges = set.intersection(dst_set).copied().collect::<HashSet<Node>>();
                 // println!("Node: {node} -> {:?}",edges);
+                
                 // add only edges connecting src & dst super node sets
                 if !edges.is_empty() {
                     out.nodes.insert(*node);

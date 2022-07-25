@@ -65,7 +65,7 @@ impl MinimumCut for Graph {
             let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
             // println!("Random Edge: ({src},{dst})");
 
-            // STEP B.1 : Contract the edge by merging the edge's nodes
+            // STEP B : Contract the edge by merging the edge's nodes
             // remove both nodes that form the random edge and
             // hold onto the incoming/outgoing edges
             let super_src = super_nodes.remove(&src).unwrap();
@@ -78,7 +78,7 @@ impl MinimumCut for Graph {
             super_nodes.entry(src).or_insert(super_node);
 
 
-            // STEP B.2 : Collapse/Remove newly formed edge loops since src & dst is the new super node
+            // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
             // Hint: repeat until all edge loops have been removed
             while super_edges.remove(&Edge(src,dst)) != 0 { };
             while super_edges.remove(&Edge(dst,src)) != 0 { };
@@ -92,7 +92,7 @@ impl MinimumCut for Graph {
                 // collect any remaining
                 .collect::<HashSet<Edge>>();
 
-            // STEP B.3 : Repoint bad edges to the new super node
+            // STEP D : Repoint bad edges to the new super node
             // We have to remove, fix and reinsert 1..* all edges incl. any **duplicate** ones
             for mut e in bad_edges {
                 let mut edges = 0;

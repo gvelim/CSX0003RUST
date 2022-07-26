@@ -13,15 +13,17 @@ trait MinimumCut {
 impl MinimumCut for Graph {
     // ANCHOR: graphs_min_cut
     fn minimum_cut(&self) -> Option<Graph> {
-        let mut iterations = self.nodes.len();
+        let nodes = self.nodes.len();
+        let mut iterations = nodes * nodes;
         let mut min_cut = 100;
         let mut result = None;
 
         while iterations != 0 && min_cut > 4 {
             if let Some(graph) = self.contract_graph() {
 
-                let edges = graph.export_edges().len();
+                let edges = graph.export_edges();
                 print!("Edges: {:?}", edges);
+                let edges = edges.len();
 
                 if edges < min_cut {
                     min_cut = edges;
@@ -147,7 +149,9 @@ impl MinimumCut for Graph {
                     edges.iter()
                         .for_each(|dst| {
                             out.nodes.insert(*dst);
-                            out.edges.entry(*dst).or_insert(HashSet::new()).insert(*src);
+                            out.edges.entry(*dst)
+                                .or_insert(HashSet::new())
+                                .insert(*src);
                         });
                     // add edges: direction src -> dst
                     out.nodes.insert(*src);
@@ -169,6 +173,7 @@ mod test {
     #[test]
     fn test_min_cut() {
 
+        // test dataset: Array[ (input_graph, output_graph) ]
         let adj_list: Vec<(Vec<Vec<Node>>, Vec<Vec<Node>>)> = vec![
             (
                 vec![
@@ -220,14 +225,7 @@ mod test {
                 ]
             )
         ];
-/*
-        let adj_list: [Vec<Node>;4] = [
-            vec![1, 2, 4],
-            vec![2, 3, 1, 4],
-            vec![3, 4, 2],
-            vec![4, 1, 3, 2]
-        ];
-*/
+
         for (input, output) in &adj_list {
             let g = Graph::import_edges( input ).expect("Error: Couldn't load input edges");
             let o = Graph::import_edges(output ).expect("Error: Couldn't load output edges");

@@ -5,25 +5,27 @@ use hashbag::*;
 
 
 trait MinimumCut {
-    fn minimum_cut(&self) -> Option<HashSet<Edge>>;
-    fn contract_graph(&self) -> Option<HashSet<Edge>>;
+    fn minimum_cut(&self) -> Option<Graph>;
+    fn contract_graph(&self) -> Option<Graph>;
     fn get_crossing_edges(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Graph;
 }
 
 impl MinimumCut for Graph {
     // ANCHOR: graphs_min_cut
-    fn minimum_cut(&self) -> Option<HashSet<Edge>> {
+    fn minimum_cut(&self) -> Option<Graph> {
         let mut iterations = self.nodes.len();
         let mut min_cut = 100;
         let mut result = None;
 
-        while iterations != 0 && min_cut > 2 {
-            if let Some(edges) = self.contract_graph() {
+        while iterations != 0 && min_cut > 4 {
+            if let Some(graph) = self.contract_graph() {
+
+                let edges = graph.export_edges().len();
                 print!("Edges: {:?}", edges);
 
-                if edges.len() < min_cut {
-                    min_cut = edges.len();
-                    result = Some(edges);
+                if edges < min_cut {
+                    min_cut = edges;
+                    result = Some(graph);
                     print!(" << Min Cut !!")
                 }
                 println!();
@@ -35,7 +37,7 @@ impl MinimumCut for Graph {
     // ANCHOR_END: graphs_min_cut
 
     // ANCHOR: graphs_contraction
-    fn contract_graph(&self) -> Option<HashSet<Edge>> {
+    fn contract_graph(&self) -> Option<Graph> {
 
         if self.edges.is_empty() {
             return None;
@@ -122,19 +124,16 @@ impl MinimumCut for Graph {
         let (_, dst_set) = super_nodes.iter().last().unwrap();
         let (_, src_set) = super_nodes.iter().next().unwrap();
 
-        Some( self
-            .get_crossing_edges(src_set, dst_set)
-            .export_edges()
-        )
+        Some( self.get_crossing_edges(src_set, dst_set) )
     }
     // ANCHOR_END: graphs_contraction
 
     // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
-        src_set.into_iter()
-            .fold(Graph::new(), | mut out,node| {
+        let output = src_set.into_iter()
+            .fold(Graph::new(), |mut out, src| {
                 // get src_node's edges from the original graph
-                let set = self.edges.get(node).unwrap();
+                let set = self.edges.get(src).unwrap();
 
                 // Keep only the edges nodes found in the dst_set (intersection)
                 // we need to clone the reference before we push them
@@ -144,11 +143,20 @@ impl MinimumCut for Graph {
                 
                 // add only edges connecting src & dst super node sets
                 if !edges.is_empty() {
-                    out.nodes.insert(*node);
-                    out.edges.insert(*node,edges);
+                    // add edges: direction dst -> src
+                    edges.iter()
+                        .for_each(|dst| {
+                            out.nodes.insert(*dst);
+                            out.edges.entry(*dst).or_insert(HashSet::new()).insert(*src);
+                        });
+                    // add edges: direction src -> dst
+                    out.nodes.insert(*src);
+                    out.edges.insert(*src, edges);
                 }
                 out
-            })
+            });
+        // println!("Crossing graph: {:?}", output);
+        output
     }
     // ANCHOR_END: graphs_crossing
 }
@@ -160,30 +168,57 @@ mod test {
 
     #[test]
     fn test_min_cut() {
-/*
-            expected result: 2
-            cuts are [(1,7), (4,5)]
 
-        let adj_list: [Vec<Node>;8] = [
-            vec![1, 2, 3, 4, 7],
-            vec![2, 1, 3, 4],
-            vec![3, 1, 2, 4],
-            vec![4, 1, 2, 3, 5],
-            vec![5, 4, 6, 7, 8],
-            vec![6, 5, 7, 8],
-            vec![7, 1, 5, 6, 8],
-            vec![8, 5, 6, 7]
-        ];
-*/
-        let adj_list: [Vec<Node>;8] = [
-            vec![1, 2, 4, 3],
-            vec![2, 3, 1, 4, 5],
-            vec![3, 4, 2, 8, 1],
-            vec![4, 1, 3, 2],
-            vec![5, 6, 8, 7, 2],
-            vec![6, 7, 5, 8],
-            vec![7, 8, 6, 5],
-            vec![8, 5, 3, 7, 6]
+        let adj_list: Vec<(Vec<Vec<Node>>, Vec<Vec<Node>>)> = vec![
+            (
+                vec![
+                    vec![1, 2, 4, 3],
+                    vec![2, 3, 1, 4, 5],
+                    vec![3, 4, 2, 8, 1],
+                    vec![4, 1, 3, 2],
+                    vec![5, 6, 8, 7, 2],
+                    vec![6, 7, 5, 8],
+                    vec![7, 8, 6, 5],
+                    vec![8, 5, 3, 7, 6]
+                ],
+                vec![
+                    vec![3, 8],
+                    vec![2, 5],
+                    vec![8, 3],
+                    vec![5, 2]
+                ]
+            ),
+            (
+                vec![
+                    vec![1, 2, 3, 4, 7],
+                    vec![2, 1, 3, 4],
+                    vec![3, 1, 2, 4],
+                    vec![4, 1, 2, 3, 5],
+                    vec![5, 4, 6, 7, 8],
+                    vec![6, 5, 7, 8],
+                    vec![7, 1, 5, 6, 8],
+                    vec![8, 5, 6, 7]
+                ],
+                vec![
+                    vec![1, 7],
+                    vec![4, 5],
+                    vec![7, 1],
+                    vec![5, 4]
+                ]
+            ),
+            (
+                vec![
+                    vec![1, 2, 4],
+                    vec![2, 3, 1, 4],
+                    vec![3, 4, 2],
+                    vec![4, 1, 3, 2]
+                ],
+                vec![
+                    vec![1, 2, 4],
+                    vec![2, 1],
+                    vec![4, 1]
+                ]
+            )
         ];
 /*
         let adj_list: [Vec<Node>;4] = [
@@ -193,10 +228,10 @@ mod test {
             vec![4, 1, 3, 2]
         ];
 */
-        let g = Graph::import_edges( &adj_list ).expect("Error: Couldn't load edges");
-        let mut output = HashSet::<Edge>::new();
-        output.insert( Edge(3, 8));
-        output.insert( Edge(2, 5));
-        assert_eq!(g.minimum_cut(), Some(output) );
+        for (input, output) in &adj_list {
+            let g = Graph::import_edges( input ).expect("Error: Couldn't load input edges");
+            let o = Graph::import_edges(output ).expect("Error: Couldn't load output edges");
+            assert_eq!( g.minimum_cut(), Some(o) );
+        }
     }
 }

@@ -45,6 +45,7 @@ impl Edge {
 }
  */
 
+#[derive(PartialEq)]
 struct Graph {
     edges: HashMap<Node, HashSet<Node>>,
     nodes: HashSet<Node>
@@ -63,6 +64,7 @@ impl Graph {
                 dst_nodes.iter()
                     .for_each(|dst_node| {
                         edges.insert(Edge(*src_node,*dst_node));
+                        edges.insert(Edge(*dst_node,*src_node));
                     });
                 edges
             })

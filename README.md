@@ -14,5 +14,7 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
 - [Selection](https://gvelim.github.io/CSX0003RUST/selection.html)
   - Random
   - Deterministic
+- [Graphs](https://github.com/gvelim/CSX0003RUST/blob/master/src/graphs/README.md) 
+  - Minimum Cut
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

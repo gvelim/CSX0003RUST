@@ -1,7 +1,10 @@
+
+
 use crate::graphs::*;
 use std::collections::{HashMap, HashSet};
 use rand::{Rng, thread_rng};
 use hashbag::*;
+
 
 
 trait MinimumCut {
@@ -13,18 +16,29 @@ trait MinimumCut {
 impl MinimumCut for Graph {
     // ANCHOR: graphs_min_cut
     fn minimum_cut(&self) -> Option<Graph> {
+
+        // calculate the number of iterations as N*log(N)
         let nodes = self.nodes.len();
-        let mut iterations = nodes * nodes;
+        let mut iterations = nodes as u32 * nodes.log2();
+
+        // initialise min-cut min value and output as Option
         let mut min_cut = 100;
         let mut result = None;
 
+        // iterate N*log(N) time or exit if min-cut found has only 2 edges
         while iterations != 0 && min_cut > 4 {
+
+            // contract the graph
             if let Some(graph) = self.contract_graph() {
 
+                // extract the number of edges
                 let edges = graph.export_edges();
                 print!("Edges: {:?}", edges);
+                // count the edges
                 let edges = edges.len();
 
+                // if number of edges returned is smaller than current
+                // then store the min-cut returned from this iteration
                 if edges < min_cut {
                     min_cut = edges;
                     result = Some(graph);

@@ -40,9 +40,9 @@ The below function provides an implementation approach to the contraction algori
 ## Finding Graph Edges between two sets of Nodes
 Given subsets of nodes, in order to find the crossing edges we have to
 * For each `src:node` in the `node subset A`
-  * Extract the **graph's edges** originating from the `src:node`
-  * Test for the `intersection` of `src:node` edges against the `node subset B`
-  * if the `intersection` is empty proceed, otherwise store the edges in a `HashSet` 
+  * Extract the graph's `edges` originating from the `src:node`
+  * Test for the `intersection` of graph's `edges` (aka destination nodes) against the `node subset B`
+  * if the `intersection` is empty proceed, otherwise store the edges in a new `graph` 
 
 Worth noting here that for every edge found we need to account for its opposite self, for example, for `Edge(2,3)` we need to also add `Edge(3,2)`
 

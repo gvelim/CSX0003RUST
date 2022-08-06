@@ -1,4 +1,5 @@
 mod min_cut;
+mod bfs;
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};

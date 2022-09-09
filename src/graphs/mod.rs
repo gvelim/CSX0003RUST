@@ -1,3 +1,5 @@
+
+
 mod min_cut;
 mod bfs;
 
@@ -81,9 +83,9 @@ impl Graph {
                 graph.nodes.insert(*src);
                 dst.into_iter()
                     .for_each(|dst| {
-                        let nodes = graph.edges.entry(*src)
-                            .or_insert(HashSet::new());
-                        nodes.insert(*dst);
+                        graph.edges.entry(*src)
+                            .or_insert(HashSet::new())
+                            .insert(*dst);
                     })
             });
 

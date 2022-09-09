@@ -34,7 +34,7 @@ impl<T>  MergeSort<T> for [T]
         //println!("\tInput: ({}){:?} =>", len, v);
         match len {
             // unity slice, just return it
-            0..=1 => (0),
+            0..=1 => 0,
             // sort the binary slice and exit
             // use a local variable to eliminate the need for &mut as input
             // and given we output a new vector

@@ -1,5 +1,3 @@
-
-
 use crate::graphs::*;
 use std::collections::{HashMap, HashSet};
 use rand::{Rng, thread_rng};
@@ -19,7 +17,7 @@ impl MinimumCut for Graph {
 
         // calculate the number of iterations as N*log(N)
         let nodes = self.nodes.len();
-        let mut iterations = nodes as u32 * nodes.log2();
+        let mut iterations = nodes as u32 * nodes.ilog2();
 
         // initialise min-cut min value and output as Option
         let mut min_cut = 100;

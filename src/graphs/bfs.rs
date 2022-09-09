@@ -1,12 +1,12 @@
 use std::collections::VecDeque;
 use crate::graphs::*;
 
-trait BreadthFirstSearch {
+trait BFS {
     fn calc_distances(&self, start:Node) -> HashMap<usize, HashSet<Node>>;
     fn dist_to_adjacentlist(distances: Vec<usize>) -> HashMap<usize, HashSet<Node>>;
 }
 
-impl BreadthFirstSearch for Graph {
+impl BFS for Graph {
     fn calc_distances(&self, start:Node) -> HashMap<usize, HashSet<Node>> {
 
         // setup queue

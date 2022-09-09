@@ -1,4 +1,5 @@
 #![feature(int_log)]
+
 extern crate core;
 
 use rand::distributions::Standard;

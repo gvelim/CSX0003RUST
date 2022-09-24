@@ -147,7 +147,17 @@ impl MinimumCut for Graph {
         let output = src_set.into_iter()
             .fold(Graph::new(), |mut out, src| {
                 // get src_node's edges from the original graph
-                let set = self.edges.get(src).unwrap();
+                let set = self.edges.get(src)
+                    .unwrap()
+                    .iter()
+                    .fold( HashSet::new(), |mut out, &nodetype| {
+                        match nodetype {
+                            NodeType::N(node)|NodeType::NC(node, _) => {
+                                out.insert(node);
+                            }
+                        }
+                        out
+                    });
 
                 // Keep only the edges nodes found in the dst_set (intersection)
                 // we need to clone the reference before we push them
@@ -159,15 +169,22 @@ impl MinimumCut for Graph {
                 if !edges.is_empty() {
                     // add edges: direction dst -> src
                     edges.iter()
-                        .for_each(|dst| {
-                            out.nodes.insert(*dst);
-                            out.edges.entry(*dst)
+                        .for_each(|&dst| {
+                            out.nodes.insert(dst);
+                            out.edges.entry(dst)
                                 .or_insert(HashSet::new())
-                                .insert(*src);
+                                .insert(NodeType::N(*src));
                         });
                     // add edges: direction src -> dst
                     out.nodes.insert(*src);
-                    out.edges.insert(*src, edges);
+                    out.edges.insert(
+                        *src,
+                        edges.into_iter()
+                            .fold( HashSet::new(), |mut out,node| {
+                                out.insert(NodeType::N(node));
+                                out
+                            })
+                    );
                 }
                 out
             });

@@ -7,6 +7,13 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 
 type Node = usize;
+type Cost = usize;
+
+#[derive(Debug,Clone,Copy,Hash, PartialEq, Eq)]
+enum NodeType {
+    N(Node),
+    NC(Node, Cost)
+}
 
 #[derive(Clone,Copy,Hash)]
 struct Edge(Node, Node);
@@ -50,7 +57,7 @@ impl Edge {
 
 #[derive(PartialEq)]
 struct Graph {
-    edges: HashMap<Node, HashSet<Node>>,
+    edges: HashMap<Node, HashSet<NodeType>>,
     nodes: HashSet<Node>
 }
 
@@ -62,17 +69,26 @@ impl Graph {
         }
     }
     fn export_edges(&self) -> HashSet<Edge> {
+        use NodeType::*;
+
         self.edges.iter()
             .fold( HashSet::<Edge>::new(), |mut edges, (src_node, dst_nodes)| {
                 dst_nodes.iter()
                     .for_each(|dst_node| {
-                        edges.insert(Edge(*src_node,*dst_node));
-                        edges.insert(Edge(*dst_node,*src_node));
+                        match dst_node {
+                            &N(node) |
+                            &NC(node, _) => {
+                                edges.insert(Edge(*src_node, node));
+                                edges.insert(Edge(node, *src_node));
+                            }
+                        }
                     });
                 edges
             })
     }
     fn import_edges( list: &[Vec<Node>] ) -> Result<Self, Error> {
+        use NodeType::*;
+
         let mut graph = Graph::new();
 
         list.into_iter().
@@ -85,11 +101,31 @@ impl Graph {
                     .for_each(|dst| {
                         graph.edges.entry(*src)
                             .or_insert(HashSet::new())
-                            .insert(*dst);
+                            .insert(N(*dst));
                     })
             });
 
         Ok(graph)
+    }
+    fn from_edge_list(edge_list: &Vec<(Node, Node, Cost)>) -> Self {
+        let mut adjacency_list: HashMap<Node, HashSet<NodeType>> = HashMap::new();
+        let mut nodes = HashSet::new();
+
+        for &(source, destination, cost) in edge_list.iter() {
+            let destinations = adjacency_list
+                .entry(source)
+                .or_insert_with(|| HashSet::new());
+
+            destinations.insert(NodeType::NC(destination, cost));
+
+            nodes.insert(source);
+            nodes.insert(destination);
+        }
+
+        Graph {
+            edges: adjacency_list,
+            nodes,
+        }
     }
 }
 

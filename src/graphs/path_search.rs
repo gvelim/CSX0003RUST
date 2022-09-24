@@ -1,5 +1,6 @@
 use std::collections::{VecDeque, HashMap};
 use crate::graphs::*;
+use NodeType::{NC};
 
 trait PathSearch {
     fn shortest_path(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;

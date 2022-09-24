@@ -147,17 +147,15 @@ impl MinimumCut for Graph {
         let output = src_set.into_iter()
             .fold(Graph::new(), |mut out, src| {
                 // get src_node's edges from the original graph
-                let set = self.edges.get(src)
+                let set: HashSet<Node> = self.edges.get(src)
                     .unwrap()
                     .iter()
-                    .fold( HashSet::new(), |mut out, &nodetype| {
-                        match nodetype {
-                            NodeType::N(node)|NodeType::NC(node, _) => {
-                                out.insert(node);
-                            }
+                    .map(|&ntype|
+                        match ntype {
+                            NodeType::N(node)|NC(node, _) => node
                         }
-                        out
-                    });
+                    )
+                    .collect();
 
                 // Keep only the edges nodes found in the dst_set (intersection)
                 // we need to clone the reference before we push them
@@ -179,11 +177,7 @@ impl MinimumCut for Graph {
                     out.nodes.insert(*src);
                     out.edges.insert(
                         *src,
-                        edges.into_iter()
-                            .fold( HashSet::new(), |mut out,node| {
-                                out.insert(NodeType::N(node));
-                                out
-                            })
+                        edges.into_iter().map(|edge| NodeType::N(edge)).collect()
                     );
                 }
                 out

@@ -5,6 +5,9 @@ mod bfs;
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
+use std::fs::File;
+use std::path::Path;
+use crate::graphs::NodeType::NC;
 
 type Node = usize;
 type Cost = usize;
@@ -116,7 +119,7 @@ impl Graph {
                 .entry(source)
                 .or_insert_with(|| HashSet::new());
 
-            destinations.insert(NodeType::NC(destination, cost));
+            destinations.insert(NC(destination, cost));
 
             nodes.insert(source);
             nodes.insert(destination);
@@ -127,7 +130,38 @@ impl Graph {
             nodes,
         }
     }
+    fn import_text_graph(file: &str) -> Option<Graph> {
+        use std::{io::{BufRead, BufReader}, str::FromStr};
+
+        let mut g = Graph::new();
+        let f = File::open(Path::new(file)).expect("Could not open file");
+        let buf = BufReader::new(f);
+
+        let mut reader = buf.lines().into_iter();
+        while let Some(Ok(line)) = reader.next() {
+
+            let mut part = line.split('\t').into_iter();
+            let node = Node::from_str(part.next().unwrap()).expect("Cannot convert text to Node");
+            g.nodes.insert(node);
+
+            while let Some(txt) = part.next() {
+
+                if let Some((e_str, c_str)) = txt.split_once(',') {
+                    let edge = Node::from_str(e_str).expect("Cannot convert text to Node");
+                    let cost = Cost::from_str(c_str).expect("Cannot convert text to Cost");
+                    g.edges.entry(node)
+                        .or_insert(HashSet::new())
+                        .insert(NC( edge, cost ));
+                } else {
+                    panic!("Cannot convert txt into (node, cost)")
+                }
+            }
+            // println!("{} -> {:?}",node, g.edges[&node])
+        }
+        Some(g)
+    }
 }
+
 
 impl Clone for Graph {
     fn clone(&self) -> Self {
@@ -144,4 +178,10 @@ impl Debug for Graph {
             .entries( self.edges.iter() )
             .finish()
     }
+}
+
+#[cfg(test)]
+mod test {
+    //use crate::graphs::Graph;
+
 }

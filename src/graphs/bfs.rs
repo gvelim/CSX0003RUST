@@ -56,7 +56,7 @@ impl BFS for Graph {
 
                     edges.iter()
                         .filter_map(|&edge|
-                            if let NodeType::NC(node,cost) = edge { Some((node,cost))} else { panic!("Must use NodeType::NC") }
+                            if let NC(node,cost) = edge { Some((node,cost))} else { panic!("Must use NodeType::NC") }
                         )
                         .for_each(|(edge, cost)| {
                             // calc the new path cost to edge
@@ -106,7 +106,7 @@ impl BFS for Graph {
                 .iter()
                 .for_each(|&dst| {
                     match dst {
-                        NodeType::N(dst) | NodeType::NC(dst, _) => {
+                        NodeType::N(dst) | NC(dst, _) => {
                             // if not visited yet
                             if !visited[dst-1] {
                                 // mark visited
@@ -181,5 +181,28 @@ mod test {
         let path = g.shortest_path(2, 5);
         assert!(path.is_some());
         assert_eq!(path.unwrap().1, 4);
+    }
+    #[test]
+    fn large_graph() {
+        let data = vec![
+            (7 as Node,588 as Cost),
+            (37,405),
+            (59,675),
+            (82,521),
+            (99,909),
+            (115,328),
+            (133,418),
+            (165,957),
+            (188,830),
+            (197,839)
+        ];
+        let g = Graph::import_text_graph("src/graphs/input_random_10_16.txt").expect("graph couldn't be loaded");
+
+        data.into_iter()
+            .for_each(|(goal, cost)| {
+                let path = g.shortest_path( 1, goal);
+                assert!(path.is_some());
+                assert_eq!(path.unwrap().1, cost);
+            })
     }
 }

@@ -1,6 +1,5 @@
 use std::collections::{VecDeque, HashMap};
 use crate::graphs::*;
-use NodeType::{NC};
 
 trait BFS {
     fn calc_distances(&self, start:Node) -> HashMap<usize, HashSet<Node>>;

@@ -1,4 +1,5 @@
-use std::collections::{VecDeque, HashMap};
+use std::cmp::Ordering;
+use std::collections::{VecDeque, HashMap, BinaryHeap};
 use crate::graphs::*;
 use NodeType::{NC};
 
@@ -9,55 +10,73 @@ trait PathSearch {
 impl PathSearch for Graph {
     fn shortest_path(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
 
-        let mut path: Vec<Node> = Vec::new();
-        let mut queue = VecDeque::new();
+        // We are using a BinaryHeap queue in order to always have first in the queue
+        // the node with lowest cost to explore next
+        struct Step(Node,Cost);
+        impl Eq for Step {}
+        impl PartialEq<Self> for Step {
+            fn eq(&self, other: &Self) -> bool {
+                self.0 == other.0 && self.1 == other.1
+            }
+        }
+        impl PartialOrd<Self> for Step {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                Some(self.cmp(other))
+            }
+        }
+        impl Ord for Step {
+            fn cmp(&self, other: &Self) -> Ordering {
+                // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
+                // hence we need to reverse the comparison other.cmp(self)
+                other.1.cmp(&self.1)
+            }
+        }
+
+        let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
         let mut node_cost = self.nodes.iter()
-            .fold( HashMap::<Node,(Cost,Option<Node>)>::new(), |mut cost_history, node| {
+            .fold( HashMap::<Node,(Cost, Option<Node>)>::new(), |mut cost_history, node| {
                 cost_history.entry(*node).or_insert( (Cost::MAX, None));
                 cost_history
             });
-        // set cost at start node to zero with no parent
+        // set cost at start node to zero with no parent node
         node_cost.entry(start)
             .and_modify(
                 |c| *c = (0, None)
             );
-        let mut best_path = None;
-        let mut best_cost = Cost::MAX;
 
-        // push start node in the DFS queue
-        queue.push_front(start);
+        // push start node in the BinaryHeap queue
+        queue.push(Step(start,0));
 
-        // while a node in the queue pick the node
-        while let Some(node) = queue.pop_front() {
+        // while queue has nodes pick the node with the lowest cost
+        while let Some(Step(node,_)) = queue.pop() {
 
             let path_cost = node_cost[&node].0;
 
-            // if node is the target node
-            // assuming cost is the lowest cost
-            if node == goal && path_cost < best_cost {
-                // clear path for use in case we find another path
-                // build the shortest path by pushing target node first
-                path.clear();
-                path.push(node);
+            // if we have found the the target node
+            // then we have completed our search
+            // (Dijkstra's algo property - all nodes are processed once)
+            if node == goal {
+                let mut path = VecDeque::new();
+                // reconstruct the shortest path starting from the target node
+                path.push_front(node);
                 // set target as current node
                 let mut cur_node= node;
-                // backtrace all parents until you reached None, that is, the start node
+                // backtrace all parents until you reach None, that is, the start node
                 while let Some(parent) = node_cost[&cur_node].1 {
-                    path.push(parent);
+                    path.push_front(parent);
                     cur_node = parent;
                 }
-                best_path = Some((path.clone(), path_cost));
-                best_cost = path_cost;
-                println!("\t Path!: {:?}", best_path);
+                println!("\t Path!: {:?} [{path_cost}]", path);
+                return Some((path.into(), path_cost));
             } else {
                 if let Some(edges) = self.edges.get(&node) {
-
                     edges.iter()
-                        .filter_map(|&edge|
-                            if let NC(node,cost) = edge { Some((node,cost))} else { panic!("Must use NodeType::NC") }
-                        )
+                        .filter_map(|&edge| match edge {
+                            NC(node, cost) => Some((node, cost)),
+                            _ => panic!("Must use NodeType::NC")
+                        })
                         .for_each(|(edge, cost)| {
                             // calc the new path cost to edge
                             let edge_cost = path_cost + cost;
@@ -72,16 +91,15 @@ impl PathSearch for Graph {
                                     );
                                 // push_front for Depth First Search -> slower but finds all paths
                                 // push_back for Breadth First Search -> faster but finds best only
-                                queue.push_back(edge);
+                                queue.push(Step(edge, edge_cost));
                             }
                         })
                 }
             }
-
         }
 
-        println!("Path: {:?}", best_path);
-        best_path
+        println!("Cannot find a path !!");
+        None
     }
 
 }

@@ -35,12 +35,11 @@ impl PathSearch for Graph {
         let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
-        let mut node_cost = self.nodes.iter()
-            .fold( HashMap::<Node,(Cost, Option<Node>)>::new(), |mut cost_history, node| {
-                cost_history.entry(*node).or_insert( (Cost::MAX, None));
-                cost_history
-            });
-        // set cost at start node to zero with no parent node
+        let mut node_cost : HashMap<Node, (Cost, Option<Node>)> = self.nodes.iter()
+            .map( |&node| (node, (Cost::MAX, None)) )
+            .collect() ;
+
+            // set cost at start node to zero with no parent node
         node_cost.entry(start)
             .and_modify(
                 |c| *c = (0, None)
@@ -50,9 +49,7 @@ impl PathSearch for Graph {
         queue.push(Step(start,0));
 
         // while queue has nodes pick the node with the lowest cost
-        while let Some(Step(node,_)) = queue.pop() {
-
-            let path_cost = node_cost[&node].0;
+        while let Some(Step(node, path_cost)) = queue.pop() {
 
             // if we have found the the target node
             // then we have completed our search

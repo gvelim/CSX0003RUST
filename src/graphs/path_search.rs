@@ -12,6 +12,7 @@ impl PathSearch for Graph {
 
         // We are using a BinaryHeap queue in order to always have first in the queue
         // the node with lowest cost to explore next
+        #[derive(Debug)]
         struct Step(Node,Cost);
         impl Eq for Step {}
         impl PartialEq<Self> for Step {
@@ -28,7 +29,7 @@ impl PathSearch for Graph {
             fn cmp(&self, other: &Self) -> Ordering {
                 // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
                 // hence we need to reverse the comparison other.cmp(self)
-                other.1.cmp(&self.1)
+                other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
             }
         }
 
@@ -90,7 +91,7 @@ impl PathSearch for Graph {
                                 // push_back for Breadth First Search -> faster but finds best only
                                 queue.push(Step(edge, edge_cost));
                             }
-                        })
+                        });
                 }
             }
         }
@@ -109,12 +110,23 @@ mod test {
 
     #[test]
     fn small_graph() {
+        let data = vec![
+            (1 as Node, 0 as Cost),
+            (2, 0),
+            (3, 1),
+            (4, 1),
+            (5, 4),
+            (6, 3)
+        ];
         let edge_list = include!("small_graph.in");
         let g = Graph::from_edge_list(&edge_list);
 
-        let path = g.shortest_path(2, 5);
-        assert!(path.is_some());
-        assert_eq!(path.unwrap().1, 4);
+        data.into_iter()
+        .for_each(|(goal, cost)| {
+            let path = g.shortest_path(2, goal);
+            assert!(path.is_some());
+            assert_eq!(path.unwrap().1, cost);
+        })
     }
 
     #[test]

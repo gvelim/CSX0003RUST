@@ -4,7 +4,6 @@ use rand::{Rng, thread_rng};
 use hashbag::*;
 
 
-
 trait MinimumCut {
     fn minimum_cut(&self) -> Option<Graph>;
     fn contract_graph(&self) -> Option<Graph>;
@@ -59,14 +58,13 @@ impl MinimumCut for Graph {
 
         // STEP 1: INITIALISE temporary super node and super edge structures
         let mut super_edges = self.export_edges().into_iter().collect::<HashBag<Edge>>();
-        let mut super_nodes = self.nodes.iter()
-            .fold( HashMap::<Node,HashSet<Node>>::new(), |mut super_nodes, node| {
-                super_nodes
-                    .entry(*node)
-                    .or_insert( HashSet::new() )
-                    .insert(*node);
-                super_nodes
-            });
+        let mut super_nodes: HashMap<Node,HashSet<Node>> = self.nodes.iter()
+            .map(|&node| (node, HashSet::<Node>::new()))
+            .map(|(node, mut map)| {
+                map.insert(node);
+                (node,map)
+            })
+            .collect();
 
         // println!("Super Nodes: {:?}",super_nodes);
         // println!("Super Edges: {:?}",super_edges);

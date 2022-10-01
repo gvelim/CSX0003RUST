@@ -32,7 +32,6 @@ struct NodeTrack {
 }
 type Tracker = Vec<NodeTrack>;
 trait Tracking {
-    fn new(g: &Graph, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker;
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
         (self.extract_path(start), self.extract_cost(start))
     }
@@ -40,9 +39,6 @@ trait Tracking {
     fn extract_cost(&self, start: Node) -> Cost;
 }
 impl Tracking for Tracker {
-    fn new(g: &Graph, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
-        vec![NodeTrack{visited, dist, parent}; g.nodes.len()]
-    }
     fn extract_path(&self, start:Node) -> Vec<Node> {
         let mut path = VecDeque::new();
         // reconstruct the shortest path starting from the target node
@@ -60,7 +56,11 @@ impl Tracking for Tracker {
         self[start-1].dist
     }
 }
-
+impl Graph {
+    fn get_tracker(&self, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
+        vec![NodeTrack{visited, dist, parent}; self.nodes.len()]
+    }
+}
 
 trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
@@ -74,7 +74,7 @@ impl PathSearch for Graph {
         let mut queue = VecDeque::<Node>::new();
 
         // holds whether a node has been visited, if yes, it's distance and parent node
-        let mut tracker= <Tracker as Tracking>::new(self, false,0,None);
+        let mut tracker= self.get_tracker(false, 0, None);
 
         queue.push_back(start);
         tracker[start-1].visited = true;
@@ -91,20 +91,19 @@ impl PathSearch for Graph {
                 .unwrap()
                 // scan each dst from src node
                 .iter()
+                .filter_map(|ntype| match ntype {
+                    NodeType::N(dst) | NC(dst, _) => Some(dst)
+                })
                 .for_each(|&dst| {
-                    match dst {
-                        NodeType::N(dst) | NC(dst, _) => {
-                            // if not visited yet
-                            if !tracker[dst - 1].visited {
-                                // mark visited
-                                tracker[dst - 1].visited = true;
-                                // calculate distance & store parent for distance
-                                tracker[dst - 1].dist = tracker[src - 1].dist + 1;
-                                tracker[dst - 1].parent = Some(src);
-                                // push at the back of the queue for further scanning
-                                queue.push_back(dst);
-                            }
-                        }
+                    // if not visited yet
+                    if !tracker[dst - 1].visited {
+                        // mark visited
+                        tracker[dst - 1].visited = true;
+                        // calculate distance & store parent for distance
+                        tracker[dst - 1].dist = tracker[src - 1].dist + 1;
+                        tracker[dst - 1].parent = Some(src);
+                        // push at the back of the queue for further scanning
+                        queue.push_back(dst);
                     }
                 });
         }
@@ -119,7 +118,7 @@ impl PathSearch for Graph {
         let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
-        let mut tracker= <Tracker as Tracking>::new(self, false,Cost::MAX,None);
+        let mut tracker= self.get_tracker(false, Cost::MAX, None);
 
         // set cost at start node to zero with no parent node
         tracker[start-1].dist = 0;

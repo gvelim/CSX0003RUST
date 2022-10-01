@@ -1,73 +1,143 @@
 use std::cmp::Ordering;
-use std::collections::{VecDeque, HashMap, BinaryHeap};
+use std::collections::{VecDeque, BinaryHeap};
 use crate::graphs::*;
 use NodeType::{NC};
 
+#[derive(Debug)]
+struct Step(Node,Cost);
+impl Eq for Step {}
+impl PartialEq<Self> for Step {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1
+    }
+}
+impl PartialOrd<Self> for Step {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Step {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
+        // hence we need to reverse the comparison other.cmp(self)
+        other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
+    }
+}
+
+#[derive(Debug,Clone)]
+struct NodeTrack {
+    visited:bool,
+    dist:Cost,
+    parent:Option<Node>
+}
+type Tracker = Vec<NodeTrack>;
+trait Tracking {
+    fn new(g: &Graph, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker;
+    fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
+        (self.extract_path(start), self.extract_cost(start))
+    }
+    fn extract_path(&self, start: Node) -> Vec<Node>;
+    fn extract_cost(&self, start: Node) -> Cost;
+}
+impl Tracking for Tracker {
+    fn new(g: &Graph, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
+        vec![NodeTrack{visited, dist, parent}; g.nodes.len()]
+    }
+    fn extract_path(&self, start:Node) -> Vec<Node> {
+        let mut path = VecDeque::new();
+        // reconstruct the shortest path starting from the target node
+        path.push_front(start);
+        // set target as current node
+        let mut cur_node= start;
+        // backtrace all parents until you reach None, that is, the start node
+        while let Some(parent) = self[cur_node-1].parent {
+            path.push_front(parent);
+            cur_node = parent;
+        }
+        path.into()
+    }
+    fn extract_cost(&self, start:Node) -> Cost {
+        self[start-1].dist
+    }
+}
+
+
 trait PathSearch {
-    fn shortest_path(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
+    fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
+    fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
 }
 
 impl PathSearch for Graph {
-    fn shortest_path(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
+    fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)> {
+
+        // setup queue
+        let mut queue = VecDeque::<Node>::new();
+
+        // holds whether a node has been visited, if yes, it's distance and parent node
+        let mut tracker= <Tracker as Tracking>::new(self, false,0,None);
+
+        queue.push_back(start);
+        tracker[start-1].visited = true;
+
+        while let Some(src) = queue.pop_front() {
+
+            if src == goal {
+                return Some(tracker.extract(src))
+            }
+
+            self.edges
+                // get graph edges from src node
+                .get(&src)
+                .unwrap()
+                // scan each dst from src node
+                .iter()
+                .for_each(|&dst| {
+                    match dst {
+                        NodeType::N(dst) | NC(dst, _) => {
+                            // if not visited yet
+                            if !tracker[dst - 1].visited {
+                                // mark visited
+                                tracker[dst - 1].visited = true;
+                                // calculate distance & store parent for distance
+                                tracker[dst - 1].dist = tracker[src - 1].dist + 1;
+                                tracker[dst - 1].parent = Some(src);
+                                // push at the back of the queue for further scanning
+                                queue.push_back(dst);
+                            }
+                        }
+                    }
+                });
+        }
+
+        None
+    }
+    fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
 
         // We are using a BinaryHeap queue in order to always have first in the queue
         // the node with lowest cost to explore next
-        #[derive(Debug)]
-        struct Step(Node,Cost);
-        impl Eq for Step {}
-        impl PartialEq<Self> for Step {
-            fn eq(&self, other: &Self) -> bool {
-                self.0 == other.0 && self.1 == other.1
-            }
-        }
-        impl PartialOrd<Self> for Step {
-            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                Some(self.cmp(other))
-            }
-        }
-        impl Ord for Step {
-            fn cmp(&self, other: &Self) -> Ordering {
-                // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
-                // hence we need to reverse the comparison other.cmp(self)
-                other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
-            }
-        }
 
         let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
-        let mut node_cost : HashMap<Node, (Cost, Option<Node>)> = self.nodes.iter()
-            .map( |&node| (node, (Cost::MAX, None)) )
-            .collect() ;
+        let mut tracker= <Tracker as Tracking>::new(self, false,Cost::MAX,None);
 
-            // set cost at start node to zero with no parent node
-        node_cost.entry(start)
-            .and_modify(
-                |c| *c = (0, None)
-            );
+        // set cost at start node to zero with no parent node
+        tracker[start-1].dist = 0;
 
         // push start node in the BinaryHeap queue
         queue.push(Step(start,0));
 
         // while queue has nodes pick the node with the lowest cost
-        while let Some(Step(node, path_cost)) = queue.pop() {
+        while let Some(Step(node, _)) = queue.pop() {
 
+            let path_cost= tracker[node-1].dist;
             // if we have found the the target node
             // then we have completed our search
             // (Dijkstra's algo property - all nodes are processed once)
             if node == goal {
-                let mut path = VecDeque::new();
-                // reconstruct the shortest path starting from the target node
-                path.push_front(node);
-                // set target as current node
-                let mut cur_node= node;
-                // backtrace all parents until you reach None, that is, the start node
-                while let Some(parent) = node_cost[&cur_node].1 {
-                    path.push_front(parent);
-                    cur_node = parent;
-                }
+                let path = tracker.extract_path(node);
                 println!("\t Path!: {:?} [{path_cost}]", path);
-                return Some((path.into(), path_cost));
+                return Some((path, path_cost));
             } else {
                 if let Some(edges) = self.edges.get(&node) {
                     edges.iter()
@@ -80,13 +150,11 @@ impl PathSearch for Graph {
                             let edge_cost = path_cost + cost;
 
                             // if new edge cost < currently known cost @edge
-                            if edge_cost < node_cost[&edge].0 {
+                            if edge_cost < tracker[edge-1].dist {
 
                                 // set the new lower cost @node along with related parent Node
-                                node_cost.entry(edge)
-                                    .and_modify(|c|
-                                        *c = (edge_cost, Some(node))
-                                    );
+                                tracker[edge-1].dist = edge_cost;
+                                tracker[edge-1].parent = Some(node);
                                 // push_front for Depth First Search -> slower but finds all paths
                                 // push_back for Breadth First Search -> faster but finds best only
                                 queue.push(Step(edge, edge_cost));
@@ -95,13 +163,10 @@ impl PathSearch for Graph {
                 }
             }
         }
-
         println!("Cannot find a path !!");
         None
     }
-
 }
-
 
 #[cfg(test)]
 mod test {
@@ -109,7 +174,68 @@ mod test {
     use super::*;
 
     #[test]
-    fn small_graph() {
+    fn  test_path_search_small_graph() {
+        // ( input graph, starting node, array with expected distances)
+        let test_data:(Vec<Vec<Node>>, Node, Vec<(Node, Option<(Vec<Node>,usize)>)>) =
+            (
+                vec![
+                    vec![1, 2, 3],
+                    vec![2, 4],
+                    vec![3, 7],
+                    vec![4, 6],
+                    vec![5, 7],
+                    vec![6, 8],
+                    vec![7, 8],
+                    vec![8, 1],
+                ],
+                1,
+                vec![
+                    (1, Some((vec![1],0))),
+                    (2, Some((vec![1,2],1))),
+                    (3, Some((vec![1,3],1))),
+                    (4, Some((vec![1,2,4],2))),
+                    (5, None),
+                    (6, Some((vec![1,2,4,6],3))),
+                    (7, Some((vec![1,3,7],2))),
+                    (8, Some((vec![1,3,7,8],3)))
+                ]
+            );
+        let (inp, start, out) = test_data;
+        let g = Graph::import_edges(&inp).expect("couldn't load edges");
+
+        out.into_iter()
+            .for_each(|(goal, exp)|{
+                let out = g.path_distance(start, goal);
+                println!("Inp: {start}->{goal} => Output: {:?} / Expected: {:?}", out, exp);
+                assert_eq!(out, exp);
+            });
+    }
+    #[test]
+    fn test_path_search_large_graph() {
+        let data = vec![
+            (7 as Node, 3 as Cost),
+            (37, 2),
+            (59, 2),
+            (82, 1),
+            (99, 2),
+            (115, 2),
+            (133, 2),
+            (165, 3),
+            (188, 2),
+            (197, 2)
+        ];
+        let g = Graph::import_text_graph("src/graphs/input_random_10_16.txt").expect("graph couldn't be loaded");
+
+        data.into_iter()
+            .for_each(|(goal, dist)| {
+                let path = g.path_distance(1, goal);
+                println!("1->{goal} => {:?} :: Expect: {dist}", path);
+                assert!(path.is_some());
+                assert_eq!(path.unwrap().1, dist);
+            })
+    }
+    #[test]
+    fn test_path_shortest_small_graph() {
         let data = vec![
             (1 as Node, 0 as Cost),
             (2, 0),
@@ -122,15 +248,14 @@ mod test {
         let g = Graph::from_edge_list(&edge_list);
 
         data.into_iter()
-        .for_each(|(goal, cost)| {
-            let path = g.shortest_path(2, goal);
-            assert!(path.is_some());
-            assert_eq!(path.unwrap().1, cost);
-        })
+            .for_each(|(goal, cost)| {
+                let path = g.path_shortest(2, goal);
+                assert!(path.is_some());
+                assert_eq!(path.unwrap().1, cost);
+            })
     }
-
     #[test]
-    fn large_graph() {
+    fn test_path_shortest_large_graph() {
         let data = vec![
             (7 as Node, 588 as Cost),
             (37, 405),
@@ -147,7 +272,7 @@ mod test {
 
         data.into_iter()
             .for_each(|(goal, cost)| {
-                let path = g.shortest_path(1, goal);
+                let path = g.path_shortest(1, goal);
                 assert!(path.is_some());
                 assert_eq!(path.unwrap().1, cost);
             })

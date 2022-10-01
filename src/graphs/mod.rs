@@ -1,7 +1,6 @@
 
 
 mod min_cut;
-mod bfs;
 mod path_search;
 
 use std::collections::{HashMap, HashSet};

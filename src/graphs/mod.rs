@@ -2,7 +2,6 @@
 
 mod min_cut;
 mod path_search;
-
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use crate::graphs::NodeType::NC;
@@ -128,7 +127,7 @@ impl Graph {
             nodes,
         }
     }
-    fn import_text_graph(file: &str) -> Option<Graph> {
+    fn import_text_graph(file: &str, node_pat: char, edge_pat: char) -> Option<Graph> {
         use std::{fs::File, path::Path, io::{BufRead, BufReader}, str::FromStr};
 
         let mut g = Graph::new();
@@ -139,20 +138,27 @@ impl Graph {
             .enumerate()
             .filter_map(|(num,line)| Some((num, line.expect(format!("Cannot read line:{num} from file").as_str()))) )
             .for_each(|(num,line)| {
-                let mut part = line.split('\t').into_iter();
+                let mut part = line.split(node_pat).into_iter();
                 let node = Node::from_str(part.next().unwrap()).expect(format!("Line {num}: Cannot extract Node from line").as_str());
                 g.nodes.insert(node);
 
                 while let Some(txt) = part.next() {
-                    if let Some((e_str, c_str)) = txt.split_once(',') {
-                        let edge = Node::from_str(e_str).expect(format!("Line {num}: Cannot convert {e_str} to Edge").as_str());
-                        let cost = Cost::from_str(c_str).expect(format!("Line {num}: Cannot convert {c_str} to Cost").as_str());
-                        g.edges.entry(node)
-                            .or_insert(HashSet::new())
-                            .insert(NC(edge, cost));
-                    } else {
-                        panic!("Cannot convert txt into (edge, cost): line {num} ends with a tab ??")
-                    }
+                    let edge = match edge_pat {
+                        '\0' => NodeType::N( Node::from_str(txt).expect(format!("Line {num}: Cannot convert {txt} to Edge").as_str()) ),
+                        ',' =>
+                            if let Some((e_str, c_str)) = txt.split_once(edge_pat) {
+                                NC(
+                                    Node::from_str(e_str).expect(format!("Line {num}: Cannot convert {e_str} to Edge").as_str()),
+                                    Cost::from_str(c_str).expect(format!("Line {num}: Cannot convert {c_str} to Cost").as_str())
+                                )
+                            } else {
+                                panic!("Cannot convert {txt} into (edge, cost): line {num} ends with a tab ??")
+                            },
+                        pat => panic!("Unkown delimiter:({}) within txt:({txt}",pat)
+                    };
+                    g.edges.entry(node)
+                        .or_insert(HashSet::new())
+                        .insert(edge);
                 }
                 // println!("{} -> {:?}",node, g.edges[&node])
             });

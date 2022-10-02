@@ -82,8 +82,8 @@ impl MinimumCut for Graph {
             // STEP B : Contract the edge by merging the edge's nodes
                 // remove both nodes that form the random edge and
                 // hold onto the incoming/outgoing edges
-            let super_src = super_nodes.remove(&src).unwrap();
-            let super_dst = super_nodes.remove(&dst).unwrap();
+            let super_src = super_nodes.remove(&src).unwrap_or_default();
+            let super_dst = super_nodes.remove(&dst).unwrap_or_default();
                 // combine the incoming/outgoing edges for attaching onto the new super-node
             let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
             // println!("Merged super node: {src}->{:?}", super_node);
@@ -99,10 +99,14 @@ impl MinimumCut for Graph {
 
             // STEP D : Identify all edges affected due to the collapsing of nodes
             let bad_edges = super_edges.iter()
-                // remove the reference
-                .copied()
                 // filter out those not affected
-                .filter(|e| if e.0 == dst || e.1 == dst { true } else { false } )
+                .filter(|&e| match e {
+                    Edge(s, _) if *s == dst => true,
+                    Edge(_ , d) if *d == dst => true,
+                    _ => false
+                })
+                // remove the reference
+                .cloned()
                 // collect any remaining
                 .collect::<HashSet<Edge>>();
 
@@ -148,11 +152,9 @@ impl MinimumCut for Graph {
                 let set: HashSet<Node> = self.edges.get(src)
                     .unwrap()
                     .iter()
-                    .map(|&ntype|
-                        match ntype {
-                            NodeType::N(node)|NC(node, _) => node
-                        }
-                    )
+                    .map(|&ntype| match ntype {
+                        NodeType::N(node)|NC(node, _) => node
+                    })
                     .collect();
 
                 // Keep only the edges nodes found in the dst_set (intersection)
@@ -194,8 +196,8 @@ mod test {
     #[test]
     fn test_min_cut() {
 
-        // test dataset: Array[ (input_graph, output_graph) ]
-        let adj_list: Vec<(Vec<Vec<Node>>, Vec<Vec<Node>>)> = vec![
+        // test dataset: Array[ (input_graph, minimum expected edges) ]
+        let adj_list: Vec<(Vec<Vec<Node>>, usize)> = vec![
             (
                 vec![
                     vec![1, 2, 4, 3],
@@ -207,12 +209,7 @@ mod test {
                     vec![7, 8, 6, 5],
                     vec![8, 5, 3, 7, 6]
                 ],
-                vec![
-                    vec![3, 8],
-                    vec![2, 5],
-                    vec![8, 3],
-                    vec![5, 2]
-                ]
+                4
             ),
             (
                 vec![
@@ -225,12 +222,7 @@ mod test {
                     vec![7, 1, 5, 6, 8],
                     vec![8, 5, 6, 7]
                 ],
-                vec![
-                    vec![1, 7],
-                    vec![4, 5],
-                    vec![7, 1],
-                    vec![5, 4]
-                ]
+                4
             ),
             (
                 vec![
@@ -239,18 +231,36 @@ mod test {
                     vec![3, 4, 2],
                     vec![4, 1, 3, 2]
                 ],
-                vec![
-                    vec![1, 2, 4],
-                    vec![2, 1],
-                    vec![4, 1]
-                ]
+                4
             )
         ];
 
-        for (input, output) in &adj_list {
-            let g = Graph::import_edges( input ).expect("Error: Couldn't load input edges");
-            let o = Graph::import_edges(output ).expect("Error: Couldn't load output edges");
-            assert_eq!( g.minimum_cut(), Some(o) );
+        for (input, output) in adj_list {
+            let g = Graph::import_edges( &input ).expect("Error: Couldn't load input edges");
+            let mc = g.minimum_cut();
+            assert!(mc.is_some());
+            let edges = mc.unwrap().export_edges();
+            assert_eq!( edges.len(), output );
+            println!("------------");
         }
+    }
+    #[test]
+    fn test_min_cut_txt_graph() {
+
+        let test_data = vec![
+            ("src/graphs/mc_input_random_1_6.txt", 4),
+            ("src/graphs/mc_input_random_10_25.txt", 12)
+        ];
+
+        test_data.into_iter()
+            .for_each(|(fname, cuts)| {
+                let g = Graph::import_text_graph(fname, ' ', '\0').expect("Cannot open file: mc_input_random_10_25.txt");
+                let mc = g.minimum_cut();
+                assert!(mc.is_some());
+                let edges = mc.unwrap().export_edges();
+                println!(">> Min-cut: {:?}",edges);
+                assert_eq!( edges.len(), cuts );
+                println!("--------------------");
+        })
     }
 }

@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::{VecDeque, BinaryHeap};
+use std::ops::{Index, IndexMut};
 use crate::graphs::*;
 use NodeType::{NC};
 
@@ -30,7 +31,9 @@ struct NodeTrack {
     dist:Cost,
     parent:Option<Node>
 }
-type Tracker = Vec<NodeTrack>;
+struct Tracker {
+    list: Vec<NodeTrack>
+}
 trait Tracking {
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
         (self.extract_path(start), self.extract_cost(start))
@@ -46,19 +49,32 @@ impl Tracking for Tracker {
         // set target as current node
         let mut cur_node= start;
         // backtrace all parents until you reach None, that is, the start node
-        while let Some(parent) = self[cur_node-1].parent {
+        while let Some(parent) = self[cur_node].parent {
             path.push_front(parent);
             cur_node = parent;
         }
         path.into()
     }
     fn extract_cost(&self, start:Node) -> Cost {
-        self[start-1].dist
+        self[start].dist
     }
 }
+impl Index<Node> for Tracker {
+    type Output = NodeTrack;
+
+    fn index(&self, index: Node) -> &Self::Output {
+        &self.list[index-1]
+    }
+}
+impl IndexMut<Node> for Tracker {
+    fn index_mut(&mut self, index: Node) -> &mut Self::Output {
+        &mut self.list[index-1]
+    }
+}
+
 impl Graph {
     fn get_tracker(&self, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
-        vec![NodeTrack{visited, dist, parent}; self.nodes.len()]
+        Tracker{ list: vec![NodeTrack{visited, dist, parent}; self.nodes.len()] }
     }
 }
 
@@ -77,7 +93,7 @@ impl PathSearch for Graph {
         let mut tracker= self.get_tracker(false, 0, None);
 
         queue.push_back(start);
-        tracker[start-1].visited = true;
+        tracker[start].visited = true;
 
         while let Some(src) = queue.pop_front() {
 
@@ -96,12 +112,12 @@ impl PathSearch for Graph {
                 })
                 .for_each(|&dst| {
                     // if not visited yet
-                    if !tracker[dst - 1].visited {
+                    if !tracker[dst].visited {
                         // mark visited
-                        tracker[dst - 1].visited = true;
+                        tracker[dst].visited = true;
                         // calculate distance & store parent for distance
-                        tracker[dst - 1].dist = tracker[src - 1].dist + 1;
-                        tracker[dst - 1].parent = Some(src);
+                        tracker[dst].dist = tracker[src].dist + 1;
+                        tracker[dst].parent = Some(src);
                         // push at the back of the queue for further scanning
                         queue.push_back(dst);
                     }
@@ -121,7 +137,7 @@ impl PathSearch for Graph {
         let mut tracker= self.get_tracker(false, Cost::MAX, None);
 
         // set cost at start node to zero with no parent node
-        tracker[start-1].dist = 0;
+        tracker[start].dist = 0;
 
         // push start node in the BinaryHeap queue
         queue.push(Step(start,0));
@@ -129,7 +145,7 @@ impl PathSearch for Graph {
         // while queue has nodes pick the node with the lowest cost
         while let Some(Step(node, _)) = queue.pop() {
 
-            let path_cost= tracker[node-1].dist;
+            let path_cost= tracker[node].dist;
             // if we have found the the target node
             // then we have completed our search
             // (Dijkstra's algo property - all nodes are processed once)
@@ -150,11 +166,11 @@ impl PathSearch for Graph {
                         let edge_cost = path_cost + cost;
 
                         // if new edge cost < currently known cost @edge
-                        if edge_cost < tracker[edge-1].dist {
+                        if edge_cost < tracker[edge].dist {
 
                             // set the new lower cost @node along with related parent Node
-                            tracker[edge-1].dist = edge_cost;
-                            tracker[edge-1].parent = Some(node);
+                            tracker[edge].dist = edge_cost;
+                            tracker[edge].parent = Some(node);
                             // push_front for Depth First Search -> slower but finds all paths
                             // push_back for Breadth First Search -> faster but finds best only
                             queue.push(Step(edge, edge_cost));

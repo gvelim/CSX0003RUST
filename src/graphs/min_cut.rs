@@ -248,13 +248,14 @@ mod test {
     fn test_min_cut_txt_graph() {
 
         let test_data = vec![
-            ("src/graphs/mc_input_random_1_6.txt", 4),
-            ("src/graphs/mc_input_random_10_25.txt", 12)
+            ("src/graphs/mc_input_random_1_6.txt", 4)
+            ,("src/graphs/mc_input_random_10_25.txt", 12)
+//            ,("src/graphs/mc_input_random_40_200.txt", 122)
         ];
 
         test_data.into_iter()
             .for_each(|(fname, cuts)| {
-                let g = Graph::import_text_graph(fname, ' ', '\0').expect("Cannot open file: mc_input_random_10_25.txt");
+                let g = Graph::import_text_graph(fname, ' ', '\0').expect(format!("Cannot open file: {}",fname).as_str());
                 let mc = g.minimum_cut();
                 assert!(mc.is_some());
                 let edges = mc.unwrap().export_edges();

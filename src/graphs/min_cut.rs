@@ -17,10 +17,10 @@ impl MinimumCut for Graph {
 
         // calculate the number of iterations as N*log(N)
         let nodes = self.nodes.len();
-        let mut iterations = nodes as u32 * nodes.ilog2();
+        let mut iterations = nodes; // as u32 * nodes.ilog2();
 
         // initialise min-cut min value and output as Option
-        let mut min_cut = 100;
+        let mut min_cut = usize::MAX;
         let mut result = None;
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
@@ -31,7 +31,6 @@ impl MinimumCut for Graph {
 
                 // extract the number of edges
                 let edges = graph.export_edges();
-                print!("Edges: {:?}", edges);
                 // count the edges
                 let edges = edges.len();
 
@@ -40,9 +39,8 @@ impl MinimumCut for Graph {
                 if edges < min_cut {
                     min_cut = edges;
                     result = Some(graph);
-                    print!(" << Min Cut !!")
+                    println!("Min Cut !! => {:?}", edges);
                 }
-                println!();
             }
             iterations -= 1;
         }

@@ -56,6 +56,12 @@ impl MinimumCut for Graph {
             fn get_super_edges(&self) -> SuperEdges {
                 SuperEdges { list: self.export_edges().into_iter().collect::<HashBag<Edge>>() }
             }
+            fn get_super_nodes(&self) -> HashMap<Node,HashSet<Node>> {
+                self.nodes.iter()
+                    .map(|&node| (node, HashSet::<Node>::new()))
+                    .map(|(node, mut map)| { map.insert(node); (node,map) })
+                    .collect::<HashMap<Node,HashSet<Node>>>()
+            }
         }
         struct SuperEdges {
             list: HashBag<Edge>
@@ -81,9 +87,9 @@ impl MinimumCut for Graph {
                     // collect any remaining
                     .collect::<HashSet<Edge>>()
             }
-            fn repoint_edges(&mut self, old: Node, new: Node) {
+            fn repoint_edges(&mut self, from: Node, to: Node) {
                 // Identify all edges affected due to the collapsing of nodes
-                self.get_edges_with_node(old)
+                self.get_edges_with_node(from)
                     .into_iter()
                     .for_each(|mut e| {
                         // we have only bad edges here hence this code does not have to deal with good edges
@@ -97,8 +103,8 @@ impl MinimumCut for Graph {
                         };
 
                         // fix the edge, we should no have loop so far such (dst,dst)
-                        if e.0 == old { e.0 = new }
-                        else if e.1 == old { e.1 = new }
+                        if e.0 == from { e.0 = to }
+                        else if e.1 == from { e.1 = to }
 
                         // insert back the fixed edge incl. any duplicates
                         while count != 0 {
@@ -115,16 +121,7 @@ impl MinimumCut for Graph {
 
         // STEP 1: INITIALISE temporary super node and super edge structures
         let mut super_edges = self.get_super_edges();
-        let mut super_nodes: HashMap<Node,HashSet<Node>> = self.nodes.iter()
-            .map(|&node| (node, HashSet::<Node>::new()))
-            .map(|(node, mut map)| {
-                map.insert(node);
-                (node,map)
-            })
-            .collect();
-
-        // println!("Super Nodes: {:?}",super_nodes);
-        // println!("Super Edges: {:?}",super_edges);
+        let mut super_nodes= self.get_super_nodes();
 
         // STEP 2: CONTRACT the graph, until 2 super nodes are left
         while super_nodes.len() > 2 {
@@ -134,7 +131,6 @@ impl MinimumCut for Graph {
                 // get a copy rather a reference so we don't upset the borrow checker
                 // while we deconstruct the edge into src and dst nodes
             let Edge(src,dst) = super_edges[idx];
-            // println!("Random Edge: ({src},{dst})");
 
             // STEP B : Contract the edge by merging the edge's nodes
                 // remove both nodes that form the random edge and
@@ -143,26 +139,18 @@ impl MinimumCut for Graph {
             let super_dst = super_nodes.remove(&dst).unwrap();
                 // combine the incoming/outgoing edges for attaching onto the new super-node
             let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
-            // println!("Merged super node: {src}->{:?}", super_node);
 
                 // re-insert the src node as the new super-node and attach the resulting union
             super_nodes.entry(src).or_insert(super_node);
 
-
             // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
-                // Hint: repeat until all edge loops have been removed
             super_edges.remove_edge( &Edge(src, dst));
             super_edges.remove_edge( &Edge(dst, src));
 
             // STEP D : Identify all edges affected due to the collapsing of nodes
             // STEP E : Repoint all affected edges to the new super node
             super_edges.repoint_edges(dst, src);
-
-            // println!("Round done\n=======");
-            // println!("Super Nodes: {:?}",super_nodes);
-            // println!("Super Edges: {:?}",super_edges);
         }
-        // println!("Graph: {:?}",self);
 
         // STEP 3 : find the edges between the two super node sets
         let (_, dst_set) = super_nodes.iter().last().unwrap();

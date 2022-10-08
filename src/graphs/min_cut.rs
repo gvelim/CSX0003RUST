@@ -1,5 +1,6 @@
 use crate::graphs::*;
 use std::collections::{HashMap, HashSet};
+use std::ops::Index;
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
@@ -51,13 +52,69 @@ impl MinimumCut for Graph {
 
     // ANCHOR: graphs_contraction
     fn contract_graph(&self) -> Option<Graph> {
+        impl Graph {
+            fn get_super_edges(&self) -> SuperEdges {
+                SuperEdges { list: self.export_edges().into_iter().collect::<HashBag<Edge>>() }
+            }
+        }
+        struct SuperEdges {
+            list: HashBag<Edge>
+        }
+        impl Index<usize> for SuperEdges {
+            type Output = Edge;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                self.list.iter().nth(index).unwrap()
+            }
+        }
+        impl SuperEdges {
+            fn len(&self) -> usize { self.list.len() }
+            fn remove_edge(&mut self, edge: &Edge) {
+                while self.list.remove(&edge) != 0 { };
+            }
+            fn get_edges_with_node(&self, node: Node) -> HashSet<Edge> {
+                self.list.iter()
+                    // filter out those not affected
+                    .filter(|&e| e.has_node(node) )
+                    // remove the reference
+                    .cloned()
+                    // collect any remaining
+                    .collect::<HashSet<Edge>>()
+            }
+            fn repoint_edges(&mut self, old: Node, new: Node) {
+                // Identify all edges affected due to the collapsing of nodes
+                self.get_edges_with_node(old)
+                    .into_iter()
+                    .for_each(|mut e| {
+                        // we have only bad edges here hence this code does not have to deal with good edges
+                        // count how many duplicates we have by calling remove once so we get the total number of duplicates
+                        let mut count = match self.list.remove(&e) {
+                            1 => 1usize,
+                            total => {
+                                while self.list.remove(&e) != 0 { }
+                                total
+                            }
+                        };
+
+                        // fix the edge, we should no have loop so far such (dst,dst)
+                        if e.0 == old { e.0 = new }
+                        else if e.1 == old { e.1 = new }
+
+                        // insert back the fixed edge incl. any duplicates
+                        while count != 0 {
+                            self.list.insert(e);
+                            count -= 1;
+                        }
+                    });
+            }
+        }
 
         if self.edges.is_empty() {
             return None;
         }
 
         // STEP 1: INITIALISE temporary super node and super edge structures
-        let mut super_edges = self.export_edges().into_iter().collect::<HashBag<Edge>>();
+        let mut super_edges = self.get_super_edges();
         let mut super_nodes: HashMap<Node,HashSet<Node>> = self.nodes.iter()
             .map(|&node| (node, HashSet::<Node>::new()))
             .map(|(node, mut map)| {
@@ -76,7 +133,7 @@ impl MinimumCut for Graph {
             let idx = thread_rng().gen_range(0..super_edges.len()-1);
                 // get a copy rather a reference so we don't upset the borrow checker
                 // while we deconstruct the edge into src and dst nodes
-            let Edge(src,dst) = super_edges.iter().nth(idx).copied().unwrap();
+            let Edge(src,dst) = super_edges[idx];
             // println!("Random Edge: ({src},{dst})");
 
             // STEP B : Contract the edge by merging the edge's nodes
@@ -94,37 +151,12 @@ impl MinimumCut for Graph {
 
             // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
                 // Hint: repeat until all edge loops have been removed
-            while super_edges.remove(&Edge(src,dst)) != 0 { };
-            while super_edges.remove(&Edge(dst,src)) != 0 { };
+            super_edges.remove_edge( &Edge(src, dst));
+            super_edges.remove_edge( &Edge(dst, src));
 
             // STEP D : Identify all edges affected due to the collapsing of nodes
-            let bad_edges = super_edges.iter()
-                // filter out those not affected
-                .filter(|&e| e.has_node(dst) )
-                // remove the reference
-                .cloned()
-                // collect any remaining
-                .collect::<HashSet<Edge>>();
-
-            // STEP E : Repoint affected edges to the new super node
-                // We have to remove, fix and reinsert 1..* all edges incl. any **duplicate** ones
-            for mut e in bad_edges {
-                // we have only bad edges here hence this code does not have to deal with good edges
-                // count how many duplicates we are about to remove
-                let mut edges = super_edges.contains(&e);
-                // then remove the bad edge incl. any duplicates
-                while super_edges.remove(&e) != 0 { }
-
-                // fix the edge, we should no have loop so far such (dst,dst)
-                if e.0 == dst { e.0 = src }
-                else if e.1 == dst { e.1 = src }
-
-                // insert back the fixed edge incl. any duplicates
-                while edges != 0 {
-                    super_edges.insert(e);
-                    edges -= 1;
-                }
-            }
+            // STEP E : Repoint all affected edges to the new super node
+            super_edges.repoint_edges(dst, src);
 
             // println!("Round done\n=======");
             // println!("Super Nodes: {:?}",super_nodes);

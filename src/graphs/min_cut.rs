@@ -23,7 +23,7 @@ impl MinimumCut for Graph {
         let mut result = None;
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
-        while iterations != 0 && min_cut > 4 {
+        while iterations != 0 {
 
             // contract the graph
             if let Some(graph) = self.contract_graph() {
@@ -82,8 +82,8 @@ impl MinimumCut for Graph {
             // STEP B : Contract the edge by merging the edge's nodes
                 // remove both nodes that form the random edge and
                 // hold onto the incoming/outgoing edges
-            let super_src = super_nodes.remove(&src).unwrap_or_default();
-            let super_dst = super_nodes.remove(&dst).unwrap_or_default();
+            let super_src = super_nodes.remove(&src).unwrap();
+            let super_dst = super_nodes.remove(&dst).unwrap();
                 // combine the incoming/outgoing edges for attaching onto the new super-node
             let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
             // println!("Merged super node: {src}->{:?}", super_node);
@@ -100,11 +100,7 @@ impl MinimumCut for Graph {
             // STEP D : Identify all edges affected due to the collapsing of nodes
             let bad_edges = super_edges.iter()
                 // filter out those not affected
-                .filter(|&e| match e {
-                    Edge(s, _) if *s == dst => true,
-                    Edge(_ , d) if *d == dst => true,
-                    _ => false
-                })
+                .filter(|&e| e.has_node(dst) )
                 // remove the reference
                 .cloned()
                 // collect any remaining
@@ -119,9 +115,9 @@ impl MinimumCut for Graph {
                 // then remove the bad edge incl. any duplicates
                 while super_edges.remove(&e) != 0 { }
 
-                // fix the edge
+                // fix the edge, we should no have loop so far such (dst,dst)
                 if e.0 == dst { e.0 = src }
-                if e.1 == dst { e.1 = src }
+                else if e.1 == dst { e.1 = src }
 
                 // insert back the fixed edge incl. any duplicates
                 while edges != 0 {

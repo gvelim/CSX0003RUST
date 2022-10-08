@@ -4,6 +4,7 @@ mod min_cut;
 mod path_search;
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
+use std::mem::swap;
 use crate::graphs::NodeType::NC;
 
 type Node = usize;
@@ -20,7 +21,7 @@ struct Edge(Node, Node);
 
 impl PartialEq for Edge {
     fn eq(&self, other: &Self) -> bool {
-        (self.0 == other.0 && self.1 == other.1) || (self.0 == other.1 && self.1 == other.0)
+        self.0 == other.0 && self.1 == other.1
     }
     fn ne(&self, other: &Self) -> bool {
         !self.eq(other)
@@ -35,25 +36,26 @@ impl Debug for Edge {
             .finish()
     }
 }
-/*
+
 impl Edge {
-    fn starts_at(&self, e: &Self) -> bool {
-        self.0 == e.1
+    fn has_node(&self, n:Node) -> bool {
+        self.0 == n || self.1 == n
     }
-    fn ends_at(&self, e: &Self) -> bool {
-        self.1 == e.0
+    fn from(&self, e: &Self) -> bool {
+        self.0 == e.1 // Edge(4,5).from( Edge(3,4) )
+    }
+    fn to(&self, e: &Self) -> bool {
+        self.1 == e.0 // Edge(4,5).to( Edge(5,6) )
     }
     fn is_adjacent(&self, other:&Self) -> bool {
-        (self.0 == other.0 || self.0 == other.1) || (self.1 == other.0 || self.1 == other.1)
+        self.from(other) || self.to(other)
     }
     fn is_loop(&self) -> bool {
         self.0 == self.1
     }
-    fn start(&mut self, e: &Self) { self.0 = e.1; }
-    fn end(&mut self, e: &Self) { self.1 = e.0; }
-    fn reverse(&self) -> Edge { Edge(self.1, self.0) }
+    fn reverse(&mut self) { swap( &mut self.1, &mut self.0); }
 }
- */
+
 
 #[derive(PartialEq)]
 struct Graph {

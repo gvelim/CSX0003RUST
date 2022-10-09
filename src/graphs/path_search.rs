@@ -4,6 +4,8 @@ use std::ops::{Index, IndexMut};
 use crate::graphs::*;
 use NodeType::{NC};
 
+// ANCHOR: graphs_search_path_utils
+// ANCHOR: graphs_search_path_utils_Step
 #[derive(Debug)]
 struct Step(Node,Cost);
 impl Eq for Step {}
@@ -24,7 +26,8 @@ impl Ord for Step {
         other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
     }
 }
-
+// ANCHOR_END: graphs_search_path_utils_Step
+// ANCHOR: graphs_search_path_utils_NodeTrack
 #[derive(Debug,Clone)]
 struct NodeTrack {
     visited:bool,
@@ -71,12 +74,15 @@ impl IndexMut<Node> for Tracker {
         &mut self.list[index-1]
     }
 }
-
+// ANCHOR_END: graphs_search_path_utils_NodeTrack
+// ANCHOR: graphs_search_path_utils_NodeTrack_graph
 impl Graph {
     fn get_tracker(&self, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
         Tracker{ list: vec![NodeTrack{visited, dist, parent}; self.nodes.len()] }
     }
 }
+// ANCHOR_END: graphs_search_path_utils_NodeTrack_graph
+// ANCHOR: graphs_search_path_utils
 
 trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
@@ -84,6 +90,7 @@ trait PathSearch {
 }
 
 impl PathSearch for Graph {
+    // ANCHOR: graphs_search_path_shortest
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)> {
 
         // setup queue
@@ -126,6 +133,8 @@ impl PathSearch for Graph {
 
         None
     }
+    // ANCHOR_END: graphs_search_path_shortest
+    // ANCHOR: graphs_search_path_min_cost
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
 
         // We are using a BinaryHeap queue in order to always have first in the queue
@@ -154,33 +163,38 @@ impl PathSearch for Graph {
                 println!("\t Path!: {:?} [{path_cost}]", path);
                 return Some((path, path_cost));
             }
-
             if let Some(edges) = self.edges.get(&node) {
                 edges.iter()
-                    .filter_map(|&edge| match edge {
-                        NC(node, cost) => Some((node, cost)),
-                        _ => panic!("Must use NodeType::NC")
-                    })
-                    .for_each(|(edge, cost)| {
-                        // calc the new path cost to edge
-                        let edge_cost = path_cost + cost;
-
-                        // if new edge cost < currently known cost @edge
-                        if edge_cost < tracker[edge].dist {
-
-                            // set the new lower cost @node along with related parent Node
-                            tracker[edge].dist = edge_cost;
-                            tracker[edge].parent = Some(node);
-                            // push_front for Depth First Search -> slower but finds all paths
-                            // push_back for Breadth First Search -> faster but finds best only
-                            queue.push(Step(edge, edge_cost));
+                    .filter_map(|&edge|
+                        if let NC(node, cost) = edge { Some((node, cost)) }
+                        else { panic!("Must use NodeType::NC") }
+                    )
+                    .filter_map(|(edge, cost)| {
+                        if tracker[edge].visited { None }
+                        else {
+                            // calc the new path cost to edge
+                            let edge_cost = path_cost + cost;
+                            // if new cost is better than previsously found
+                            if edge_cost > tracker[edge].dist  { None }
+                            else {
+                                // set the new lower cost @node along with related parent Node
+                                tracker[edge].dist = edge_cost;
+                                tracker[edge].parent = Some(node);
+                                Some((edge, edge_cost))
+                            }
                         }
+                    })
+                    .for_each(|(edge, edge_cost)| {
+                        // push unprocessed edge and cost to the queue
+                        queue.push(Step(edge, edge_cost));
                     });
             }
+            tracker[node].visited = true;
         }
         println!("Cannot find a path !!");
         None
     }
+// ANCHOR_END: graphs_search_path_min_cost
 }
 
 #[cfg(test)]

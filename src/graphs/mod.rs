@@ -55,6 +55,9 @@ impl Edge {
         self.0 == self.1
     }
     fn reverse(&mut self) { swap( &mut self.1, &mut self.0); }
+    fn replace_node(&mut self, from:Node, to:Node) {
+        if self.0 == from { self.0 = to } else if self.1 == from { self.1 = to }
+    }
 }
 
 

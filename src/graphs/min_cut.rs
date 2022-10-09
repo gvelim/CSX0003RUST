@@ -76,7 +76,7 @@ impl MinimumCut for Graph {
             fn remove_edge(&mut self, edge: &Edge) {
                 while self.list.remove(&edge) != 0 { };
             }
-            fn get_edges_with_node(&self, node: Node) -> HashSet<Edge> {
+            fn get_edges_at_node(&self, node: Node) -> HashSet<Edge> {
                 self.list.iter()
                     // filter out those not affected
                     .filter(|&e| e.has_node(node) )
@@ -85,28 +85,27 @@ impl MinimumCut for Graph {
                     // collect any remaining
                     .collect::<HashSet<Edge>>()
             }
-            fn repoint_edges(&mut self, from: Node, to: Node) {
+            fn repoint_edges(&mut self, old: Node, new: Node) {
                 // Identify all edges affected due to the collapsing of nodes
-                self.get_edges_with_node(from)
+                self.get_edges_at_node(old)
                     .into_iter()
-                    .for_each(|mut e| {
+                    .for_each(|mut edge| {
                         // we have only bad edges here hence this code does not have to deal with good edges
                         // count how many duplicates we have by calling remove once so we get the total number of duplicates
-                        let mut count = match self.list.remove(&e) {
+                        let mut count = match self.list.remove(&edge) {
                             1 => 1usize,
                             total => {
-                                while self.list.remove(&e) != 0 { }
+                                while self.list.remove(&edge) != 0 { }
                                 total
                             }
                         };
 
                         // fix the edge, we should no have loop so far such (dst,dst)
-                        if e.0 == from { e.0 = to }
-                        else if e.1 == from { e.1 = to }
+                        edge.replace_node(old, new);
 
                         // insert back the fixed edge incl. any duplicates
                         while count != 0 {
-                            self.list.insert(e);
+                            self.list.insert(edge);
                             count -= 1;
                         }
                     });
@@ -145,8 +144,8 @@ impl MinimumCut for Graph {
             super_edges.remove_edge( &Edge(src, dst));
             super_edges.remove_edge( &Edge(dst, src));
 
-            // STEP D : Identify all edges affected due to the collapsing of nodes
-            // STEP E : Repoint all affected edges to the new super node
+            // STEP D : Identify all edges that still point to the dst removed as part of collapsing src and dst nodes
+            // STEP E : Repoint all affected edges to the new super node src
             super_edges.repoint_edges(dst, src);
         }
 

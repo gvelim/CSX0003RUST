@@ -1,5 +1,5 @@
 use crate::graphs::*;
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, ops::Div};
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
@@ -22,9 +22,11 @@ impl MinimumCut for Graph {
         // initialise min-cut min value and output as Option
         let mut min_cut = usize::MAX;
         let mut result = None;
+        let repetitions = iterations;
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
-        while iterations != 0 {
+        let mut f = f32::MAX;
+        while iterations != 0 && f > 0.090 {
 
             // contract the graph
             if let Some(graph) = self.contract_graph() {
@@ -39,9 +41,10 @@ impl MinimumCut for Graph {
                 if edges < min_cut {
                     min_cut = edges;
                     result = Some(graph);
-                    println!("({iterations}) Min Cut !! => {:?}", edges);
+                    f = (min_cut as f32).div(repetitions as f32);
+                    println!("({iterations})({f:.3}) Min Cut !! => {:?}", edges);
                 }
-            }
+        }
             iterations -= 1;
         }
         result
@@ -213,19 +216,19 @@ mod test {
 
         // test dataset: Array[ (input_graph, minimum expected edges) ]
         let adj_list: Vec<(Vec<Vec<Node>>, usize)> = vec![
-            // (
-            //     vec![
-            //         vec![1, 2, 4, 3],
-            //         vec![2, 3, 1, 4, 5],
-            //         vec![3, 4, 2, 8, 1],
-            //         vec![4, 1, 3, 2],
-            //         vec![5, 6, 8, 7, 2],
-            //         vec![6, 7, 5, 8],
-            //         vec![7, 8, 6, 5],
-            //         vec![8, 5, 3, 7, 6]
-            //     ],
-            //     4
-            // ),
+            (
+                vec![
+                    vec![1, 2, 4, 3],
+                    vec![2, 3, 1, 4, 5],
+                    vec![3, 4, 2, 8, 1],
+                    vec![4, 1, 3, 2],
+                    vec![5, 6, 8, 7, 2],
+                    vec![6, 7, 5, 8],
+                    vec![7, 8, 6, 5],
+                    vec![8, 5, 3, 7, 6]
+                ],
+                4
+            ),
             (
                 vec![
                     vec![1, 2, 3, 4, 7],

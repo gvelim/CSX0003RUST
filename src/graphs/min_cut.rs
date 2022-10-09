@@ -26,7 +26,7 @@ impl MinimumCut for Graph {
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
         let mut f = f32::MAX;
-        while iterations != 0 && f > 0.090 {
+        while iterations != 0 && f > 0.089 {
 
             // contract the graph
             if let Some(graph) = self.contract_graph() {
@@ -108,11 +108,12 @@ impl MinimumCut for Graph {
             
                 // Fix Direction * -> OLD
                 self.list.values_mut()
-                    .for_each(|edges| {
-                        let mut count = match edges.remove(&old) {
-                            1 => 1usize,
-                            total=> { while edges.remove(&old) != 0 {}; total }
-                        };
+                    .filter_map( |e| {
+                        let count = e.contains(&old);
+                        if  count > 0  { Some((count, e)) } else { None }
+                    })
+                    .for_each(|(mut count, edges)| {
+                        while edges.remove(&old) != 0 {};
                         while count != 0 { edges.insert(new); count -= 1; }
                     });
                 // println!(" -> {:?}",self.list[&new]);

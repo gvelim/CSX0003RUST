@@ -16,7 +16,17 @@ enum NodeType {
     N(Node),
     NC(Node, Cost)
 }
+impl Into<Node> for NodeType {
+    #[inline]
+    fn into(self) -> Node {
+        match self { NodeType::N(node)|NC(node, _) => node }
+    }
+}
 
+impl Into<NodeType> for Node {
+    #[inline]
+    fn into(self) -> NodeType { NodeType::N(self) }
+}
 #[derive(Clone,Copy,Hash)]
 struct Edge(Node, Node);
 

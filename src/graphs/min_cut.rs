@@ -160,14 +160,12 @@ impl MinimumCut for Graph {
     // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
         let output = src_set.into_iter()
-            .fold(Graph::new(), |mut out, src| {
+            .fold(Graph::new(), |mut out, &src| {
                 // get src_node's edges from the original graph
-                let set: HashSet<Node> = self.edges.get(src)
+                let set: HashSet<Node> = self.edges.get(&src)
                     .unwrap()
                     .iter()
-                    .map(|&ntype| match ntype {
-                        NodeType::N(node)|NC(node, _) => node
-                    })
+                    .map(|&ntype| ntype.into())
                     .collect();
 
                 // Keep only the edges nodes found in the dst_set (intersection)
@@ -184,13 +182,13 @@ impl MinimumCut for Graph {
                             out.nodes.insert(dst);
                             out.edges.entry(dst)
                                 .or_insert(HashSet::new())
-                                .insert(NodeType::N(*src));
+                                .insert(src.into());
                         });
                     // add edges: direction src -> dst
-                    out.nodes.insert(*src);
+                    out.nodes.insert(src);
                     out.edges.insert(
-                        *src,
-                        edges.into_iter().map(|edge| NodeType::N(edge)).collect()
+                        src,
+                        edges.into_iter().map(|n| n.into()).collect()
                     );
                 }
                 out

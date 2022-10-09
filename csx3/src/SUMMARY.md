@@ -21,4 +21,6 @@
 - [Graphs](./graph.md)
   - [Krager's Minimum Cut](./graph_min_cut.md)
     - [Contraction Algorithm](./graph_contraction.md)
-  - [Shortest Path](./graph_shortest_path.md)
+  - [Path Search](./graph_path_search.md)
+    - [Shortest Distance](./graph_shortest_distance.md)
+    - [Minimum Path Cost](./graph_minimum_cost.md)

@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection">
-      <change afterPath="$PROJECT_DIR$/csx3/src/graph.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/csx3/src/graph_min_cut.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/graphs/README.md" afterDir="false" />
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/csx3/src/SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/SUMMARY.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +19,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="graphs" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -37,22 +36,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/csx3/src",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "terminal"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.build.tool.cargo&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/csx3/src" />
       <recent name="$PROJECT_DIR$/src/graphs" />
+      <recent name="$PROJECT_DIR$/csx3/src" />
     </key>
   </component>
   <component name="RunAnythingCache">
@@ -61,7 +60,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test min_cut::test">
+  <component name="RunManager" selected="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -147,8 +146,76 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test graphs::min_cut::test::test_min_cut_txt_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::min_cut::test::test_min_cut_txt_graph -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test graphs::path_search::test::large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::path_search::test::large_graph -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test graphs::path_search::test::small_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::path_search::test::small_graph -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test min_cut::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::min_cut::test" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="NIGHTLY" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test path_search::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::path_search::test" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -181,15 +248,19 @@
       <item itemvalue="Cargo.Run All Tests" />
       <item itemvalue="Cargo.Run DocTests" />
       <item itemvalue="Cargo.Run main" />
+      <item itemvalue="Cargo.Test graphs::path_search::test::large_graph" />
+      <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
+      <item itemvalue="Cargo.Test graphs::path_search::test::small_graph" />
       <item itemvalue="Cargo.Test min_cut::test" />
+      <item itemvalue="Cargo.Test path_search::test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
+        <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test graphs::path_search::test::small_graph" />
+        <item itemvalue="Cargo.Test graphs::path_search::test::large_graph" />
       </list>
     </recent_temporary>
   </component>
@@ -277,7 +348,210 @@
       <option name="project" value="LOCAL" />
       <updated>1658695900980</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="- fn() to read CSX graph test files&#10;- CSX Dijkstra's related test case">
+      <created>1664032151424</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1664032151425</updated>
+    </task>
+    <task id="LOCAL-00012" summary="refactoring code&#10;- split path_search from BFS module">
+      <created>1664034553144</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1664034553144</updated>
+    </task>
+    <task id="LOCAL-00013" summary="refactoring code">
+      <created>1664047279051</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1664047279051</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost">
+      <created>1664222024443</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1664222024443</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost">
+      <created>1664223772669</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1664223772669</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost">
+      <created>1664224725685</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1664224725685</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost">
+      <created>1664224766840</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1664224766840</updated>
+    </task>
+    <task id="LOCAL-00018" summary="refactoring&#10;- replace fold() with map().collect()&#10;- reduce HashMap calls within the loop">
+      <created>1664351304820</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1664351304820</updated>
+    </task>
+    <task id="LOCAL-00019" summary="refactoring min_cut.rs&#10;- replace fold() with map().collect()">
+      <created>1664555622104</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1664555622104</updated>
+    </task>
+    <task id="LOCAL-00020" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664622679060</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1664622679060</updated>
+    </task>
+    <task id="LOCAL-00021" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664633479559</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1664633479559</updated>
+    </task>
+    <task id="LOCAL-00022" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664633504984</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1664633504984</updated>
+    </task>
+    <task id="LOCAL-00023" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664633607895</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1664633607895</updated>
+    </task>
+    <task id="LOCAL-00024" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664634044697</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1664634044697</updated>
+    </task>
+    <task id="LOCAL-00025" summary="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path">
+      <created>1664644211416</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1664644211416</updated>
+    </task>
+    <task id="LOCAL-00026" summary="refactoring &#10;- Tracker initialisation from Graph">
+      <created>1664644657247</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1664644657247</updated>
+    </task>
+    <task id="LOCAL-00027" summary="refactoring &#10;- Tracker initialisation from Graph">
+      <created>1664644728564</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1664644728564</updated>
+    </task>
+    <task id="LOCAL-00028" summary="refactoring &#10;- Tracker initialisation from Graph&#10;- path distance iterator">
+      <created>1664645633934</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1664645633934</updated>
+    </task>
+    <task id="LOCAL-00029" summary="refactoring &#10;- Tracker initialisation from Graph&#10;- path distance iterator">
+      <created>1664645929410</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1664645929410</updated>
+    </task>
+    <task id="LOCAL-00030" summary="refactoring min-cut &#10;- test cases&#10;- workaround for nasty library bug? where edges are not removed in the HashBag causing zombie edges">
+      <created>1664720941636</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1664720941636</updated>
+    </task>
+    <task id="LOCAL-00031" summary="refactoring Tracker&#10;- Tracker indexing to [node] rather [node-1]">
+      <created>1664829012232</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1664829012232</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Fixing edge comparison bug that resulted to zombie edges">
+      <created>1665230829414</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1665230829414</updated>
+    </task>
+    <task id="LOCAL-00033" summary="refactoring fn min_cut(); encapsulating super edge handling inside a structure">
+      <created>1665267230729</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1665267230729</updated>
+    </task>
+    <task id="LOCAL-00034" summary="refactoring fn min_cut(); encapsulating super edge handling inside a structure">
+      <created>1665268938554</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1665268938554</updated>
+    </task>
+    <task id="LOCAL-00035" summary="refactoring fn min_cut(); super nodes creation moved into the graph">
+      <created>1665270103792</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1665270103792</updated>
+    </task>
+    <task id="LOCAL-00036" summary="minor refactoring of min_cuts()">
+      <created>1665304176439</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1665304176439</updated>
+    </task>
+    <task id="LOCAL-00037" summary="WIP">
+      <created>1665308894613</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1665308894613</updated>
+    </task>
+    <task id="LOCAL-00038" summary="WIP">
+      <created>1665321784694</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1665321784694</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait">
+      <created>1665322253792</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1665322253792</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -304,8 +578,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="idea files" />
-    <MESSAGE value="graph min-cut WIP" />
     <MESSAGE value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
     <MESSAGE value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
     <MESSAGE value="version 6 - WIP - exports Graph with min-cut" />
@@ -313,7 +585,25 @@
     <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
     <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
     <MESSAGE value="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection" />
-    <option name="LAST_COMMIT_MESSAGE" value="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection" />
+    <MESSAGE value="- fn() to read CSX graph test files&#10;- CSX Dijkstra's related test case" />
+    <MESSAGE value="refactoring code&#10;- split path_search from BFS module" />
+    <MESSAGE value="refactoring code" />
+    <MESSAGE value="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost" />
+    <MESSAGE value="refactoring&#10;- replace fold() with map().collect()&#10;- reduce HashMap calls within the loop" />
+    <MESSAGE value="refactoring min_cut.rs&#10;- replace fold() with map().collect()" />
+    <MESSAGE value="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path" />
+    <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph" />
+    <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph&#10;- path distance iterator" />
+    <MESSAGE value="refactoring" />
+    <MESSAGE value="refactoring min-cut &#10;- test cases&#10;- workaround for nasty library bug? where edges are not removed in the HashBag causing zombie edges" />
+    <MESSAGE value="refactoring Tracker&#10;- Tracker indexing to [node] rather [node-1]" />
+    <MESSAGE value="Fixing edge comparison bug that resulted to zombie edges" />
+    <MESSAGE value="refactoring fn min_cut(); encapsulating super edge handling inside a structure" />
+    <MESSAGE value="refactoring fn min_cut(); super nodes creation moved into the graph" />
+    <MESSAGE value="minor refactoring of min_cuts()" />
+    <MESSAGE value="WIP" />
+    <MESSAGE value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

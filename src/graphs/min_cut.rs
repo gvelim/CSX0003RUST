@@ -1,6 +1,5 @@
 use crate::graphs::*;
 use std::collections::{HashMap, HashSet};
-use std::ops::Index;
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
@@ -17,7 +16,8 @@ impl MinimumCut for Graph {
 
         // calculate the number of iterations as N*log(N)
         let nodes = self.nodes.len();
-        let mut iterations = nodes; // as u32 * nodes.ilog2();
+        let mut iterations = nodes as u32 * nodes.ilog2();
+        println!("Run Iterations: {iterations}");
 
         // initialise min-cut min value and output as Option
         let mut min_cut = usize::MAX;
@@ -39,7 +39,7 @@ impl MinimumCut for Graph {
                 if edges < min_cut {
                     min_cut = edges;
                     result = Some(graph);
-                    println!("Min Cut !! => {:?}", edges);
+                    println!("({iterations}) Min Cut !! => {:?}", edges);
                 }
             }
             iterations -= 1;
@@ -52,7 +52,11 @@ impl MinimumCut for Graph {
     fn contract_graph(&self) -> Option<Graph> {
         impl Graph {
             fn get_super_edges(&self) -> SuperEdges {
-                SuperEdges { list: self.export_edges().into_iter().collect::<HashBag<Edge>>() }
+                let list = self.edges.iter()
+                    .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect())
+                    ).collect();
+                // println!("get_super_edges(): {:?}",list);
+                SuperEdges { list }
             }
             fn get_super_nodes(&self) -> HashMap<Node,HashSet<Node>> {
                 self.nodes.iter()
@@ -61,54 +65,54 @@ impl MinimumCut for Graph {
                     .collect::<HashMap<Node,HashSet<Node>>>()
             }
         }
+        #[derive(Debug)]
         struct SuperEdges {
-            list: HashBag<Edge>
-        }
-        impl Index<usize> for SuperEdges {
-            type Output = Edge;
-
-            fn index(&self, index: usize) -> &Self::Output {
-                self.list.iter().nth(index).unwrap()
-            }
+            list: HashMap<Node, HashBag<Node>>
         }
         impl SuperEdges {
-            fn len(&self) -> usize { self.list.len() }
+            fn get_random_edge(&self) -> Edge {
+                let mut idx = thread_rng().gen_range(0..self.list.len()-1);
+                let (&node, edges) =
+                    self.list.iter()
+                        .nth(idx)
+                        .expect(format!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})").as_str());
+                // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
+                idx = thread_rng().gen_range(0..edges.len()-1);
+                // println!("{idx})");
+                Edge(
+                    node,
+                    self.list[&node].iter()
+                        .nth(idx)
+                        .copied()
+                        .expect(format!("get_random_edge(): cannot get dst node at position({idx})").as_str())
+                )
+            }
             fn remove_edge(&mut self, edge: &Edge) {
-                while self.list.remove(&edge) != 0 { };
+                let Edge(src, dst) = edge;
+                // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
+                while self.list.get_mut(src)
+                    .expect(format!("remove_edge(): Node({src}) cannot be found within SuperEdges").as_str())
+                    .remove(dst) != 0 { };
+                // println!("{:?}",self);
             }
-            fn get_edges_at_node(&self, node: Node) -> HashSet<Edge> {
-                self.list.iter()
-                    // filter out those not affected
-                    .filter(|&e| e.has_node(node) )
-                    // remove the reference
-                    .cloned()
-                    // collect any remaining
-                    .collect::<HashSet<Edge>>()
-            }
-            fn repoint_edges(&mut self, old: Node, new: Node) {
-                // Identify all edges affected due to the collapsing of nodes
-                self.get_edges_at_node(old)
-                    .into_iter()
-                    .for_each(|mut edge| {
-                        // we have only bad edges here hence this code does not have to deal with good edges
-                        // count how many duplicates we have by calling remove once so we get the total number of duplicates
-                        let mut count = match self.list.remove(&edge) {
+            fn move_edges(&mut self, old: Node, new: Node) {
+                // Fix direction OLD -> *
+                let old_edges = self.list.remove(&old).expect(format!("move_edges(): cannot remove old node({old})").as_str());
+                // print!("move_edges(): {old}:{:?}, {new}:{:?}", old_edges,self.list[&new]);
+                self.list.get_mut(&new)
+                    .expect("")
+                    .extend( old_edges.into_iter());
+            
+                // Fix Direction * -> OLD
+                self.list.values_mut()
+                    .for_each(|edges| {
+                        let mut count = match edges.remove(&old) {
                             1 => 1usize,
-                            total => {
-                                while self.list.remove(&edge) != 0 { }
-                                total
-                            }
+                            total=> { while edges.remove(&old) != 0 {}; total }
                         };
-
-                        // fix the edge, we should no have loop so far such (dst,dst)
-                        edge.replace_node(old, new);
-
-                        // insert back the fixed edge incl. any duplicates
-                        while count != 0 {
-                            self.list.insert(edge);
-                            count -= 1;
-                        }
+                        while count != 0 { edges.insert(new); count -= 1; }
                     });
+                // println!(" -> {:?}",self.list[&new]);
             }
         }
 
@@ -124,10 +128,10 @@ impl MinimumCut for Graph {
         while super_nodes.len() > 2 {
 
             // STEP A: select a random edge
-            let idx = thread_rng().gen_range(0..super_edges.len()-1);
                 // get a copy rather a reference so we don't upset the borrow checker
                 // while we deconstruct the edge into src and dst nodes
-            let Edge(src,dst) = super_edges[idx];
+            let Edge(src,dst) = super_edges.get_random_edge();
+            // println!("While: E({src},{dst}):{:?}",super_edges.list);
 
             // STEP B : Contract the edge by merging the edge's nodes
                 // remove both nodes that form the random edge and
@@ -146,7 +150,7 @@ impl MinimumCut for Graph {
 
             // STEP D : Identify all edges that still point to the dst removed as part of collapsing src and dst nodes
             // STEP E : Repoint all affected edges to the new super node src
-            super_edges.repoint_edges(dst, src);
+            super_edges.move_edges(dst, src);
         }
 
         // STEP 3 : find the edges between the two super node sets
@@ -165,9 +169,7 @@ impl MinimumCut for Graph {
                 let set: HashSet<Node> = self.edges.get(src)
                     .unwrap()
                     .iter()
-                    .map(|&ntype| match ntype {
-                        NodeType::N(node)|NC(node, _) => node
-                    })
+                    .map(|&ntype| ntype.into() )
                     .collect();
 
                 // Keep only the edges nodes found in the dst_set (intersection)
@@ -211,19 +213,19 @@ mod test {
 
         // test dataset: Array[ (input_graph, minimum expected edges) ]
         let adj_list: Vec<(Vec<Vec<Node>>, usize)> = vec![
-            (
-                vec![
-                    vec![1, 2, 4, 3],
-                    vec![2, 3, 1, 4, 5],
-                    vec![3, 4, 2, 8, 1],
-                    vec![4, 1, 3, 2],
-                    vec![5, 6, 8, 7, 2],
-                    vec![6, 7, 5, 8],
-                    vec![7, 8, 6, 5],
-                    vec![8, 5, 3, 7, 6]
-                ],
-                4
-            ),
+            // (
+            //     vec![
+            //         vec![1, 2, 4, 3],
+            //         vec![2, 3, 1, 4, 5],
+            //         vec![3, 4, 2, 8, 1],
+            //         vec![4, 1, 3, 2],
+            //         vec![5, 6, 8, 7, 2],
+            //         vec![6, 7, 5, 8],
+            //         vec![7, 8, 6, 5],
+            //         vec![8, 5, 3, 7, 6]
+            //     ],
+            //     4
+            // ),
             (
                 vec![
                     vec![1, 2, 3, 4, 7],
@@ -263,7 +265,7 @@ mod test {
         let test_data = vec![
             ("src/graphs/mc_input_random_1_6.txt", 4)
             ,("src/graphs/mc_input_random_10_25.txt", 12)
-//            ,("src/graphs/mc_input_random_40_200.txt", 122)
+            ,("src/graphs/mc_input_random_40_200.txt", 122)
         ];
 
         test_data.into_iter()

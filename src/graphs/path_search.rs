@@ -114,23 +114,24 @@ impl PathSearch for Graph {
                 .unwrap()
                 // scan each dst from src node
                 .iter()
-                .filter_map(|ntype| match ntype {
-                    NodeType::N(dst) | NC(dst, _) => Some(dst)
+                .map(|ntype| match ntype {
+                    NodeType::N(dst) | NC(dst, _) => dst
                 })
-                .for_each(|&dst| {
-                    // if not visited yet
-                    if !tracker[dst].visited {
+                .filter_map(|&dst| {
+                    // if visited do not proceed
+                    if tracker[dst].visited { None }
+                    else {
                         // mark visited
                         tracker[dst].visited = true;
                         // calculate distance & store parent for distance
                         tracker[dst].dist = tracker[src].dist + 1;
                         tracker[dst].parent = Some(src);
                         // push at the back of the queue for further scanning
-                        queue.push_back(dst);
+                        Some(dst)
                     }
-                });
+                })
+                .for_each(|dst| { queue.push_back(dst) })
         }
-
         None
     }
     // ANCHOR_END: graphs_search_path_shortest
@@ -165,8 +166,8 @@ impl PathSearch for Graph {
             }
             if let Some(edges) = self.edges.get(&node) {
                 edges.iter()
-                    .filter_map(|&edge|
-                        if let NC(node, cost) = edge { Some((node, cost)) }
+                    .map(|&edge|
+                        if let NC(node, cost) = edge { (node, cost) }
                         else { panic!("Must use NodeType::NC") }
                     )
                     .filter_map(|(edge, cost)| {

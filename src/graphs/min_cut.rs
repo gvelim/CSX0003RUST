@@ -3,7 +3,6 @@ use std::{collections::{HashMap, HashSet}, ops::Div};
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
-
 trait MinimumCut {
     fn minimum_cut(&self) -> Option<Graph>;
     fn contract_graph(&self) -> Option<Graph>;
@@ -22,7 +21,7 @@ impl MinimumCut for Graph {
         // initialise min-cut min value and output as Option
         let mut min_cut = usize::MAX;
         let mut result = None;
-        let repetitions = iterations;
+        let repetitions = iterations as f32;
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
         let mut f = f32::MAX;
@@ -41,7 +40,7 @@ impl MinimumCut for Graph {
                 if edges < min_cut {
                     min_cut = edges;
                     result = Some(graph);
-                    f = (min_cut as f32).div(repetitions as f32);
+                    f = (min_cut as f32).div(repetitions);
                     println!("({iterations})({f:.3}) Min Cut !! => {:?}", edges);
                 }
         }
@@ -74,13 +73,13 @@ impl MinimumCut for Graph {
         }
         impl SuperEdges {
             fn get_random_edge(&self) -> Edge {
-                let mut idx = thread_rng().gen_range(0..self.list.len()-1);
+                let mut idx = thread_rng().gen_range(0..self.list.len());
                 let (&node, edges) =
                     self.list.iter()
                         .nth(idx)
                         .expect(format!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})").as_str());
                 // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
-                idx = thread_rng().gen_range(0..edges.len()-1);
+                idx = thread_rng().gen_range(0..edges.len());
                 // println!("{idx})");
                 Edge(
                     node,
@@ -100,10 +99,12 @@ impl MinimumCut for Graph {
             }
             fn move_edges(&mut self, old: Node, new: Node) {
                 // Fix direction OLD -> *
-                let old_edges = self.list.remove(&old).expect(format!("move_edges(): cannot remove old node({old})").as_str());
+                let old_edges = self.list
+                    .remove(&old)
+                    .expect(format!("move_edges(): cannot remove old node({old})").as_str());
                 // print!("move_edges(): {old}:{:?}, {new}:{:?}", old_edges,self.list[&new]);
                 self.list.get_mut(&new)
-                    .expect("")
+                    .expect(format!("move_edges(): failed to extend({new}) with {:?} from({new})", old_edges).as_str())
                     .extend( old_edges.into_iter());
             
                 // Fix Direction * -> OLD

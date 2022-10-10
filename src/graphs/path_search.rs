@@ -114,10 +114,8 @@ impl PathSearch for Graph {
                 .unwrap()
                 // scan each dst from src node
                 .iter()
-                .map(|ntype| match ntype {
-                    NodeType::N(dst) | NC(dst, _) => dst
-                })
-                .filter_map(|&dst| {
+                .map(|&ntype| ntype.into() )
+                .filter_map(|dst| {
                     // if visited do not proceed
                     if tracker[dst].visited { None }
                     else {

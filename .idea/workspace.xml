@@ -8,9 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="min_cut() refactor minor">
-      <change afterPath="$PROJECT_DIR$/src/graphs/mc_input_random_20_75.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphs/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +60,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test graphs::path_search::test::test_path_search_large_graph">
+  <component name="RunManager" selected="Cargo.Test min_cut::test">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -164,23 +163,6 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test graphs::min_cut::test::test_min_cut_txt_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::min_cut::test::test_min_cut_txt_graph -- --exact" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <envs />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Test graphs::path_search::test::test_path_search_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_search_large_graph -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -200,6 +182,23 @@
     </configuration>
     <configuration name="Test graphs::path_search::test::test_path_shortest_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_shortest_large_graph -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test min_cut::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::min_cut::test" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -249,19 +248,19 @@
       <item itemvalue="Cargo.Run All Tests" />
       <item itemvalue="Cargo.Run DocTests" />
       <item itemvalue="Cargo.Run main" />
+      <item itemvalue="Cargo.Test min_cut::test" />
       <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
-      <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
       <item itemvalue="Cargo.Test path_search::test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
         <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
-        <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
-        <item itemvalue="Cargo.Test path_search::test" />
       </list>
     </recent_temporary>
   </component>

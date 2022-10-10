@@ -76,26 +76,22 @@ impl MinimumCut for Graph {
             fn get_random_edge(&self) -> Edge {
                 let mut idx = thread_rng().gen_range(0..self.list.len());
                 let (&node, edges) =
-                    self.list.iter()
-                        .nth(idx)
+                    self.list.iter().nth(idx)
                         .expect(format!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})").as_str());
                 // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
                 idx = thread_rng().gen_range(0..edges.len());
                 // println!("{idx})");
                 Edge(
                     node,
-                    self.list[&node].iter()
-                        .nth(idx)
-                        .copied()
+                    self.list[&node].iter().nth(idx).cloned()
                         .expect(format!("get_random_edge(): cannot get dst node at position({idx})").as_str())
                 )
             }
-            fn remove_edge(&mut self, edge: &Edge) {
-                let Edge(src, dst) = edge;
+            fn remove_edge(&mut self, src: Node, dst: Node) {
                 // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
-                while self.list.get_mut(src)
+                while self.list.get_mut(&src)
                     .expect(format!("remove_edge(): Node({src}) cannot be found within SuperEdges").as_str())
-                    .remove(dst) != 0 { };
+                    .remove(&dst) != 0 { };
                 // println!("{:?}",self);
             }
             fn move_edges(&mut self, old: Node, new: Node) {
@@ -151,8 +147,8 @@ impl MinimumCut for Graph {
             super_nodes.entry(src).or_insert(super_node);
 
             // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
-            super_edges.remove_edge( &Edge(src, dst));
-            super_edges.remove_edge( &Edge(dst, src));
+            super_edges.remove_edge( src, dst);
+            super_edges.remove_edge( dst, src);
 
             // STEP D : Identify all edges that still point to the dst removed as part of collapsing src and dst nodes
             // STEP E : Repoint all affected edges to the new super node src

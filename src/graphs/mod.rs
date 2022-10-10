@@ -88,12 +88,11 @@ impl Graph {
         use NodeType::*;
 
         self.edges.iter()
-            .fold( HashSet::<Edge>::new(), |mut edges, (src_node, dst_nodes)| {
+            .fold( HashSet::<Edge>::new(),|mut edges, (src_node, dst_nodes)| {
                 dst_nodes.iter()
-                    .for_each(|dst_node| {
+                    .for_each(|&dst_node| {
                         match dst_node {
-                            &N(node) |
-                            &NC(node, _) => {
+                            N(node) | NC(node, _) => {
                                 edges.insert(Edge(*src_node, node));
                                 edges.insert(Edge(node, *src_node));
                             }
@@ -103,8 +102,6 @@ impl Graph {
             })
     }
     fn import_edges( list: &[Vec<Node>] ) -> Result<Self, Error> {
-        use NodeType::N;
-
         let mut graph = Graph::new();
 
         list.into_iter().
@@ -117,10 +114,9 @@ impl Graph {
                     .for_each(|dst| {
                         graph.edges.entry(*src)
                             .or_insert(HashSet::new())
-                            .insert(N(*dst));
+                            .insert((*dst).into());
                     })
             });
-
         Ok(graph)
     }
     fn from_edge_list(edge_list: &Vec<(Node, Node, Cost)>) -> Self {

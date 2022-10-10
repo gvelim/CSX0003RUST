@@ -1,5 +1,6 @@
 use crate::graphs::*;
 use std::{collections::{HashMap, HashSet}, ops::Div};
+use std::fmt::format;
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
@@ -159,47 +160,52 @@ impl MinimumCut for Graph {
         }
 
         // STEP 3 : find the edges between the two super node sets
-        let (_, dst_set) = super_nodes.iter().last().unwrap();
-        let (_, src_set) = super_nodes.iter().next().unwrap();
-
-        Some( self.get_crossing_edges(src_set, dst_set) )
+        let mut snode_iter = super_nodes.iter();
+        Some(
+            self.get_crossing_edges(
+                snode_iter.next().expect("There is no src super node").1,
+                snode_iter.next().expect("There is no dst super node").1
+            )
+        )
     }
     // ANCHOR_END: graphs_contraction
 
     // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
         let output = src_set.into_iter()
-            .fold(Graph::new(), |mut out, src| {
-                // get src_node's edges from the original graph
-                let set: HashSet<Node> = self.edges.get(src)
-                    .unwrap()
-                    .iter()
-                    .map(|&ntype| ntype.into() )
-                    .collect();
-
+            .map(|src|
+                ( src,
+                  // get src_node's edges from the original graph
+                  self.edges.get(src)
+                      .expect(format!("get_crossing_edges(): cannot extract edges for node({src}").as_str())
+                      .iter()
+                      .map(|&ntype| ntype.into() )
+                      .collect::<HashSet<Node>>()
+                )
+            )
+            .map(|(src, set)|
                 // Keep only the edges nodes found in the dst_set (intersection)
                 // we need to clone the reference before we push them
                 // into the output graph structure
-                let edges = set.intersection(dst_set).copied().collect::<HashSet<Node>>();
+                (src, set.intersection(dst_set).copied().collect::<HashSet<Node>>())
+            )
+            .filter(|(_, edges)| !edges.is_empty() )
+            .fold(Graph::new(), |mut out, (&src, edges)| {
                 // println!("Node: {node} -> {:?}",edges);
-                
-                // add only edges connecting src & dst super node sets
-                if !edges.is_empty() {
-                    // add edges: direction dst -> src
-                    edges.iter()
-                        .for_each(|&dst| {
-                            out.nodes.insert(dst);
-                            out.edges.entry(dst)
-                                .or_insert(HashSet::new())
-                                .insert(NodeType::N(*src));
-                        });
-                    // add edges: direction src -> dst
-                    out.nodes.insert(*src);
-                    out.edges.insert(
-                        *src,
-                        edges.into_iter().map(|edge| NodeType::N(edge)).collect()
-                    );
-                }
+                // add edges: direction dst -> src
+                edges.iter()
+                    .for_each(|&dst| {
+                        out.nodes.insert(dst);
+                        out.edges.entry(dst)
+                            .or_insert(HashSet::new())
+                            .insert(src.into() );
+                    });
+                // add edges: direction src -> dst
+                out.nodes.insert(src);
+                out.edges.insert(
+                    src,
+                    edges.into_iter().map(|edge| edge.into()).collect()
+                );
                 out
             });
         // println!("Crossing graph: {:?}", output);
@@ -270,6 +276,7 @@ mod test {
         let test_data = vec![
             ("src/graphs/mc_input_random_1_6.txt", 4)
             ,("src/graphs/mc_input_random_10_25.txt", 12)
+            ,("src/graphs/mc_input_random_20_75.txt", 32)
             ,("src/graphs/mc_input_random_40_200.txt", 122)
         ];
 

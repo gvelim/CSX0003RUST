@@ -7,7 +7,8 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait">
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="min_cut() refactor minor">
+      <change afterPath="$PROJECT_DIR$/src/graphs/mc_input_random_20_75.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
     </list>
@@ -19,7 +20,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="graphs" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -60,7 +61,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph">
+  <component name="RunManager" selected="Cargo.Test graphs::path_search::test::test_path_search_large_graph">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -146,6 +147,23 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test graphs::min_cut::test::test_min_cut" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::min_cut::test::test_min_cut -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Test graphs::min_cut::test::test_min_cut_txt_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::min_cut::test::test_min_cut_txt_graph -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -163,8 +181,8 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test graphs::path_search::test::large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::path_search::test::large_graph -- --exact" />
+    <configuration name="Test graphs::path_search::test::test_path_search_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_search_large_graph -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -180,27 +198,10 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test graphs::path_search::test::small_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::path_search::test::small_graph -- --exact" />
+    <configuration name="Test graphs::path_search::test::test_path_shortest_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_shortest_large_graph -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <envs />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test min_cut::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::min_cut::test" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <option name="channel" value="NIGHTLY" />
       <option name="requiredFeatures" value="true" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -248,19 +249,19 @@
       <item itemvalue="Cargo.Run All Tests" />
       <item itemvalue="Cargo.Run DocTests" />
       <item itemvalue="Cargo.Run main" />
-      <item itemvalue="Cargo.Test graphs::path_search::test::large_graph" />
+      <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
+      <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
+      <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
       <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
-      <item itemvalue="Cargo.Test graphs::path_search::test::small_graph" />
-      <item itemvalue="Cargo.Test min_cut::test" />
       <item itemvalue="Cargo.Test path_search::test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
+        <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
+        <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
         <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut_txt_graph" />
         <item itemvalue="Cargo.Test path_search::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test graphs::path_search::test::small_graph" />
-        <item itemvalue="Cargo.Test graphs::path_search::test::large_graph" />
       </list>
     </recent_temporary>
   </component>
@@ -551,7 +552,14 @@
       <option name="project" value="LOCAL" />
       <updated>1665322253792</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="min_cut() refactor minor">
+      <created>1665420803851</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1665420803851</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -578,7 +586,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph" />
     <MESSAGE value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
     <MESSAGE value="version 6 - WIP - exports Graph with min-cut" />
     <MESSAGE value="vesion 6 - WIP - exports Graph with min-cut" />
@@ -603,7 +610,8 @@
     <MESSAGE value="minor refactoring of min_cuts()" />
     <MESSAGE value="WIP" />
     <MESSAGE value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
+    <MESSAGE value="min_cut() refactor minor" />
+    <option name="LAST_COMMIT_MESSAGE" value="min_cut() refactor minor" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -111,7 +111,7 @@ impl PathSearch for Graph {
             self.edges
                 // get graph edges from src node
                 .get(&src)
-                .unwrap()
+                .expect(format!("path_distance(): Cannot extract edges for node {src}").as_str())
                 // scan each dst from src node
                 .iter()
                 .map(|&ntype| ntype.into() )

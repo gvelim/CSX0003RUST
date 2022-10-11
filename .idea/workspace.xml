@@ -8,8 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="min_cut() refactor minor">
-      <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graphs/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +59,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test min_cut::test">
+  <component name="RunManager" selected="Cargo.Test path_search::test">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -256,8 +255,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test min_cut::test" />
         <item itemvalue="Cargo.Test path_search::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
         <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
@@ -558,7 +557,14 @@
       <option name="project" value="LOCAL" />
       <updated>1665420803851</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="min_cut() refactor minor">
+      <created>1665444525040</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1665444525040</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

@@ -168,7 +168,7 @@ impl MinimumCut for Graph {
 
     // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
-        let output = src_set.into_iter()
+        src_set.into_iter()
             .map(|src|
                 ( src,
                   // get src_node's edges from the original graph
@@ -203,9 +203,7 @@ impl MinimumCut for Graph {
                     edges.into_iter().map(|edge| edge.into()).collect()
                 );
                 out
-            });
-        // println!("Crossing graph: {:?}", output);
-        output
+            })
     }
     // ANCHOR_END: graphs_crossing
 }

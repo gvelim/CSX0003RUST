@@ -111,13 +111,13 @@ impl PathSearch for Graph {
             self.edges
                 // get graph edges from src node
                 .get(&src)
-                .expect(format!("path_distance(): Cannot extract edges for node {src}").as_str())
+                .unwrap_or_else(|| panic!("path_distance(): Cannot extract edges for node {src}"))
                 // scan each dst from src node
                 .iter()
                 .map(|&ntype| ntype.into() )
-                .filter_map(|dst| {
+                .filter(|&dst| {
                     // if visited do not proceed
-                    if tracker[dst].visited { None }
+                    if tracker[dst].visited { false }
                     else {
                         // mark visited
                         tracker[dst].visited = true;
@@ -125,7 +125,7 @@ impl PathSearch for Graph {
                         tracker[dst].dist = tracker[src].dist + 1;
                         tracker[dst].parent = Some(src);
                         // push at the back of the queue for further scanning
-                        Some(dst)
+                        true
                     }
                 })
                 .for_each(|dst| { queue.push_back(dst) })

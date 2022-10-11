@@ -104,29 +104,29 @@ impl Graph {
     fn import_edges( list: &[Vec<Node>] ) -> Result<Self, Error> {
         let mut graph = Graph::new();
 
-        list.into_iter().
+        list.iter().
             map(|edges| {
                 (&edges[0],&edges[1..])
             })
             .for_each(|(src, dst)| {
                 graph.nodes.insert(*src);
-                dst.into_iter()
+                dst.iter()
                     .for_each(|dst| {
                         graph.edges.entry(*src)
-                            .or_insert(HashSet::new())
+                            .or_default()
                             .insert((*dst).into());
                     })
             });
         Ok(graph)
     }
-    fn from_edge_list(edge_list: &Vec<(Node, Node, Cost)>) -> Self {
+    fn from_edge_list(edge_list: &[(Node, Node, Cost)]) -> Self {
         let mut adjacency_list: HashMap<Node, HashSet<NodeType>> = HashMap::new();
         let mut nodes = HashSet::new();
 
         for &(source, destination, cost) in edge_list.iter() {
             let destinations = adjacency_list
                 .entry(source)
-                .or_insert_with(|| HashSet::new());
+                .or_insert_with(HashSet::new);
 
             destinations.insert(NC(destination, cost));
 
@@ -143,25 +143,25 @@ impl Graph {
         use std::{fs::File, path::Path, io::{BufRead, BufReader}, str::FromStr};
 
         let mut g = Graph::new();
-        let f = File::open(Path::new(file)).expect(format!("Could not open {file}").as_str());
+        let f = File::open(Path::new(file)).unwrap_or_else(|e| panic!("Could not open {file}: {e}"));
         let buf = BufReader::new(f);
 
         buf.lines().into_iter()
             .enumerate()
-            .filter_map(|(num,line)| Some((num, line.expect(format!("Cannot read line:{num} from file").as_str()))) )
+            .map(|(num,line)| (num, line.unwrap_or_else(|e| panic!("Cannot read line:{num} from file: {e}") )))
             .for_each(|(num,line)| {
-                let mut part = line.split(node_pat).into_iter();
-                let node = Node::from_str(part.next().unwrap()).expect(format!("Line {num}: Cannot extract Node from line").as_str());
+                let mut part = line.split(node_pat);
+                let node = Node::from_str(part.next().unwrap()).unwrap_or_else(|e| panic!("Line {num}: Cannot extract Node from line {e}"));
                 g.nodes.insert(node);
 
                 while let Some(txt) = part.next() {
                     let edge = match edge_pat {
-                        '\0' => NodeType::N( Node::from_str(txt).expect(format!("Line {num}: Cannot convert {txt} to Edge").as_str()) ),
+                        '\0' => NodeType::N( Node::from_str(txt).unwrap_or_else(|e| panic!("Line {num}: Cannot convert {txt} to Edge {e}")) ),
                         ',' =>
                             if let Some((e_str, c_str)) = txt.split_once(edge_pat) {
                                 NC(
-                                    Node::from_str(e_str).expect(format!("Line {num}: Cannot convert {e_str} to Edge").as_str()),
-                                    Cost::from_str(c_str).expect(format!("Line {num}: Cannot convert {c_str} to Cost").as_str())
+                                    Node::from_str(e_str).unwrap_or_else(|e| panic!("Line {num}: Cannot convert {e_str} to Edge {e}")),
+                                    Cost::from_str(c_str).unwrap_or_else(|e| panic!("Line {num}: Cannot convert {c_str} to Cost {e}"))
                                 )
                             } else {
                                 panic!("Cannot convert {txt} into (edge, cost): line {num} ends with a tab ??")
@@ -169,7 +169,7 @@ impl Graph {
                         pat => panic!("Unkown delimiter:({}) within txt:({txt}",pat)
                     };
                     g.edges.entry(node)
-                        .or_insert(HashSet::new())
+                        .or_default()
                         .insert(edge);
                 }
                 // println!("{} -> {:?}",node, g.edges[&node])

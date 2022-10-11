@@ -1,6 +1,5 @@
 use crate::graphs::*;
 use std::{collections::{HashMap, HashSet}, ops::Div};
-use std::fmt::format;
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
@@ -77,20 +76,20 @@ impl MinimumCut for Graph {
                 let mut idx = thread_rng().gen_range(0..self.list.len());
                 let (&node, edges) =
                     self.list.iter().nth(idx)
-                        .expect(format!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})").as_str());
+                        .unwrap_or_else(|| panic!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})"));
                 // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
                 idx = thread_rng().gen_range(0..edges.len());
                 // println!("{idx})");
                 Edge(
                     node,
                     self.list[&node].iter().nth(idx).cloned()
-                        .expect(format!("get_random_edge(): cannot get dst node at position({idx})").as_str())
+                        .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
                 )
             }
             fn remove_edge(&mut self, src: Node, dst: Node) {
                 // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
                 while self.list.get_mut(&src)
-                    .expect(format!("remove_edge(): Node({src}) cannot be found within SuperEdges").as_str())
+                    .unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"))
                     .remove(&dst) != 0 { };
                 // println!("{:?}",self);
             }
@@ -98,10 +97,10 @@ impl MinimumCut for Graph {
                 // Fix direction OLD -> *
                 let old_edges = self.list
                     .remove(&old)
-                    .expect(format!("move_edges(): cannot remove old node({old})").as_str());
+                    .unwrap_or_else(|| panic!("move_edges(): cannot remove old node({old})"));
                 // print!("move_edges(): {old}:{:?}, {new}:{:?}", old_edges,self.list[&new]);
                 self.list.get_mut(&new)
-                    .expect(format!("move_edges(): failed to extend({new}) with {:?} from({new})", old_edges).as_str())
+                    .unwrap_or_else(|| panic!("move_edges(): failed to extend({new}) with {:?} from({new})", old_edges))
                     .extend( old_edges.into_iter());
             
                 // Fix Direction * -> OLD
@@ -168,12 +167,12 @@ impl MinimumCut for Graph {
 
     // ANCHOR: graphs_crossing
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
-        let output = src_set.into_iter()
+         src_set.iter()
             .map(|src|
                 ( src,
                   // get src_node's edges from the original graph
                   self.edges.get(src)
-                      .expect(format!("get_crossing_edges(): cannot extract edges for node({src}").as_str())
+                      .unwrap_or_else(|| panic!("get_crossing_edges(): cannot extract edges for node({src}"))
                       .iter()
                       .map(|&ntype| ntype.into() )
                       .collect::<HashSet<Node>>()
@@ -193,7 +192,7 @@ impl MinimumCut for Graph {
                     .for_each(|&dst| {
                         out.nodes.insert(dst);
                         out.edges.entry(dst)
-                            .or_insert(HashSet::new())
+                            .or_default()
                             .insert(src.into() );
                     });
                 // add edges: direction src -> dst
@@ -203,9 +202,9 @@ impl MinimumCut for Graph {
                     edges.into_iter().map(|edge| edge.into()).collect()
                 );
                 out
-            });
+            })
         // println!("Crossing graph: {:?}", output);
-        output
+
     }
     // ANCHOR_END: graphs_crossing
 }
@@ -278,7 +277,7 @@ mod test {
 
         test_data.into_iter()
             .for_each(|(fname, cuts)| {
-                let g = Graph::import_text_graph(fname, ' ', '\0').expect(format!("Cannot open file: {}",fname).as_str());
+                let g = Graph::import_text_graph(fname, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}",fname));
                 let mc = g.minimum_cut();
                 assert!(mc.is_some());
                 let edges = mc.unwrap().export_edges();

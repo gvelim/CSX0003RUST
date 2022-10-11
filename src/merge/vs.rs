@@ -343,7 +343,7 @@ impl<T> Index<usize> for VirtualSlice<'_, T> where T: Ord + Debug {
             match self {
                 // syntactic overkill as rust will automatically dereference the chain of references
                 // but it feels good to be explicit!!
-                NonAdjacent(vv) => &(*vv.as_ptr().add(index)),
+                NonAdjacent(vv) => *vv.as_ptr().add(index),
                 Adjacent(s) => &*s.as_ptr().add(index),
             }
         }

@@ -3,6 +3,7 @@ use std::{collections::{HashMap, HashSet}, ops::Div};
 use rand::{Rng, thread_rng};
 use hashbag::*;
 
+
 trait MinimumCut {
     fn minimum_cut(&self) -> Option<Graph>;
     fn contract_graph(&self) -> Option<Graph>;
@@ -204,7 +205,6 @@ impl MinimumCut for Graph {
                 out
             })
         // println!("Crossing graph: {:?}", output);
-
     }
     // ANCHOR_END: graphs_crossing
 }
@@ -269,10 +269,10 @@ mod test {
     fn test_min_cut_txt_graph() {
 
         let test_data = vec![
-            ("src/graphs/mc_input_random_1_6.txt", 4)
-            ,("src/graphs/mc_input_random_10_25.txt", 12)
-            ,("src/graphs/mc_input_random_20_75.txt", 32)
-            ,("src/graphs/mc_input_random_40_200.txt", 122)
+            ("src/graphs/txt/mc_input_random_1_6.txt", 4)
+            ,("src/graphs/txt/mc_input_random_10_25.txt", 12)
+            ,("src/graphs/txt/mc_input_random_20_75.txt", 32)
+            ,("src/graphs/txt/mc_input_random_40_200.txt", 122)
         ];
 
         test_data.into_iter()

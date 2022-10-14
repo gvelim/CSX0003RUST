@@ -16,5 +16,8 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Deterministic
 - [Graphs](https://github.com/gvelim/CSX0003RUST/blob/master/src/graphs/README.md) 
   - Minimum Cut
+  - Path Search
+    - Shortest Path
+    - Minimum Distance
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

@@ -128,7 +128,7 @@ impl PathSearch for Graph {
                         true
                     }
                 })
-                .for_each(|dst| { queue.push_back(dst) })
+                .for_each(|dst| queue.push_back(dst) )
         }
         None
     }
@@ -252,7 +252,7 @@ mod test {
             (188, 2),
             (197, 2)
         ];
-        let g = Graph::import_text_graph("src/graphs/ps_input_random_10_16.txt", '\t',',').expect("graph couldn't be loaded");
+        let g = Graph::import_text_graph("src/graphs/txt/ps_input_random_10_16.txt", '\t',',').expect("graph couldn't be loaded");
 
         data.into_iter()
             .for_each(|(goal, dist)| {
@@ -296,7 +296,7 @@ mod test {
             (188, 830),
             (197, 839)
         ];
-        let g = Graph::import_text_graph("src/graphs/ps_input_random_10_16.txt",'\t',',').expect("graph couldn't be loaded");
+        let g = Graph::import_text_graph("src/graphs/txt/ps_input_random_10_16.txt",'\t',',').expect("graph couldn't be loaded");
 
         data.into_iter()
             .for_each(|(goal, cost)| {

@@ -2,10 +2,10 @@
 
 mod min_cut;
 mod path_search;
+mod scc;
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
-use std::mem::swap;
 use crate::graphs::NodeType::NC;
 
 type Node = usize;
@@ -27,18 +27,9 @@ impl Into<NodeType> for Node {
     }
 }
 
-#[derive(Clone,Copy,Hash)]
+#[derive(Clone,Copy,Hash,Eq, PartialEq)]
 struct Edge(Node, Node);
 
-impl PartialEq for Edge {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0 && self.1 == other.1
-    }
-    fn ne(&self, other: &Self) -> bool {
-        !self.eq(other)
-    }
-}
-impl Eq for Edge {}
 impl Debug for Edge {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("E")
@@ -49,25 +40,25 @@ impl Debug for Edge {
 }
 
 impl Edge {
-    fn has_node(&self, n:Node) -> bool {
-        self.0 == n || self.1 == n
-    }
-    fn from(&self, e: &Self) -> bool {
-        self.0 == e.1 // Edge(4,5).from( Edge(3,4) )
-    }
-    fn to(&self, e: &Self) -> bool {
-        self.1 == e.0 // Edge(4,5).to( Edge(5,6) )
-    }
-    fn is_adjacent(&self, other:&Self) -> bool {
-        self.from(other) || self.to(other)
-    }
-    fn is_loop(&self) -> bool {
-        self.0 == self.1
-    }
-    fn reverse(&mut self) { swap( &mut self.1, &mut self.0); }
-    fn replace_node(&mut self, from:Node, to:Node) {
-        if self.0 == from { self.0 = to } else if self.1 == from { self.1 = to }
-    }
+    // fn has_node(&self, n:Node) -> bool {
+    //     self.0 == n || self.1 == n
+    // }
+    // fn from(&self, e: &Self) -> bool {
+    //     self.0 == e.1 // Edge(4,5).from( Edge(3,4) )
+    // }
+    // fn to(&self, e: &Self) -> bool {
+    //     self.1 == e.0 // Edge(4,5).to( Edge(5,6) )
+    // }
+    // fn is_adjacent(&self, other:&Self) -> bool {
+    //     self.from(other) || self.to(other)
+    // }
+    // fn is_loop(&self) -> bool {
+    //     self.0 == self.1
+    // }
+    // fn reverse(&mut self) { swap( &mut self.1, &mut self.0); }
+    // fn replace_node(&mut self, from:Node, to:Node) {
+    //     if self.0 == from { self.0 = to } else if self.1 == from { self.1 = to }
+    // }
 }
 
 
@@ -154,7 +145,7 @@ impl Graph {
                 let node = Node::from_str(part.next().unwrap()).unwrap_or_else(|e| panic!("Line {num}: Cannot extract Node from line {e}"));
                 g.nodes.insert(node);
 
-                while let Some(txt) = part.next() {
+                for txt in part {
                     let edge = match edge_pat {
                         '\0' => NodeType::N( Node::from_str(txt).unwrap_or_else(|e| panic!("Line {num}: Cannot convert {txt} to Edge {e}")) ),
                         ',' =>

@@ -7,12 +7,10 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="min_cut() refactor minor">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="Fix Lint reports">
       <change beforePath="$PROJECT_DIR$/src/graphs/min_cut.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/min_cut.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/path_search.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/path_search.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/merge/vs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/merge/vs.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,10 +21,11 @@
     <branch-grouping />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="graphs" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="vtag2d35" />
@@ -43,18 +42,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "language.rust.cargo.check"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.cargo.check&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/graphs" />
@@ -263,10 +262,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test min_cut::test" />
-        <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
+        <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
+        <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
         <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
       </list>
     </recent_temporary>
@@ -565,7 +564,14 @@
       <option name="project" value="LOCAL" />
       <updated>1665420803851</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Fix Lint reports">
+      <created>1665697880754</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1665697880754</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -579,7 +585,23 @@
                   <entry key="Show.Git.Branches" value="true" />
                 </map>
               </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
             </State>
+          </value>
+        </entry>
+        <entry key="ef0102b0-1efc-43d3-9adb-adce2d9b1f95">
+          <value>
+            <State />
           </value>
         </entry>
       </map>
@@ -622,7 +644,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster" />
     <MESSAGE value="version 6 - WIP - exports Graph with min-cut" />
     <MESSAGE value="vesion 6 - WIP - exports Graph with min-cut" />
     <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
@@ -647,7 +668,8 @@
     <MESSAGE value="WIP" />
     <MESSAGE value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
     <MESSAGE value="min_cut() refactor minor" />
-    <option name="LAST_COMMIT_MESSAGE" value="min_cut() refactor minor" />
+    <MESSAGE value="Fix Lint reports" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix Lint reports" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

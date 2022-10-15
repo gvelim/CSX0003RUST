@@ -46,7 +46,7 @@ pub struct NodeTrack {
 pub struct Tracker {
     list: Vec<NodeTrack>
 }
-trait Tracking {
+pub trait Tracking {
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
         (self.extract_path(start), self.extract_cost(start))
     }

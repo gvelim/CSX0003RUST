@@ -3,11 +3,13 @@ use std::collections::{VecDeque, BinaryHeap};
 use std::ops::{Index, IndexMut};
 use crate::graphs::*;
 use NodeType::{NC};
+use crate::graphs::path_search::NodeState::{Discovered, Undiscovered};
 
 // ANCHOR: graphs_search_path_utils
 // ANCHOR: graphs_search_path_utils_Step
-#[derive(Debug)]
-struct Step(Node,Cost);
+#[derive(Debug,Copy, Clone)]
+pub struct Step(pub Node, pub Cost);
+
 impl Eq for Step {}
 impl PartialEq<Self> for Step {
     fn eq(&self, other: &Self) -> bool {
@@ -23,18 +25,25 @@ impl Ord for Step {
     fn cmp(&self, other: &Self) -> Ordering {
         // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
         // hence we need to reverse the comparison other.cmp(self)
-        other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
+        other.1.cmp(&self.1) //then_with(|| other.0.cmp(&self.0))
     }
 }
 // ANCHOR_END: graphs_search_path_utils_Step
 // ANCHOR: graphs_search_path_utils_NodeTrack
-#[derive(Debug,Clone)]
-struct NodeTrack {
-    visited:bool,
-    dist:Cost,
-    parent:Option<Node>
+#[derive(Debug,Clone,PartialEq)]
+pub enum NodeState {
+    Undiscovered,
+    Discovered,
+    Processed
 }
-struct Tracker {
+#[derive(Debug,Clone)]
+pub struct NodeTrack {
+    pub visited:NodeState,
+    pub dist:Cost,
+    pub parent:Option<Node>
+}
+#[derive(Debug)]
+pub struct Tracker {
     list: Vec<NodeTrack>
 }
 trait Tracking {
@@ -77,7 +86,7 @@ impl IndexMut<Node> for Tracker {
 // ANCHOR_END: graphs_search_path_utils_NodeTrack
 // ANCHOR: graphs_search_path_utils_NodeTrack_graph
 impl Graph {
-    fn get_tracker(&self, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
+    pub fn get_tracker(&self, visited:NodeState, dist:Cost, parent:Option<Node>) -> Tracker {
         Tracker{ list: vec![NodeTrack{visited, dist, parent}; self.nodes.len()] }
     }
 }
@@ -97,10 +106,10 @@ impl PathSearch for Graph {
         let mut queue = VecDeque::<Node>::new();
 
         // holds whether a node has been visited, if yes, it's distance and parent node
-        let mut tracker= self.get_tracker(false, 0, None);
+        let mut tracker= self.get_tracker(Undiscovered, 0, None);
 
         queue.push_back(start);
-        tracker[start].visited = true;
+        tracker[start].visited = Discovered;
 
         while let Some(src) = queue.pop_front() {
 
@@ -117,10 +126,10 @@ impl PathSearch for Graph {
                 .map(|&ntype| ntype.into() )
                 .filter(|&dst| {
                     // if visited do not proceed
-                    if tracker[dst].visited { false }
+                    if tracker[dst].visited == Discovered { false }
                     else {
                         // mark visited
-                        tracker[dst].visited = true;
+                        tracker[dst].visited = Discovered;
                         // calculate distance & store parent for distance
                         tracker[dst].dist = tracker[src].dist + 1;
                         tracker[dst].parent = Some(src);
@@ -142,7 +151,7 @@ impl PathSearch for Graph {
         let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
-        let mut tracker= self.get_tracker(false, Cost::MAX, None);
+        let mut tracker= self.get_tracker(Undiscovered, Cost::MAX, None);
 
         // set cost at start node to zero with no parent node
         tracker[start].dist = 0;
@@ -169,7 +178,7 @@ impl PathSearch for Graph {
                         else { panic!("Must use NodeType::NC") }
                     )
                     .filter_map(|(edge, cost)| {
-                        if tracker[edge].visited { None }
+                        if tracker[edge].visited == Discovered { None }
                         else {
                             // calc the new path cost to edge
                             let edge_cost = path_cost + cost;
@@ -188,7 +197,7 @@ impl PathSearch for Graph {
                         queue.push(Step(edge, edge_cost));
                     });
             }
-            tracker[node].visited = true;
+            tracker[node].visited = Discovered;
         }
         println!("Cannot find a path !!");
         None

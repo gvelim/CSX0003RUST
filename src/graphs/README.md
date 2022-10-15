@@ -1,5 +1,8 @@
 # Graphs
-Collection of common graph algorithms
+Collection of common graph algorithms for calculating 
+* path search
+* minimum-cuts
+* strongly connected components
 
 For more details visit here:
 https://gvelim.github.io/CSX0003RUST/graph.html

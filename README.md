@@ -18,6 +18,8 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Minimum Cut
   - Path Search
     - Shortest Path
-    - Minimum Distance
+    - Minimum Distance 
+  - Strong Connectivity
+    - Kosaraju’s algorithm
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

@@ -7,7 +7,6 @@ use crate::graphs::{
         NodeState::{ Discovered, Processed, Undiscovered }
     }
 };
-use crate::graphs::path_search::Tracking;
 
 trait ConnectedComponents {
     fn strongly_connected_components(&self) -> Option<HashMap<Node, HashSet<Node>>>;
@@ -41,24 +40,22 @@ impl ConnectedComponents for Graph {
             fn dfs(&mut self, g: &Graph, start: Node) {
                 // Entering the node
                 self.time += 1;
-                self.tracker[start].visited = Discovered;
-                self.tracker[start].dist = self.time;
+                self.tracker[start].visited(Discovered).distance(self.time);
 
                 // processing the edges
                 println!("Enter: {start}:{:?}", self.tracker[start]);
                 if let Some(edges) = g.edges.get(&start) {
                     for &dst in edges {
                         let d = dst.into();
-                        if self.tracker[d].visited == Undiscovered {
-                            self.tracker[d].parent = Some(start);
+                        if !self.tracker[d].is_discovered() {
+                            self.tracker[d].parent(start);
                             self.dfs(g, d);
                         }
                     }
                 }
                 // Exiting the node
                 self.time += 1;
-                self.tracker[start].visited = Processed;
-                self.tracker[start].dist = self.time;
+                self.tracker[start].visited(Processed).distance(self.time);
                 self.queue.push(Step(start, self.time));
                 println!("Exit: {start}:{:?}", self.tracker[start]);
             }
@@ -70,7 +67,7 @@ impl ConnectedComponents for Graph {
         self.nodes.iter()
             .for_each(|&start| {
                 println!("Start >> {start}");
-                if scc.tracker[start].visited == Undiscovered {
+                if !scc.tracker[start].is_discovered() {
                     scc.dfs(self, start)
                 }
             });
@@ -82,7 +79,7 @@ impl ConnectedComponents for Graph {
         println!("{:?}",v);
         v.into_iter()
             .for_each(|Step(node, _)| {
-                if scc.tracker[node].visited == Undiscovered {
+                if !scc.tracker[node].is_discovered() {
                     println!("Found >>");
                     scc.dfs( &rev_g,node );
                 }

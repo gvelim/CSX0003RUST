@@ -38,9 +38,23 @@ pub enum NodeState {
 }
 #[derive(Debug,Clone)]
 pub struct NodeTrack {
-    pub visited:NodeState,
-    pub dist:Cost,
-    pub parent:Option<Node>
+    visited:NodeState,
+    dist:Cost,
+    parent:Option<Node>
+}
+impl NodeTrack {
+    pub fn visited(&mut self, s:NodeState) -> &mut Self {
+        self.visited = s; self
+    }
+    pub fn distance(&mut self, d:Cost) -> &mut Self {
+        self.dist = d; self
+    }
+    pub fn parent(&mut self, n:Node) -> &mut Self {
+        self.parent =Some(n); self
+    }
+    pub fn is_discovered(&self) -> bool {
+        self.visited != Undiscovered
+    }
 }
 #[derive(Debug)]
 pub struct Tracker {
@@ -109,7 +123,7 @@ impl PathSearch for Graph {
         let mut tracker= self.get_tracker(Undiscovered, 0, None);
 
         queue.push_back(start);
-        tracker[start].visited = Discovered;
+        tracker[start].visited(Discovered);
 
         while let Some(src) = queue.pop_front() {
 
@@ -126,17 +140,17 @@ impl PathSearch for Graph {
                 .map(|&ntype| ntype.into() )
                 .filter(|&dst| {
                     // if visited do not proceed
-                    if tracker[dst].visited == Discovered { false }
+                    if tracker[dst].is_discovered() { false }
                     else {
-                        // mark visited
-                        tracker[dst].visited = Discovered;
-                        // calculate distance & store parent for distance
-                        tracker[dst].dist = tracker[src].dist + 1;
-                        tracker[dst].parent = Some(src);
-                        // push at the back of the queue for further scanning
+                        let level = tracker[src].dist + 1;
+                        // mark visited, calculate distance & store parent for distance
+                        tracker[dst].visited(Discovered)
+                            .distance(level)
+                            .parent(src);
                         true
                     }
                 })
+                // push at the back of the queue for further scanning
                 .for_each(|dst| queue.push_back(dst) )
         }
         None
@@ -178,7 +192,7 @@ impl PathSearch for Graph {
                         else { panic!("Must use NodeType::NC") }
                     )
                     .filter_map(|(edge, cost)| {
-                        if tracker[edge].visited == Discovered { None }
+                        if tracker[edge].is_discovered() { None }
                         else {
                             // calc the new path cost to edge
                             let edge_cost = path_cost + cost;
@@ -186,8 +200,7 @@ impl PathSearch for Graph {
                             if edge_cost > tracker[edge].dist  { None }
                             else {
                                 // set the new lower cost @node along with related parent Node
-                                tracker[edge].dist = edge_cost;
-                                tracker[edge].parent = Some(node);
+                                tracker[edge].distance(edge_cost).parent(node);
                                 Some((edge, edge_cost))
                             }
                         }

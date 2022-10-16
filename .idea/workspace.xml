@@ -7,7 +7,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="Fixed merged changes">
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="refactor NodeTrack to allow more functional style setting of values">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/scc.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/scc.rs" afterDir="false" />
     </list>
@@ -45,16 +45,17 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs",
+    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs/txt",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "vcs.Git"
+    "settings.editor.selected.configurable": "language.rust.build.tool.cargo"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/graphs/txt" />
       <recent name="$PROJECT_DIR$/src/graphs" />
       <recent name="$PROJECT_DIR$/csx3/src" />
     </key>
@@ -65,7 +66,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test min_cut::test">
+  <component name="RunManager" selected="Cargo.Test graphs::scc::test::test_scc_small">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -151,23 +152,6 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test graphs::min_cut::test::test_min_cut" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::min_cut::test::test_min_cut -- --exact" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <envs />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Test graphs::path_search::test::test_path_search_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_search_large_graph -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -187,6 +171,23 @@
     </configuration>
     <configuration name="Test graphs::path_search::test::test_path_shortest_large_graph" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::path_search::test::test_path_shortest_large_graph -- --exact" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test graphs::scc::test::test_scc_small" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::scc::test::test_scc_small -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -253,19 +254,19 @@
       <item itemvalue="Cargo.Run All Tests" />
       <item itemvalue="Cargo.Run DocTests" />
       <item itemvalue="Cargo.Run main" />
+      <item itemvalue="Cargo.Test graphs::scc::test::test_scc_small" />
       <item itemvalue="Cargo.Test min_cut::test" />
-      <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
       <item itemvalue="Cargo.Test path_search::test" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test graphs::scc::test::test_scc_small" />
         <item itemvalue="Cargo.Test path_search::test" />
+        <item itemvalue="Cargo.Test min_cut::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
-        <item itemvalue="Cargo.Test graphs::min_cut::test::test_min_cut" />
       </list>
     </recent_temporary>
   </component>
@@ -570,7 +571,49 @@
       <option name="project" value="LOCAL" />
       <updated>1665697880754</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Scc test case and build done">
+      <created>1665828732915</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1665828732915</updated>
+    </task>
+    <task id="LOCAL-00043" summary="graph README.md update">
+      <created>1665828944171</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1665828944171</updated>
+    </task>
+    <task id="LOCAL-00044" summary="fn scc() test case runs and builds">
+      <created>1665829330572</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1665829330572</updated>
+    </task>
+    <task id="LOCAL-00045" summary="fn scc() : WIP&#10;Pass 1: calc entry/exit times per node&#10;Pass 2: apply dfs using calc'ed node order against a reversed graph">
+      <created>1665871985983</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1665871985983</updated>
+    </task>
+    <task id="LOCAL-00046" summary="fn scc() : WIP">
+      <created>1665873309559</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1665873309559</updated>
+    </task>
+    <task id="LOCAL-00047" summary="refactor NodeTrack to allow more functional style setting of values">
+      <created>1665907763615</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1665907763615</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -582,17 +625,6 @@
               <option name="CUSTOM_BOOLEAN_PROPERTIES">
                 <map>
                   <entry key="Show.Git.Branches" value="true" />
-                </map>
-              </option>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="master" />
-                      </list>
-                    </value>
-                  </entry>
                 </map>
               </option>
             </State>
@@ -610,6 +642,11 @@
         <entry key="Branch">
           <value>
             <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="graphs" />
+                </option>
+              </RecentGroup>
               <RecentGroup>
                 <option name="FILTER_VALUES">
                   <option value="merge_lazy" />
@@ -643,12 +680,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="version 6 - WIP - exports Graph with min-cut" />
-    <MESSAGE value="vesion 6 - WIP - exports Graph with min-cut" />
-    <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
-    <MESSAGE value="version 7 - WIP - refactoring of code, adding&#10;- export_edges()&#10;- edges_across_nodes()" />
-    <MESSAGE value="version 8 - Done - Super edges implementation now allows to duplicate edges, hence reducing the iteration to find the min-cut&#10;&#10;feasible with the use of HashBag collection" />
-    <MESSAGE value="- fn() to read CSX graph test files&#10;- CSX Dijkstra's related test case" />
     <MESSAGE value="refactoring code&#10;- split path_search from BFS module" />
     <MESSAGE value="refactoring code" />
     <MESSAGE value="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost" />
@@ -668,7 +699,13 @@
     <MESSAGE value="Refactoring&#10;- Node &lt;&gt; NodeType conversion using Into&lt;T&gt; trait" />
     <MESSAGE value="min_cut() refactor minor" />
     <MESSAGE value="Fix Lint reports" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix Lint reports" />
+    <MESSAGE value="Scc test case and build done" />
+    <MESSAGE value="graph README.md update" />
+    <MESSAGE value="fn scc() test case runs and builds" />
+    <MESSAGE value="fn scc() : WIP&#10;Pass 1: calc entry/exit times per node&#10;Pass 2: apply dfs using calc'ed node order against a reversed graph" />
+    <MESSAGE value="fn scc() : WIP" />
+    <MESSAGE value="refactor NodeTrack to allow more functional style setting of values" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor NodeTrack to allow more functional style setting of values" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

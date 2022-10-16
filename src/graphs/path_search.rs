@@ -3,11 +3,13 @@ use std::collections::{VecDeque, BinaryHeap};
 use std::ops::{Index, IndexMut};
 use crate::graphs::*;
 use NodeType::{NC};
+use crate::graphs::path_search::NodeState::{Discovered, Undiscovered};
 
 // ANCHOR: graphs_search_path_utils
 // ANCHOR: graphs_search_path_utils_Step
-#[derive(Debug)]
-struct Step(Node,Cost);
+#[derive(Debug,Copy, Clone)]
+pub struct Step(pub Node, pub Cost);
+
 impl Eq for Step {}
 impl PartialEq<Self> for Step {
     fn eq(&self, other: &Self) -> bool {
@@ -23,21 +25,42 @@ impl Ord for Step {
     fn cmp(&self, other: &Self) -> Ordering {
         // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
         // hence we need to reverse the comparison other.cmp(self)
-        other.1.cmp(&self.1).then_with(|| other.0.cmp(&self.0))
+        other.1.cmp(&self.1) //then_with(|| other.0.cmp(&self.0))
     }
 }
 // ANCHOR_END: graphs_search_path_utils_Step
 // ANCHOR: graphs_search_path_utils_NodeTrack
+#[derive(Debug,Clone,PartialEq)]
+pub enum NodeState {
+    Undiscovered,
+    Discovered,
+    Processed
+}
 #[derive(Debug,Clone)]
-struct NodeTrack {
-    visited:bool,
+pub struct NodeTrack {
+    visited:NodeState,
     dist:Cost,
     parent:Option<Node>
 }
-struct Tracker {
+impl NodeTrack {
+    pub fn visited(&mut self, s:NodeState) -> &mut Self {
+        self.visited = s; self
+    }
+    pub fn distance(&mut self, d:Cost) -> &mut Self {
+        self.dist = d; self
+    }
+    pub fn parent(&mut self, n:Node) -> &mut Self {
+        self.parent =Some(n); self
+    }
+    pub fn is_discovered(&self) -> bool {
+        self.visited != Undiscovered
+    }
+}
+#[derive(Debug)]
+pub struct Tracker {
     list: Vec<NodeTrack>
 }
-trait Tracking {
+pub trait Tracking {
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
         (self.extract_path(start), self.extract_cost(start))
     }
@@ -77,7 +100,7 @@ impl IndexMut<Node> for Tracker {
 // ANCHOR_END: graphs_search_path_utils_NodeTrack
 // ANCHOR: graphs_search_path_utils_NodeTrack_graph
 impl Graph {
-    fn get_tracker(&self, visited:bool, dist:Cost, parent:Option<Node>) -> Tracker {
+    pub fn get_tracker(&self, visited:NodeState, dist:Cost, parent:Option<Node>) -> Tracker {
         Tracker{ list: vec![NodeTrack{visited, dist, parent}; self.nodes.len()] }
     }
 }
@@ -97,10 +120,10 @@ impl PathSearch for Graph {
         let mut queue = VecDeque::<Node>::new();
 
         // holds whether a node has been visited, if yes, it's distance and parent node
-        let mut tracker= self.get_tracker(false, 0, None);
+        let mut tracker= self.get_tracker(Undiscovered, 0, None);
 
         queue.push_back(start);
-        tracker[start].visited = true;
+        tracker[start].visited(Discovered);
 
         while let Some(src) = queue.pop_front() {
 
@@ -117,17 +140,17 @@ impl PathSearch for Graph {
                 .map(|&ntype| ntype.into() )
                 .filter(|&dst| {
                     // if visited do not proceed
-                    if tracker[dst].visited { false }
+                    if tracker[dst].is_discovered() { false }
                     else {
-                        // mark visited
-                        tracker[dst].visited = true;
-                        // calculate distance & store parent for distance
-                        tracker[dst].dist = tracker[src].dist + 1;
-                        tracker[dst].parent = Some(src);
-                        // push at the back of the queue for further scanning
+                        let level = tracker[src].dist + 1;
+                        // mark visited, calculate distance & store parent for distance
+                        tracker[dst].visited(Discovered)
+                            .distance(level)
+                            .parent(src);
                         true
                     }
                 })
+                // push at the back of the queue for further scanning
                 .for_each(|dst| queue.push_back(dst) )
         }
         None
@@ -142,7 +165,7 @@ impl PathSearch for Graph {
         let mut queue = BinaryHeap::new();
 
         // reset all node costs to MAX value with no path-parent nodes
-        let mut tracker= self.get_tracker(false, Cost::MAX, None);
+        let mut tracker= self.get_tracker(Undiscovered, Cost::MAX, None);
 
         // set cost at start node to zero with no parent node
         tracker[start].dist = 0;
@@ -169,7 +192,7 @@ impl PathSearch for Graph {
                         else { panic!("Must use NodeType::NC") }
                     )
                     .filter_map(|(edge, cost)| {
-                        if tracker[edge].visited { None }
+                        if tracker[edge].is_discovered() { None }
                         else {
                             // calc the new path cost to edge
                             let edge_cost = path_cost + cost;
@@ -177,8 +200,7 @@ impl PathSearch for Graph {
                             if edge_cost > tracker[edge].dist  { None }
                             else {
                                 // set the new lower cost @node along with related parent Node
-                                tracker[edge].dist = edge_cost;
-                                tracker[edge].parent = Some(node);
+                                tracker[edge].distance(edge_cost).parent(node);
                                 Some((edge, edge_cost))
                             }
                         }
@@ -188,7 +210,7 @@ impl PathSearch for Graph {
                         queue.push(Step(edge, edge_cost));
                     });
             }
-            tracker[node].visited = true;
+            tracker[node].visited = Discovered;
         }
         println!("Cannot find a path !!");
         None

@@ -157,7 +157,7 @@ impl Graph {
                             } else {
                                 panic!("Cannot convert {txt} into (edge, cost): line {num} ends with a tab ??")
                             },
-                        pat => panic!("Unkown delimiter:({}) within txt:({txt}",pat)
+                        pat => panic!("Unknown delimiter:({}) within txt:({txt}",pat)
                     };
                     g.edges.entry(node)
                         .or_default()

@@ -68,9 +68,11 @@ impl ConnectedComponents for Graph {
         // 1st Pass : Find all paths and calculate entry and exit times per node
         self.nodes.iter()
             .for_each(|&start| {
-                println!("Start >> {start}");
+                // println!("Start >> {start}");
                 if !scc.tracker[start].is_discovered() {
-                    println!("Pass 1: Path {:?}",scc.path_search(self, start));
+                    let path = scc.path_search(self, start);
+                    println!("Pass 1: Path {:?}",path);
+                    scc.path.clear();
                 }
             });
 
@@ -137,7 +139,6 @@ mod test {
                 println!("> {fname}");
                 let g = Graph::import_text_graph(fname, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}",fname));
                 let mc = g.strongly_connected();
-                println!(">> Components: {:?}",mc);
                 let mut scc =
                     mc.into_iter()
                         .take(5)
@@ -147,6 +148,7 @@ mod test {
                             out
                         });
                 scc.sort_by(|a, b| b.cmp(a));
+                println!("Found: {:?}, Expected {:?}",scc,cuts);
                 assert_eq!( scc, cuts );
                 println!("--------------------");
             });

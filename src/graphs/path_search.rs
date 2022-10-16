@@ -58,7 +58,7 @@ impl NodeTrack {
 }
 #[derive(Debug)]
 pub struct Tracker {
-    list: Vec<NodeTrack>
+    list: HashMap<Node, NodeTrack>
 }
 pub trait Tracking {
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
@@ -89,19 +89,27 @@ impl Index<Node> for Tracker {
     type Output = NodeTrack;
 
     fn index(&self, index: Node) -> &Self::Output {
-        &self.list[index-1]
+        &self.list.get(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker {:?}", &self))
     }
 }
 impl IndexMut<Node> for Tracker {
     fn index_mut(&mut self, index: Node) -> &mut Self::Output {
-        &mut self.list[index-1]
+        self.list.get_mut(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker"))
     }
 }
 // ANCHOR_END: graphs_search_path_utils_NodeTrack
 // ANCHOR: graphs_search_path_utils_NodeTrack_graph
 impl Graph {
     pub fn get_tracker(&self, visited:NodeState, dist:Cost, parent:Option<Node>) -> Tracker {
-        Tracker{ list: vec![NodeTrack{visited, dist, parent}; self.nodes.len()] }
+        let n = NodeTrack { visited, dist, parent };
+        Tracker{
+            list: self.nodes.iter()
+                .fold( HashMap::new(), |mut out, &node| {
+                    out.entry(node)
+                        .or_insert( n.clone() );
+                    out
+                })
+        }
     }
 }
 // ANCHOR_END: graphs_search_path_utils_NodeTrack_graph

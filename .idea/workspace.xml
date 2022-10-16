@@ -7,9 +7,8 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="fn scc() : WIP">
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="refactor NodeTrack to allow more functional style setting of values">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graphs/path_search.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/path_search.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/graphs/scc.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/scc.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -607,7 +606,14 @@
       <option name="project" value="LOCAL" />
       <updated>1665873309559</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="refactor NodeTrack to allow more functional style setting of values">
+      <created>1665907763615</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1665907763615</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -674,7 +680,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="- fn() to read CSX graph test files&#10;- CSX Dijkstra's related test case" />
     <MESSAGE value="refactoring code&#10;- split path_search from BFS module" />
     <MESSAGE value="refactoring code" />
     <MESSAGE value="Dijsktra's implementation &#10;- Replacing Queue with BinaryHeap&#10;- top of queue node with lowest cost" />
@@ -699,7 +704,8 @@
     <MESSAGE value="fn scc() test case runs and builds" />
     <MESSAGE value="fn scc() : WIP&#10;Pass 1: calc entry/exit times per node&#10;Pass 2: apply dfs using calc'ed node order against a reversed graph" />
     <MESSAGE value="fn scc() : WIP" />
-    <option name="LAST_COMMIT_MESSAGE" value="fn scc() : WIP" />
+    <MESSAGE value="refactor NodeTrack to allow more functional style setting of values" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor NodeTrack to allow more functional style setting of values" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -93,7 +93,7 @@ impl ConnectedComponents for Graph {
                     scc.path.clear();
                     // extract new component
                     let component = scc.path_search(&rev_g, node );
-                    println!("Pass 2: Component {:?}", component);
+                    println!("Pass 2: Component [{}]{:?}", component.len(), component);
                     // store component found
                     components.push(component.clone() );
                 }
@@ -130,24 +130,28 @@ mod test {
             ("src/graphs/txt/scc_simple.txt", vec![3,2,1,1,0]),
             ("src/graphs/txt/scc_input_mostlyCycles_1_8.txt", vec![4,2,2,0,0]),
             ("src/graphs/txt/scc_input_mostlyCycles_8_16.txt", vec![13,1,1,1,0]),
+            ("src/graphs/txt/scc_input_mostlyCycles_9_32.txt", vec![14,9,6,2,1]),
             ("src/graphs/txt/scc_input_mostlyCycles_12_32.txt", vec![29,3,0,0,0]),
-            ("src/graphs/txt/scc_input_mostlyCycles_9_32.txt", vec![14,9,6,2,1])
+            ("src/graphs/txt/scc_input_mostlyCycles_30_800.txt", vec![437,256,51,44,10]),
+            ("src/graphs/txt/scc_input_mostlyCycles_50_20000.txt", vec![12634,6703,253,139,113])
         ];
 
         test_data.into_iter()
             .for_each(|(fname, cuts)| {
                 println!("> {fname}");
                 let g = Graph::import_text_graph(fname, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}",fname));
-                let mc = g.strongly_connected();
-                let mut scc =
-                    mc.into_iter()
+
+                let mut mc  = g.strongly_connected();
+                mc.sort_by(|a,b| b.len().cmp(&a.len()));
+
+                let mut scc = mc
+                        .into_iter()
                         .take(5)
                         .enumerate()
                         .fold(vec![0;5], |mut out, (idx, set)| {
                             out[idx] = set.len();
                             out
                         });
-                scc.sort_by(|a, b| b.cmp(a));
                 println!("Found: {:?}, Expected {:?}",scc,cuts);
                 assert_eq!( scc, cuts );
                 println!("--------------------");

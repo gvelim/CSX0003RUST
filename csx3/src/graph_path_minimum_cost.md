@@ -23,28 +23,20 @@ The above depiction performs the below steps
     * if `edge node` has `cost` larger to the calculated `cost distance` then assign cost to `edge node`, otherwise do not update cost
     * push `(edge node, cost)` to the priority queue and repeat
 
-### Processing path cost across the graph structure
-As we traverse the graph, the `Tracker` structure holds the processed graph information in relation to nodes visited along with the smallest `cost` and associated `parent` node.
-This helper structure, enables us to 
-* access a node as an index in the form of `tracker[node]`
-* set and update the path cost to a specific node
-* set and update the parent node for the path cost calculation
-* extract the minimum cost path given a target node
-The below code implements the above functionality
-```rust,no_run,noplayground
-{{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_NodeTrack}}
-```
-To initialise the `Tracker` we use the `Graph` structure
-```rust,no_run,noplayground
-{{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_NodeTrack_graph}}
-```
-
-### Implementation
+### Prioritised Queue
 Dijkstra's differentiating approach is that we must always process next the node with the lowest cost in the queue. To achieve this we have to make use of the `BinaryHeap` collection structure. The use of such structure help us to maintain on ordered-queue by node-cost, hence keeping the node with lowest-cost at the top of the heap/queue.
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_Step}}
 ```
-With the ordered-queue logic in place, the algorithm can now be realised through the following code
+### Implementation
+With the ordered-queue logic in place, we still need to have the means to maintain the following information per node and while we are searching the graph 
+* `node` state, in terms of processed / not processed
+* `parent` node, that is, the node we visited from
+* `unit` in terms of cost or distance
+
+The `Tracker` structure simplifies managing the [node processing state](graph_search_process_state.md) of the graph, and we will use as part of our implementation.
+
+As a result, the algorithm can now be realised through the following code
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/path_search.rs:graphs_search_path_min_cost}}
 ```

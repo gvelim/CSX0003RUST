@@ -7,7 +7,14 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="finalise scc doc draft" />
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="minor refactor">
+      <change afterPath="$PROJECT_DIR$/csx3/src/graph_search_process_state.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/SUMMARY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/graph_path_minimum_cost.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_path_minimum_cost.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/graph_path_shortest_distance.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_path_shortest_distance.md" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -267,11 +274,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test scc::test" />
-        <item itemvalue="Cargo.Test min_cut::test" />
         <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
+        <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test scc::test" />
       </list>
     </recent_temporary>
   </component>
@@ -288,13 +295,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1651747636864</updated>
-    </task>
-    <task id="LOCAL-00005" summary="vesion 4 - WIP - can extract min cuts however using hashset for edges excl. duplicate edges hence reducing algo capability to find min-cut faster">
-      <created>1658650343516</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1658650343516</updated>
     </task>
     <task id="LOCAL-00006" summary="vesion 6 - WIP - exports Graph with min-cut">
       <created>1658679856676</created>
@@ -632,7 +632,14 @@
       <option name="project" value="LOCAL" />
       <updated>1666124555467</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="minor refactor">
+      <created>1666125175976</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1666125175976</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -699,7 +706,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path" />
     <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph" />
     <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph&#10;- path distance iterator" />
     <MESSAGE value="refactoring" />
@@ -724,7 +730,8 @@
     <MESSAGE value="removing excessive println!()" />
     <MESSAGE value="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files" />
     <MESSAGE value="finalise scc doc draft" />
-    <option name="LAST_COMMIT_MESSAGE" value="finalise scc doc draft" />
+    <MESSAGE value="minor refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor refactor" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

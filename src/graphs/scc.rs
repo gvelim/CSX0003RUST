@@ -71,7 +71,7 @@ impl ConnectedComponents for Graph {
         // and in order to enable recursive searching in rust
         let mut gs = GraphState::new(self);
 
-        // 1st Pass : Find all paths and calculate entry and exit times per node
+        // Pass 1: Find all paths and calculate entry and exit times per node
         self.nodes.iter()
             .for_each(|&start| {
                 // println!("Start >> {start}");
@@ -90,21 +90,20 @@ impl ConnectedComponents for Graph {
         // reset run state
         gs = GraphState::new( &tg);
 
-        let mut components = Vec::new();
         // Pass 2: Identify and store each strongly connected component identified
         v.into_iter()
-            .for_each(|Step(node, _)| {
+            .fold(Vec::new(),|mut components, Step(node, _)| {
                 if !gs.tracker[node].is_discovered() {
-                    // reset path so to remove last found component
-                    gs.path.clear();
                     // extract new component
                     let component = gs.path_search(&tg, node );
                     println!("Pass 2: Component [{}]{:?}", component.len(), component);
                     // store component found
                     components.push(component.clone() );
+                    // reset path so to remove last found component
+                    gs.path.clear();
                 }
-            });
-        components
+                components
+            })
     }
 }
 // ANCHOR_END: graphs_scc

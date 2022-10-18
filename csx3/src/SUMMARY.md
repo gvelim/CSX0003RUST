@@ -25,4 +25,4 @@
     - [Minimum Path Cost](./graph_path_minimum_cost.md)
     - [Shortest Distance](./graph_path_shortest_distance.md)
   - [Strong Connectivity](./graph_connect.md)
-    - [Kosaraju’s algorithm1](./graph_connect_scc.md)
+    - [Kosaraju’s algorithm](./graph_connect_scc.md)

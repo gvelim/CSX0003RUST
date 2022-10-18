@@ -17,9 +17,6 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
 - [Graphs](https://github.com/gvelim/CSX0003RUST/blob/master/src/graphs/README.md) 
   - Minimum Cut
   - Path Search
-    - Shortest Path
-    - Minimum Distance 
   - Strong Connectivity
-    - Kosaraju’s algorithm
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

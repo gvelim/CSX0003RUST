@@ -7,11 +7,12 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="removing excessive println!()">
-      <change afterPath="$PROJECT_DIR$/csx3/src/graph_connect.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" afterDir="false" />
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/csx3/src/SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/SUMMARY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/graph_connect.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_connect.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphs/scc.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/graphs/scc.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,18 +52,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs/txt",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "language.rust.build.tool.cargo"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/georgevelimachitis/IdeaProjects/CSX0003RUST/src/graphs/txt&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.build.tool.cargo&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/graphs/txt" />
@@ -76,7 +77,7 @@
       <command value="cargo test" />
     </option>
   </component>
-  <component name="RunManager" selected="Cargo.Test graphs::scc::test::test_scc_small">
+  <component name="RunManager" selected="Cargo.Test scc::test">
     <configuration name="Bench Merge" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="bench --bench merge" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -196,23 +197,6 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test graphs::scc::test::test_scc_small" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="test --package csx3 --lib graphs::scc::test::test_scc_small -- --exact" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <option name="channel" value="DEFAULT" />
-      <option name="requiredFeatures" value="true" />
-      <option name="allFeatures" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="withSudo" value="false" />
-      <option name="buildTarget" value="REMOTE" />
-      <option name="backtrace" value="SHORT" />
-      <envs />
-      <option name="isRedirectInput" value="false" />
-      <option name="redirectInputPath" value="" />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Test min_cut::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="test --package csx3 --lib graphs::min_cut::test" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -247,6 +231,23 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test scc::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package csx3 --lib graphs::scc::test" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -264,7 +265,7 @@
       <item itemvalue="Cargo.Run All Tests" />
       <item itemvalue="Cargo.Run DocTests" />
       <item itemvalue="Cargo.Run main" />
-      <item itemvalue="Cargo.Test graphs::scc::test::test_scc_small" />
+      <item itemvalue="Cargo.Test scc::test" />
       <item itemvalue="Cargo.Test min_cut::test" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
       <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
@@ -272,9 +273,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Test graphs::scc::test::test_scc_small" />
-        <item itemvalue="Cargo.Test path_search::test" />
+        <item itemvalue="Cargo.Test scc::test" />
         <item itemvalue="Cargo.Test min_cut::test" />
+        <item itemvalue="Cargo.Test path_search::test" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_shortest_large_graph" />
         <item itemvalue="Cargo.Test graphs::path_search::test::test_path_search_large_graph" />
       </list>
@@ -293,20 +294,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1651747636864</updated>
-    </task>
-    <task id="LOCAL-00002" summary="graph min-cut WIP">
-      <created>1654343012240</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1654343012240</updated>
-    </task>
-    <task id="LOCAL-00003" summary="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
-      <created>1654433003431</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1654433003431</updated>
     </task>
     <task id="LOCAL-00004" summary="vesion 2 - WIP - get 2 edges but against contract nodes rather against the original graph">
       <created>1654464135723</created>
@@ -637,7 +624,21 @@
       <option name="project" value="LOCAL" />
       <updated>1665938625575</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files">
+      <created>1666025849060</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1666025849061</updated>
+    </task>
+    <task id="LOCAL-00052" summary="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files">
+      <created>1666025855643</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1666025855643</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -704,7 +705,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactoring&#10;- replace fold() with map().collect()&#10;- reduce HashMap calls within the loop" />
     <MESSAGE value="refactoring min_cut.rs&#10;- replace fold() with map().collect()" />
     <MESSAGE value="refactoring &#10;- renaming mod/fn to match function purpose&#10;- refactoring path_distance() to return also path" />
     <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph" />
@@ -729,7 +729,8 @@
     <MESSAGE value="fn scc() v1 completed however not all tests pass" />
     <MESSAGE value="Pass: Strongly Connect Components&#10;- restructure scc code&#10;- reverse() bug fix; missing nodes&#10;- test() bug fix; collate &amp; order scc len()&#10;- Tracker(); refactor Vec -&gt; HashMap to address out-of-bound issues" />
     <MESSAGE value="removing excessive println!()" />
-    <option name="LAST_COMMIT_MESSAGE" value="removing excessive println!()" />
+    <MESSAGE value="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files" />
+    <option name="LAST_COMMIT_MESSAGE" value="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

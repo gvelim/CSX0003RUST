@@ -176,7 +176,7 @@ impl PathSearch for Graph {
         let mut tracker= self.get_tracker(Undiscovered, Cost::MAX, None);
 
         // set cost at start node to zero with no parent node
-        tracker[start].dist = 0;
+        tracker[start].distance(0);
 
         // push start node in the BinaryHeap queue
         queue.push(Step(start,0));
@@ -218,7 +218,7 @@ impl PathSearch for Graph {
                         queue.push(Step(edge, edge_cost));
                     });
             }
-            tracker[node].visited = Discovered;
+            tracker[node].visited(Discovered);
         }
         println!("Cannot find a path !!");
         None

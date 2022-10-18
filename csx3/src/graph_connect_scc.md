@@ -16,6 +16,9 @@ Recursion is a key implementation approach that will enable us to perform
 As a result to measure time across recursions and without the use of a `global` variable, we resort to the `GraphState` struct that
 * holds the recursion state for `time`, `path` at node, node `state` & `ordered list`
 * implements the recursive function
+
+In addition, `GraphState` provide us with the `Tracker` structure that simplifies handling of the [node tracking state](graph_search_process_state.md) while we are search the graph.
+
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/scc.rs:graphs_scc_state}}
 ```

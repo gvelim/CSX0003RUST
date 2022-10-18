@@ -37,7 +37,14 @@ As a result and as depicted below, at the end of the graph processing, all nodes
 ![BFS](img/bfs_search_graph.png)
 
 ## Implementation
-The following implementation realises the BFS algorithm 
+We still need to have the means to maintain the following information while we are searching the graph
+* `node` state, in terms of processed / not processed
+* `parent` node, that is, the node we visited from
+* `unit` in terms of distance / level
+
+The `Tracker` structure simplifies managing the [node processing state](graph_search_process_state.md) of the graph, and we will use as part of our implementation.
+
+As a result, the following implementation realises the BFS algorithm 
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/path_search.rs:graphs_search_path_shortest}}
 ```

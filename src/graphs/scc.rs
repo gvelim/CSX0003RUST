@@ -1,12 +1,5 @@
 use std::collections::{BinaryHeap};
-use super::*;
-use crate::graphs::{
-    path_search::{
-        Step,
-        Tracker,
-        NodeState::{ Discovered, Processed, Undiscovered }
-    }
-};
+use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 
 // ANCHOR: graphs_scc_state
 struct GraphState {

@@ -26,7 +26,7 @@ The above depiction performs the below steps
 ### Prioritised Queue
 Dijkstra's differentiating approach is that we must always process next the node with the lowest cost in the queue. To achieve this we have to make use of the `BinaryHeap` collection structure. The use of such structure help us to maintain on ordered-queue by node-cost, hence keeping the node with lowest-cost at the top of the heap/queue.
 ```rust,no_run,noplayground
-{{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_Step}}
+{{#include ../../src/graphs/mod.rs:graphs_search_path_utils_Step}}
 ```
 ### Implementation
 With the ordered-queue logic in place, we still need to have the means to maintain the following information per node and while we are searching the graph 

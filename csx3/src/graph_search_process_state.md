@@ -11,9 +11,9 @@ The `Tracker` structure holds the processed graph information while provides the
 * extract the minimum cost path given a target node
   The below code implements the above functionality
 ```rust,no_run,noplayground
-{{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_NodeTrack}}
+{{#include ../../src/graphs/mod.rs:graphs_search_path_utils_NodeTrack}}
 ```
 To initialise the `Tracker` we use the `Graph` structure
 ```rust,no_run,noplayground
-{{#include ../../src/graphs/path_search.rs:graphs_search_path_utils_NodeTrack_graph}}
+{{#include ../../src/graphs/mod.rs:graphs_search_path_utils_NodeTrack_graph}}
 ```

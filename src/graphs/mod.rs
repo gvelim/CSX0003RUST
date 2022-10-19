@@ -4,8 +4,10 @@ mod min_cut;
 mod path_search;
 mod scc;
 
-use std::collections::{HashMap, HashSet};
+use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Debug, Error, Formatter};
+use std::ops::{Index, IndexMut};
 use crate::graphs::NodeType::NC;
 
 type Node = usize;
@@ -61,6 +63,115 @@ impl Edge {
     // }
 }
 
+// ANCHOR: graphs_search_path_utils_Step
+#[derive(Debug,Copy, Clone)]
+struct Step(pub Node, pub Cost);
+
+impl Eq for Step {}
+impl PartialEq<Self> for Step {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1
+    }
+}
+impl PartialOrd<Self> for Step {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Step {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
+        // hence we need to reverse the comparison other.cmp(self)
+        other.1.cmp(&self.1) //then_with(|| other.0.cmp(&self.0))
+    }
+}
+// ANCHOR_END: graphs_search_path_utils_Step
+
+// ANCHOR: graphs_search_path_utils_NodeTrack
+#[derive(Debug,Clone,PartialEq)]
+enum NodeState {
+    Undiscovered,
+    Discovered,
+    Processed
+}
+#[derive(Debug,Clone)]
+struct NodeTrack {
+    visited:NodeState,
+    dist:Cost,
+    parent:Option<Node>
+}
+impl NodeTrack {
+    fn visited(&mut self, s:NodeState) -> &mut Self {
+        self.visited = s; self
+    }
+    fn distance(&mut self, d:Cost) -> &mut Self {
+        self.dist = d; self
+    }
+    fn parent(&mut self, n:Node) -> &mut Self {
+        self.parent =Some(n); self
+    }
+    fn is_discovered(&self) -> bool {
+        self.visited != NodeState::Undiscovered
+    }
+}
+#[derive(Debug)]
+struct Tracker {
+    list: HashMap<Node, NodeTrack>
+}
+trait Tracking {
+    fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
+        (self.extract_path(start), self.extract_cost(start))
+    }
+    fn extract_path(&self, start: Node) -> Vec<Node>;
+    fn extract_cost(&self, start: Node) -> Cost;
+}
+impl Tracking for Tracker {
+    fn extract_path(&self, start:Node) -> Vec<Node> {
+        let mut path = VecDeque::new();
+        // reconstruct the shortest path starting from the target node
+        path.push_front(start);
+        // set target as current node
+        let mut cur_node= start;
+        // backtrace all parents until you reach None, that is, the start node
+        while let Some(parent) = self[cur_node].parent {
+            path.push_front(parent);
+            cur_node = parent;
+        }
+        path.into()
+    }
+    fn extract_cost(&self, start:Node) -> Cost {
+        self[start].dist
+    }
+}
+impl Index<Node> for Tracker {
+    type Output = NodeTrack;
+
+    fn index(&self, index: Node) -> &Self::Output {
+        &self.list.get(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker {:?}", &self))
+    }
+}
+impl IndexMut<Node> for Tracker {
+    fn index_mut(&mut self, index: Node) -> &mut Self::Output {
+        self.list.get_mut(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker"))
+    }
+}
+// ANCHOR_END: graphs_search_path_utils_NodeTrack
+// ANCHOR: graphs_search_path_utils_NodeTrack_graph
+impl Graph {
+
+    pub fn get_tracker(&self, visited: NodeState, dist: Cost, parent: Option<Node>) -> Tracker {
+        let n = NodeTrack { visited, dist, parent };
+        Tracker {
+            list: self.nodes.iter()
+                .fold(HashMap::new(), |mut out, &node| {
+                    out.entry(node)
+                        .or_insert(n.clone());
+                    out
+                })
+        }
+    }
+}
+// ANCHOR_END: graphs_search_path_utils_NodeTrack_graph
 
 #[derive(PartialEq)]
 struct Graph {

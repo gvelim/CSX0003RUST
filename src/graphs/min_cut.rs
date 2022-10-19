@@ -1,8 +1,76 @@
-use crate::graphs::*;
-use std::{collections::{HashMap, HashSet}, ops::Div};
+use super::*;
+use std::{collections::HashMap, ops::Div};
 use rand::{Rng, thread_rng};
-use hashbag::*;
+use hashbag::HashBag;
 
+// ANCHOR: graphs_min_cut_super_edges
+#[derive(Debug)]
+struct SuperEdges {
+    list: HashMap<Node, HashBag<Node>>
+}
+impl SuperEdges {
+    fn get_random_edge(&self) -> Edge {
+        let mut idx = thread_rng().gen_range(0..self.list.len());
+        let (&node, edges) =
+            self.list.iter().nth(idx)
+                .unwrap_or_else(|| panic!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})"));
+        // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
+        idx = thread_rng().gen_range(0..edges.len());
+        // println!("{idx})");
+        Edge(
+            node,
+            self.list[&node].iter().nth(idx).cloned()
+                .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
+        )
+    }
+    fn remove_edge(&mut self, src: Node, dst: Node) {
+        // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
+        while self.list.get_mut(&src)
+            .unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"))
+            .remove(&dst) != 0 { };
+        // println!("{:?}",self);
+    }
+    fn move_edges(&mut self, old: Node, new: Node) {
+        // Fix direction OLD -> *
+        let old_edges = self.list
+            .remove(&old)
+            .unwrap_or_else(|| panic!("move_edges(): cannot remove old node({old})"));
+        // print!("move_edges(): {old}:{:?}, {new}:{:?}", old_edges,self.list[&new]);
+        self.list.get_mut(&new)
+            .unwrap_or_else(|| panic!("move_edges(): failed to extend({new}) with {:?} from({new})", old_edges))
+            .extend( old_edges.into_iter());
+
+        // Fix Direction * -> OLD
+        self.list.values_mut()
+            .filter_map( |e| {
+                let count = e.contains(&old);
+                if  count > 0  { Some((count, e)) } else { None }
+            })
+            .for_each(|(mut count, edges)| {
+                while edges.remove(&old) != 0 {};
+                while count != 0 { edges.insert(new); count -= 1; }
+            });
+        // println!(" -> {:?}",self.list[&new]);
+    }
+}
+// ANCHOR_END: graphs_min_cut_super_edges
+// ANCHOR: graphs_min_cut_super_edges_graph
+impl Graph {
+    fn get_super_edges(&self) -> SuperEdges {
+        let list = self.edges.iter()
+            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect())
+            ).collect();
+        // println!("get_super_edges(): {:?}",list);
+        SuperEdges { list }
+    }
+    fn get_super_nodes(&self) -> HashMap<Node,HashSet<Node>> {
+        self.nodes.iter()
+            .map(|&node| (node, HashSet::<Node>::new()))
+            .map(|(node, mut map)| { map.insert(node); (node,map) })
+            .collect::<HashMap<Node,HashSet<Node>>>()
+    }
+}
+// ANCHOR_END: graphs_min_cut_super_edges_graph
 
 trait MinimumCut {
     fn minimum_cut(&self) -> Option<Graph>;
@@ -53,70 +121,6 @@ impl MinimumCut for Graph {
 
     // ANCHOR: graphs_contraction
     fn contract_graph(&self) -> Option<Graph> {
-        impl Graph {
-            fn get_super_edges(&self) -> SuperEdges {
-                let list = self.edges.iter()
-                    .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect())
-                    ).collect();
-                // println!("get_super_edges(): {:?}",list);
-                SuperEdges { list }
-            }
-            fn get_super_nodes(&self) -> HashMap<Node,HashSet<Node>> {
-                self.nodes.iter()
-                    .map(|&node| (node, HashSet::<Node>::new()))
-                    .map(|(node, mut map)| { map.insert(node); (node,map) })
-                    .collect::<HashMap<Node,HashSet<Node>>>()
-            }
-        }
-        #[derive(Debug)]
-        struct SuperEdges {
-            list: HashMap<Node, HashBag<Node>>
-        }
-        impl SuperEdges {
-            fn get_random_edge(&self) -> Edge {
-                let mut idx = thread_rng().gen_range(0..self.list.len());
-                let (&node, edges) =
-                    self.list.iter().nth(idx)
-                        .unwrap_or_else(|| panic!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})"));
-                // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
-                idx = thread_rng().gen_range(0..edges.len());
-                // println!("{idx})");
-                Edge(
-                    node,
-                    self.list[&node].iter().nth(idx).cloned()
-                        .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
-                )
-            }
-            fn remove_edge(&mut self, src: Node, dst: Node) {
-                // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
-                while self.list.get_mut(&src)
-                    .unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"))
-                    .remove(&dst) != 0 { };
-                // println!("{:?}",self);
-            }
-            fn move_edges(&mut self, old: Node, new: Node) {
-                // Fix direction OLD -> *
-                let old_edges = self.list
-                    .remove(&old)
-                    .unwrap_or_else(|| panic!("move_edges(): cannot remove old node({old})"));
-                // print!("move_edges(): {old}:{:?}, {new}:{:?}", old_edges,self.list[&new]);
-                self.list.get_mut(&new)
-                    .unwrap_or_else(|| panic!("move_edges(): failed to extend({new}) with {:?} from({new})", old_edges))
-                    .extend( old_edges.into_iter());
-            
-                // Fix Direction * -> OLD
-                self.list.values_mut()
-                    .filter_map( |e| {
-                        let count = e.contains(&old);
-                        if  count > 0  { Some((count, e)) } else { None }
-                    })
-                    .for_each(|(mut count, edges)| {
-                        while edges.remove(&old) != 0 {};
-                        while count != 0 { edges.insert(new); count -= 1; }
-                    });
-                // println!(" -> {:?}",self.list[&new]);
-            }
-        }
 
         if self.edges.is_empty() {
             return None;

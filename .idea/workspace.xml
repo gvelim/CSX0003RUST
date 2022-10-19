@@ -7,14 +7,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="minor refactor">
-      <change afterPath="$PROJECT_DIR$/csx3/src/graph_search_process_state.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/csx3/src/SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/SUMMARY.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_connect_scc.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/csx3/src/graph_path_minimum_cost.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_path_minimum_cost.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/csx3/src/graph_path_shortest_distance.md" beforeDir="false" afterPath="$PROJECT_DIR$/csx3/src/graph_path_shortest_distance.md" afterDir="false" />
-    </list>
+    <list default="true" id="a92719e4-c67d-4389-9854-93c507d3ad8b" name="Changes" comment="Graph section re-structuring" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -295,13 +288,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1651747636864</updated>
-    </task>
-    <task id="LOCAL-00006" summary="vesion 6 - WIP - exports Graph with min-cut">
-      <created>1658679856676</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1658679856676</updated>
     </task>
     <task id="LOCAL-00007" summary="vesion 6 - WIP - exports Graph with min-cut">
       <created>1658679860558</created>
@@ -639,7 +625,14 @@
       <option name="project" value="LOCAL" />
       <updated>1666125175976</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="Graph section re-structuring">
+      <created>1666127514893</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1666127514893</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -651,6 +644,17 @@
               <option name="CUSTOM_BOOLEAN_PROPERTIES">
                 <map>
                   <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/master" />
+                      </list>
+                    </value>
+                  </entry>
                 </map>
               </option>
             </State>
@@ -706,7 +710,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph" />
     <MESSAGE value="refactoring &#10;- Tracker initialisation from Graph&#10;- path distance iterator" />
     <MESSAGE value="refactoring" />
     <MESSAGE value="refactoring min-cut &#10;- test cases&#10;- workaround for nasty library bug? where edges are not removed in the HashBag causing zombie edges" />
@@ -731,7 +734,8 @@
     <MESSAGE value="- fixing test_scc() to handle &gt; 5 scc&#10;- Additional scc test files" />
     <MESSAGE value="finalise scc doc draft" />
     <MESSAGE value="minor refactor" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor refactor" />
+    <MESSAGE value="Graph section re-structuring" />
+    <option name="LAST_COMMIT_MESSAGE" value="Graph section re-structuring" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

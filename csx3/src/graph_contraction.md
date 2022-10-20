@@ -31,14 +31,18 @@ Therefore, the following temporary data structures are necessary
 
 Worth noting here that 
 * We **must** be in a position to deal with repeating `(2..*)` `super-edges` resulting from the contraction of two `super-nodes`, hence the use `HashBag` which is an unordered multiset implementation. Use of `HashSet` results to elimination of `super-edge` multiples hence **_diminishing_** algorithm's statistical ability to produce the optimal graph contraction
-* We **must** account for `super-edges` multiples while we (a) remove loops and (b) re-aligning `super-edges` following two `super-node` contraction
+* We **must** account for `SuperEdges` multiples while we (a) remove loops and (b) re-aligning `super-edges` following two `super-node` contraction
 
 The following implementation of `Super-Edges` structure, provides and abstracts, the key operations of edge collapsing. 
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_edges}}
 ```
+Similarly, the `SuperNodes` structure, provides and abstracts, the merging of two nodes into a super node 
+```rust,no_run,noplayground
+{{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_nodes}}
+```
 
-The `SuperEdge` and `SuperNode` structures are initiated from the graph
+The `SuperEdges` and `SuperNodes` structures are initiated from the graph
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_edges_graph}}
 ```

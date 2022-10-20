@@ -1,5 +1,5 @@
 use super::*;
-use std::{collections::HashMap, ops::Div};
+use std::{collections::{hash_map,HashMap}, ops::Div};
 use rand::{Rng, thread_rng};
 use hashbag::HashBag;
 
@@ -8,7 +8,9 @@ use hashbag::HashBag;
 struct SuperEdges {
     list: HashMap<Node, HashBag<Node>>
 }
+
 impl SuperEdges {
+
     fn get_random_edge(&self) -> Edge {
         let mut idx = thread_rng().gen_range(0..self.list.len());
         let (&node, edges) =
@@ -23,6 +25,7 @@ impl SuperEdges {
                 .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
         )
     }
+
     fn remove_edge(&mut self, src: Node, dst: Node) {
         // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
         while self.list.get_mut(&src)
@@ -30,6 +33,7 @@ impl SuperEdges {
             .remove(&dst) != 0 { };
         // println!("{:?}",self);
     }
+    
     fn move_edges(&mut self, old: Node, new: Node) {
         // Fix direction OLD -> *
         let old_edges = self.list
@@ -54,8 +58,35 @@ impl SuperEdges {
     }
 }
 // ANCHOR_END: graphs_min_cut_super_edges
+// ANCHOR: graphs_min_cut_super_nodes
+struct SuperNodes {
+    super_nodes:HashMap<Node,HashSet<Node>>
+}
+
+impl SuperNodes {
+
+    fn len(&self) -> usize { self.super_nodes.len() }
+
+    fn merge_nodes(&mut self, src:Node, dst:Node) -> &mut HashSet<Node> {
+        // remove both nodes that form the random edge and
+        // hold onto the incoming/outgoing edges
+        let super_src = self.super_nodes.remove(&src).unwrap();
+        let super_dst = self.super_nodes.remove(&dst).unwrap();
+
+        // combine the incoming/outgoing edges for attaching onto the new super-node
+        let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
+        // re-insert the src node as the new super-node and attach the resulting union
+        self.super_nodes.entry(src).or_insert(super_node)
+    }
+
+    fn iter(&self) -> hash_map::Iter<'_, Node, HashSet<Node>> {
+        self.super_nodes.iter()
+    }
+}
+// ANCHOR_END: graphs_min_cut_super_nodes
 // ANCHOR: graphs_min_cut_super_edges_graph
 impl Graph {
+
     fn get_super_edges(&self) -> SuperEdges {
         let list = self.edges.iter()
             .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect())
@@ -63,11 +94,17 @@ impl Graph {
         // println!("get_super_edges(): {:?}",list);
         SuperEdges { list }
     }
-    fn get_super_nodes(&self) -> HashMap<Node,HashSet<Node>> {
-        self.nodes.iter()
-            .map(|&node| (node, HashSet::<Node>::new()))
-            .map(|(node, mut map)| { map.insert(node); (node,map) })
-            .collect::<HashMap<Node,HashSet<Node>>>()
+
+    fn get_super_nodes(&self) -> SuperNodes {
+        SuperNodes {
+            super_nodes: self.nodes.iter()
+                .map(|&node| (node, HashSet::<Node>::new()))
+                .map(|(node, mut map)| {
+                    map.insert(node);
+                    (node, map)
+                })
+                .collect::<HashMap<Node, HashSet<Node>>>()
+        }
     }
 }
 // ANCHOR_END: graphs_min_cut_super_edges_graph
@@ -142,13 +179,9 @@ impl MinimumCut for Graph {
             // STEP B : Contract the edge by merging the edge's nodes
                 // remove both nodes that form the random edge and
                 // hold onto the incoming/outgoing edges
-            let super_src = super_nodes.remove(&src).unwrap();
-            let super_dst = super_nodes.remove(&dst).unwrap();
                 // combine the incoming/outgoing edges for attaching onto the new super-node
-            let super_node = super_src.union(&super_dst).copied().collect::<HashSet<Node>>();
-
                 // re-insert the src node as the new super-node and attach the resulting union
-            super_nodes.entry(src).or_insert(super_node);
+            super_nodes.merge_nodes(src, dst);
 
             // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
             super_edges.remove_edge( src, dst);

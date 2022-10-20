@@ -15,8 +15,8 @@ impl GraphState {
         self.time += 1;
         self.time
     }
-    fn get_timings(&self) -> Vec<Step> {
-        self.queue.iter().rev().copied().collect::<Vec<_>>()
+    fn get_timings(&self) -> Vec<(Node, Cost)> {
+        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
     }
     fn new(g: &Graph) -> GraphState {
         GraphState {
@@ -85,7 +85,7 @@ impl ConnectedComponents for Graph {
 
         // Pass 2: Identify and store each strongly connected component identified
         v.into_iter()
-            .fold(Vec::new(),|mut components, Step(node, _)| {
+            .fold(Vec::new(),|mut components, (node, _)| {
                 if !gs.tracker[node].is_discovered() {
                     // extract new component
                     let component = gs.path_search(&tg, node );

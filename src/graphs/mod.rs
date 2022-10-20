@@ -88,7 +88,7 @@ impl Ord for Step {
 // ANCHOR_END: graphs_search_path_utils_Step
 
 // ANCHOR: graphs_search_path_utils_NodeTrack
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 enum NodeState {
     Undiscovered,
     Discovered,
@@ -160,12 +160,11 @@ impl IndexMut<Node> for Tracker {
 impl Graph {
 
     pub fn get_tracker(&self, visited: NodeState, dist: Cost, parent: Option<Node>) -> Tracker {
-        let n = NodeTrack { visited, dist, parent };
         Tracker {
             list: self.nodes.iter()
                 .fold(HashMap::new(), |mut out, &node| {
                     out.entry(node)
-                        .or_insert(n.clone());
+                        .or_insert(NodeTrack { visited, dist, parent });
                     out
                 })
         }

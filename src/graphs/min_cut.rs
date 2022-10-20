@@ -6,31 +6,38 @@ use hashbag::HashBag;
 // ANCHOR: graphs_min_cut_super_edges
 #[derive(Debug)]
 struct SuperEdges {
-    list: HashMap<Node, HashBag<Node>>
+    list: HashMap<Node, HashBag<Node>>,
+    length: usize
 }
 
 impl SuperEdges {
 
     fn get_random_edge(&self) -> Edge {
-        let mut idx = thread_rng().gen_range(0..self.list.len());
-        let (&node, edges) =
-            self.list.iter().nth(idx)
-                .unwrap_or_else(|| panic!("get_random_edge(): Couldn't find (Node,Edges) at position({idx})"));
-        // print!("get_random_edge(): ({node},{:?}<- pos:({idx},",edges);
-        idx = thread_rng().gen_range(0..edges.len());
-        // println!("{idx})");
+        let mut idx = thread_rng().gen_range(0..self.length);
+
+        let mut iter = self.list.iter();
+        let (idx, &node, edges) = loop {
+            let (node,edges) = iter.next().unwrap();
+            if idx < edges.len() {
+                break (idx, node, edges)
+            }
+            idx -= edges.len();
+        };
+
         Edge(
             node,
-            self.list[&node].iter().nth(idx).cloned()
+            edges.iter()
+                .nth(idx)
+                .copied()
                 .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
         )
     }
 
     fn remove_edge(&mut self, src: Node, dst: Node) {
         // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
-        while self.list.get_mut(&src)
-            .unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"))
-            .remove(&dst) != 0 { };
+        let edges = self.list.get_mut(&src).unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"));
+        self.length -= edges.contains(&dst);
+        while edges.remove(&dst) != 0 { };
         // println!("{:?}",self);
     }
     
@@ -79,8 +86,30 @@ impl SuperNodes {
         self.super_nodes.entry(src).or_insert(super_node)
     }
 
-    fn iter(&self) -> hash_map::Iter<'_, Node, HashSet<Node>> {
-        self.super_nodes.iter()
+    fn iter(&self) -> SuperNodeIter {
+        SuperNodeIter { iter: self.super_nodes.iter() }
+    }
+}
+
+impl Index<Node> for SuperNodes {
+    type Output = HashSet<Node>;
+
+    fn index(&self, index: Node) -> &Self::Output {
+        &self.super_nodes[&index]
+    }
+}
+
+struct SuperNodeIter<'a> {
+    iter: hash_map::Iter<'a, Node, HashSet<Node>>
+}
+
+impl<'a> Iterator for SuperNodeIter<'a> {
+    type Item = &'a HashSet<Node>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(super_node) = self.iter.next() {
+            Some(super_node.1)
+        } else { None }
     }
 }
 // ANCHOR_END: graphs_min_cut_super_nodes
@@ -88,11 +117,14 @@ impl SuperNodes {
 impl Graph {
 
     fn get_super_edges(&self) -> SuperEdges {
+        let mut length = 0;
         let list = self.edges.iter()
-            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect())
-            ).collect();
-        // println!("get_super_edges(): {:?}",list);
-        SuperEdges { list }
+            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect::<HashBag<Node>>())
+            )
+            .inspect(|(_,c)| length += c.len() )
+            .collect();
+        // println!("get_super_edges(): [{length}]{:?}",list);
+        SuperEdges { list, length }
     }
 
     fn get_super_nodes(&self) -> SuperNodes {
@@ -131,7 +163,7 @@ impl MinimumCut for Graph {
 
         // iterate N*log(N) time or exit if min-cut found has only 2 edges
         let mut f = f32::MAX;
-        while iterations != 0 && f > 0.089 {
+        while iterations != 0 && f > 0.088 {
 
             // contract the graph
             if let Some(graph) = self.contract_graph() {
@@ -196,8 +228,8 @@ impl MinimumCut for Graph {
         let mut snode_iter = super_nodes.iter();
         Some(
             self.get_crossing_edges(
-                snode_iter.next().expect("There is no src super node").1,
-                snode_iter.next().expect("There is no dst super node").1
+                snode_iter.next().expect("There is no src super node"),
+                snode_iter.next().expect("There is no dst super node")
             )
         )
     }

@@ -5,7 +5,7 @@ The key concept behind this algorithm is that the minimum cut relates to a **ver
 
 ## How to find the minimum cut of a graph
 The algorithm performs the following steps 
-* Perform `N * log(N)` contractions of the graph, where `N` is the total number of graph nodes
+* Perform `N * ln(N)` contractions of the graph, where `N` is the total number of graph nodes
   * Record the resulting minimum-cut per contraction
   * Compare result to current min-cut and if smaller make new min-cut the current
 * Return the smallest minimum-cut recorded

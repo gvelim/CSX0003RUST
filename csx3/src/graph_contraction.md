@@ -33,20 +33,26 @@ Worth noting here that
 * We **must** be in a position to deal with repeating `(2..*)` `super-edges` resulting from the contraction of two `super-nodes`, hence the use `HashBag` which is an unordered multiset implementation. Use of `HashSet` results to elimination of `super-edge` multiples hence **_diminishing_** algorithm's statistical ability to produce the optimal graph contraction
 * We **must** account for `SuperEdges` multiples while we (a) remove loops and (b) re-aligning `super-edges` following two `super-node` contraction
 
-The following implementation of `Super-Edges` structure, provides and abstracts, the key operations of edge collapsing. 
+The following implementation of `Super-Edges` structure, provides and abstracts, the key operations of edge collapsing that is
+* extract a random edge for the total set
+* removal of an explicit edge
+* repositioning of edges from one node onto another
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_edges}}
 ```
-Similarly, the `SuperNodes` structure, provides and abstracts, the merging of two nodes into a super node 
+Similarly, the `SuperNodes` structure, provides and abstracts
+* the merging of two nodes into a super node
+* indexed access to super nodes
+* iterator
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_nodes}}
 ```
 
-The `SuperEdges` and `SuperNodes` structures are initiated from the graph
+The `SuperEdges` and `SuperNodes` structures are initiated from the `Graph` structure
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_min_cut_super_edges_graph}}
 ```
-### Putting it together
+### Putting all together
 With the supporting data structures in place we are able to write the following implementation for the contraction algorithm
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/min_cut.rs:graphs_contraction}}

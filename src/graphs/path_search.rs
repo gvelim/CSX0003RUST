@@ -90,7 +90,7 @@ impl PathSearch for Graph {
                         else {
                             // calc the new path cost to edge
                             let edge_cost = path_cost + cost;
-                            // if new cost is better than previsously found
+                            // if new cost is better than previously found
                             if edge_cost > tracker[edge].dist  { None }
                             else {
                                 // set the new lower cost @node along with related parent Node

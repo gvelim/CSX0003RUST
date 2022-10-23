@@ -162,6 +162,66 @@ impl Graph {
 }
 // ANCHOR_END: graphs_scc_traversal
 
+// ANCHOR: graphs_topological_sort
+struct TState {
+    tracker: Tracker,
+    path: Vec<Node>
+}
+
+impl TState {
+    /// Construct a new `GraphState` given a `Graph`
+    fn new(g: &Graph) -> TState {
+        TState {
+            tracker: g.get_tracker(Undiscovered, 0, None),
+            path: Vec::new()
+        }
+    }
+}
+
+impl DFSearch for TState {
+    fn pre_process_node(&mut self, node: Node) {
+        self.tracker[node].visited(Discovered);
+    }
+
+    fn post_process_node(&mut self, node: Node) {
+        self.tracker[node].visited(Processed);
+        self.path.push(node);
+    }
+
+    fn path(&self) -> &Vec<Node> {
+        &self.path
+    }
+
+    fn is_discovered(&self, node: Node) -> bool {
+        self.tracker[node].is_discovered()
+    }
+}
+
+trait TopologicalSort {
+    fn topological_sort(&self) -> Vec<Node>;
+}
+
+impl TopologicalSort for Graph {
+    fn topological_sort(&self) -> Vec<Node> {
+        // initiate the run state structure for calculating the topological sort of the graph
+        let mut ts = TState::new(self);
+
+        // Find all paths and save them
+        self.nodes
+            .iter()
+            .for_each(|&start| {
+                if !ts.tracker[start].is_discovered() {
+                    ts.path_search(self, start);
+                }
+            });
+
+        // Extract path from tracker
+        ts.path.reverse();
+        ts.path
+    }
+}
+// ANCHOR_END: graphs_topological_sort
+
 #[cfg(test)]
 mod test {
     use std::cmp::Reverse;
@@ -195,6 +255,22 @@ mod test {
                     .fold(vec![0;5], |mut out, (idx, val)| { out[idx] = val; out });
                 println!("Found: {:?}, Expected {:?}",vec,cuts);
                 assert_eq!( vec, cuts );
+                println!("--------------------");
+            });
+    }
+    #[test]
+    fn test_topological_sort() {
+        let test_data = vec![
+            ("src/graphs/txt/ts_simple.txt", vec![4, 5, 1, 2, 3, 6]),
+        ];
+
+        test_data.into_iter()
+            .for_each(|(filename, out)| {
+                println!("> {filename}");
+                let g = Graph::import_text_graph(filename, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}", filename));
+                let ts = g.topological_sort();
+                println!("Found: {:?}, Expected {:?}",ts,out);
+                assert_eq!( ts, out );
                 println!("--------------------");
             });
     }

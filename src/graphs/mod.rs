@@ -23,9 +23,10 @@ impl From<NodeType> for Node {
         match nt { NodeType::N(node)|NC(node, _) => node }
     }
 }
-impl Into<NodeType> for Node {
-    fn into(self) -> NodeType {
-        NodeType::N(self)
+
+impl From<Node> for NodeType {
+    fn from(value: Node) -> Self {
+        NodeType::N(value)
     }
 }
 
@@ -147,7 +148,7 @@ impl Index<Node> for Tracker {
     type Output = NodeTrack;
 
     fn index(&self, index: Node) -> &Self::Output {
-        &self.list.get(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker {:?}", &self))
+        self.list.get(&index).unwrap_or_else(|| panic!("Error: cannot find {index} in tracker {:?}", &self))
     }
 }
 impl IndexMut<Node> for Tracker {

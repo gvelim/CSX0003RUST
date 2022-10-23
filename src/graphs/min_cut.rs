@@ -16,21 +16,26 @@ impl SuperEdges {
         let mut idx = thread_rng().gen_range(0..self.length);
 
         let mut iter = self.list.iter();
-        let (idx, &node, edges) = loop {
-            let (node,edges) = iter.next().unwrap();
-            if idx < edges.len() {
-                break (idx, node, edges)
+        if let Some((idx, &node, edges)) = loop {
+            if let Some((node,edges)) = iter.next() {
+                if idx < edges.len() {
+                    break Some((idx, node, edges))
+                }
+                idx -= edges.len();
+            } else {
+                break None
             }
-            idx -= edges.len();
-        };
-
-        Edge(
-            node,
-            edges.iter()
-                .nth(idx)
-                .copied()
-                .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx})"))
-        )
+        } {
+            Edge(
+                node,
+                edges.iter()
+                    .nth(idx)
+                    .copied()
+                    .unwrap_or_else(|| panic!("get_random_edge(): cannot get dst node at position({idx} from src({node})"))
+            )
+        } else {
+            panic!("get_random_edge(): Couldn't pick a random edge with index({idx}) from src")
+        }
     }
 
     fn remove_edge(&mut self, src: Node, dst: Node) {

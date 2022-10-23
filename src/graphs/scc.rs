@@ -2,6 +2,8 @@ use std::collections::{BinaryHeap};
 use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 
 // ANCHOR: graphs_scc_state
+/// GraphState struct enable us to maintain the processing state of the graph
+/// and while we apply a recursive approach in searching the graph
 struct GraphState {
     tracker: Tracker,
     queue: BinaryHeap<Step>,
@@ -10,14 +12,7 @@ struct GraphState {
 }
 
 impl GraphState {
-    #[inline]
-    fn tick(&mut self) -> Cost {
-        self.time += 1;
-        self.time
-    }
-    fn get_timings(&self) -> Vec<(Node, Cost)> {
-        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
-    }
+    /// Construct a new `GraphState` given a `Graph`
     fn new(g: &Graph) -> GraphState {
         GraphState {
             tracker: g.get_tracker(Undiscovered, 0, None),
@@ -26,28 +21,75 @@ impl GraphState {
             path: Vec::new()
         }
     }
-    fn path_search(&mut self, g: &Graph, start: Node) -> &Vec<Node>{
+    /// Extract from `BinaryHeap` the exit times per ordered from max -> min
+    fn get_timings(&self) -> Vec<(Node, Cost)> {
+        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
+    }
+}
+/// Depth First Search abstraction, enabling a variety of implementations such as, strongly connected components, topological sort, etc
+/// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
+/// - Node pre-processing step fn()
+/// - Node post-processing step fn()
+/// - Path return fn()
+/// - node state fn()
+trait DFSearch {
+    /// work to be done before edges are explored, that is, discovered but not processed
+    fn pre_process_node(&mut self, node: Node);
+    /// work to be done after the edges have been explored; hence the node is now processed
+    fn post_process_node(&mut self, node: Node);
+    /// return the path at position and given the pre/post processing steps
+    fn path(&self) -> &Vec<Node>;
+    /// return whether the node has been seen before
+    fn is_discovered(&self, node: Node) -> bool;
+    /// Default implementation of depth first search
+    fn path_search(&mut self, g: &Graph, start: Node) -> &Vec<Node> {
         // Entering the node at time tick()
-        self.tick();
-        self.tracker[start].visited(Discovered).distance(self.time);
+        self.pre_process_node(start);
 
         // processing the edges
         // println!("Enter: {start}:{:?}", self.tracker[start]);
         if let Some(edges) = g.edges.get(&start) {
             for &dst in edges {
                 let d = dst.into();
-                if !self.tracker[d].is_discovered() {
+                if !self.is_discovered(d) {
                     self.path_search(g, d);
                 }
             }
         }
         // Exiting the node at time tick()
-        self.tick();
-        self.tracker[start].visited(Processed).distance(self.time);
-        self.queue.push(Step(start, self.time));
-        self.path.push(start);
+        self.post_process_node(start);
         // println!("Exit: {start}:{:?}", self.tracker[start]);
+        self.path()
+    }
+}
+
+/// Graph State implements DFSearch trait and particularly provides specific implementation for
+/// the calculation of the strongly connected components, in terms of node post/pre processing fn(),
+/// path return fn() and node state fn()
+impl DFSearch for GraphState {
+    /// capture time of entry and set node state to visited,
+    /// given the node's edges have yet be visited
+    fn pre_process_node(&mut self, node: Node) {
+        // Entering the node at time tick()
+        self.time += 1;
+        self.tracker[node].visited(Discovered).distance(self.time);
+    }
+    /// capture time of exit and set node state to processed,
+    /// given all edges have also been processed
+    fn post_process_node(&mut self, node: Node) {
+        // Exiting the node at time tick()
+        self.time += 1;
+        self.tracker[node].visited(Processed).distance(self.time);
+        self.queue.push(Step(node, self.time));
+        self.path.push(node);
+    }
+    /// Return the path as it was calculated by the post processing step
+    fn path(&self) -> &Vec<Node> {
         &self.path
+    }
+    /// return the state of the node
+    fn is_discovered(&self, node: Node) -> bool {
+        self.tracker[node].is_discovered()
     }
 }
 // ANCHOR_END: graphs_scc_state
@@ -122,6 +164,7 @@ impl Graph {
 
 #[cfg(test)]
 mod test {
+    use std::cmp::Reverse;
     use super::*;
 
     #[test]
@@ -142,7 +185,7 @@ mod test {
                 let g = Graph::import_text_graph(fname, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}",fname));
 
                 let mut scc = g.strongly_connected();
-                scc.sort_by(|a, b| b.len().cmp(&a.len()));
+                scc.sort_by_key(|a| Reverse(a.len()));
 
                 let vec = scc
                     .into_iter()
@@ -154,6 +197,5 @@ mod test {
                 assert_eq!( vec, cuts );
                 println!("--------------------");
             });
-        assert!(true);
     }
 }

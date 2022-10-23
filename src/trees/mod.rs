@@ -108,7 +108,7 @@ mod test {
 
         assert_eq!(
             a.iter()
-                .map( |x| *x )
+                .copied()
                 .collect::<Vec<i32>>(),
             vec![60,50,45,41,40]
         );

@@ -25,5 +25,7 @@
     - [Node Processing State](graph_search_process_state.md)
     - [Minimum Path Cost](./graph_path_minimum_cost.md)
     - [Shortest Distance](./graph_path_shortest_distance.md)
+    - [Abstracting Depth First Search](graph_path_dfs_abstract.md)
+    - [Topological Sort](./graph_path_topological_sort.md)
   - [Strong Connectivity](./graph_connect.md)
     - [Kosaraju’s algorithm](./graph_connect_scc.md)

@@ -14,8 +14,8 @@ Recursion is a key implementation approach that will enable us to perform
 2. Node post-processing, e.g. capture/log the `exit` time after there is no path remaining to be found from this node
 
 As a result to measure time across recursions and without the use of a `global` variable, we resort to the `GraphState` struct that
+* implements the [`DFSearch` trait](graph_path_dfs_abstract.md) that provides the recursive function
 * holds the recursion state for `time`, `path` at node, node `state` & `ordered list`
-* implements the recursive function
 
 In addition, `GraphState` provide us with the `Tracker` structure that simplifies handling of the [node processing state](graph_search_process_state.md) while we are search the graph.
 

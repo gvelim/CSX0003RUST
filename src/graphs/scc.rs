@@ -1,31 +1,7 @@
 use std::collections::{BinaryHeap};
 use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 
-// ANCHOR: graphs_scc_state
-/// GraphState struct enable us to maintain the processing state of the graph
-/// and while we apply a recursive approach in searching the graph
-struct GraphState {
-    tracker: Tracker,
-    queue: BinaryHeap<Step>,
-    time: Cost,
-    path: Vec<Node>
-}
-
-impl GraphState {
-    /// Construct a new `GraphState` given a `Graph`
-    fn new(g: &Graph) -> GraphState {
-        GraphState {
-            tracker: g.get_tracker(Undiscovered, 0, None),
-            queue: BinaryHeap::new(),
-            time: 0,
-            path: Vec::new()
-        }
-    }
-    /// Extract from `BinaryHeap` the exit times per ordered from max -> min
-    fn get_timings(&self) -> Vec<(Node, Cost)> {
-        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
-    }
-}
+// ANCHOR: graphs_abstract_dfs
 /// Depth First Search abstraction, enabling a variety of implementations such as, strongly connected components, topological sort, etc
 /// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
 /// - Node pre-processing step fn()
@@ -60,6 +36,32 @@ trait DFSearch {
         self.post_process_node(start);
         // println!("Exit: {start}:{:?}", self.tracker[start]);
         self.path()
+    }
+}
+// ANCHOR_END: graphs_abstract_dfs
+// ANCHOR: graphs_scc_state
+/// GraphState struct enable us to maintain the processing state of the graph
+/// and while we apply a recursive approach in searching the graph
+struct GraphState {
+    tracker: Tracker,
+    queue: BinaryHeap<Step>,
+    time: Cost,
+    path: Vec<Node>
+}
+
+impl GraphState {
+    /// Construct a new `GraphState` given a `Graph`
+    fn new(g: &Graph) -> GraphState {
+        GraphState {
+            tracker: g.get_tracker(Undiscovered, 0, None),
+            queue: BinaryHeap::new(),
+            time: 0,
+            path: Vec::new()
+        }
+    }
+    /// Extract from `BinaryHeap` the exit times per ordered from max -> min
+    fn get_timings(&self) -> Vec<(Node, Cost)> {
+        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
     }
 }
 
@@ -162,6 +164,79 @@ impl Graph {
 }
 // ANCHOR_END: graphs_scc_traversal
 
+// ANCHOR: graphs_topological_sort_state
+/// Graph state that we need to maintain
+/// for the topological sort algorithm
+struct TState {
+    tracker: Tracker,
+    path: Vec<Node>
+}
+
+impl TState {
+    /// Construct a new `GraphState` given a `Graph`
+    fn new(g: &Graph) -> TState {
+        TState {
+            tracker: g.get_tracker(Undiscovered, 0, None),
+            path: Vec::new()
+        }
+    }
+}
+/// Topological sort implementation of the TState
+/// There is no need for exit/entry time or tracking parent node.
+/// Here we only need to save the `node` in the `tracker.path` following its full processing
+impl DFSearch for TState {
+    /// mark node as visited but not processed
+    fn pre_process_node(&mut self, node: Node) {
+        self.tracker[node].visited(Discovered);
+    }
+    /// Important we store the node in the path following node processing complete
+    fn post_process_node(&mut self, node: Node) {
+        self.tracker[node].visited(Processed);
+        self.path.push(node);
+    }
+    /// extract the aggregate path stored
+    fn path(&self) -> &Vec<Node> {
+        &self.path
+    }
+    /// return true if node is either `Discovered` or `Processed`
+    fn is_discovered(&self, node: Node) -> bool {
+        self.tracker[node].is_discovered()
+    }
+}
+// ANCHOR_END: graphs_topological_sort_state
+// ANCHOR: graphs_topological_sort
+/// Topological Sort trait
+trait TopologicalSort {
+    fn topological_sort(&self) -> Vec<Node>;
+}
+/// Graph implementation of Topological Sort
+impl TopologicalSort for Graph {
+    /// Implementation of topological sort for Graph
+    fn topological_sort(&self) -> Vec<Node> {
+        // initiate the run state structure for calculating the topological sort of the graph
+        let mut ts = TState::new(self);
+
+        // Find path aggregate, that is, all paths joined up together
+        // Achieved by appending the path of each iteration onto tracker.path
+        // see post_processing() of TState implementation of DFSearch
+        self.nodes
+            .iter()
+            .for_each(|&start| {
+                // if node is not yet visited
+                if !ts.tracker[start].is_discovered() {
+                    // perform DFS from node and
+                    // append path found onto the tracker.path vector
+                    ts.path_search(self, start);
+                }
+            });
+
+        // Extract & reverse path from tracker so we extract the topological sort
+        ts.path.reverse();
+        ts.path
+    }
+}
+// ANCHOR_END: graphs_topological_sort
+
 #[cfg(test)]
 mod test {
     use std::cmp::Reverse;
@@ -195,6 +270,23 @@ mod test {
                     .fold(vec![0;5], |mut out, (idx, val)| { out[idx] = val; out });
                 println!("Found: {:?}, Expected {:?}",vec,cuts);
                 assert_eq!( vec, cuts );
+                println!("--------------------");
+            });
+    }
+    #[test]
+    fn test_topological_sort() {
+        let test_data = vec![
+            ("src/graphs/txt/ts_simple.txt", vec![4, 5, 1, 2, 3, 6])
+            // ,("src/graphs/txt/scc_simple.txt", vec![3,2,1,1,0])
+        ];
+
+        test_data.into_iter()
+            .for_each(|(filename, out)| {
+                println!("> {filename}");
+                let g = Graph::import_text_graph(filename, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}", filename));
+                let ts = g.topological_sort();
+                println!("Found: {:?}, Expected {:?}",ts,out);
+                assert_eq!( ts, out );
                 println!("--------------------");
             });
     }

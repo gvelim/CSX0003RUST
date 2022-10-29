@@ -1,4 +1,5 @@
 #![feature(int_log)]
+#![feature(associated_type_defaults)]
 
 extern crate core;
 

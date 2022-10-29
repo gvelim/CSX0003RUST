@@ -6,36 +6,51 @@ use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 /// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
 /// - Node pre-processing step fn()
 /// - Node post-processing step fn()
+/// - Node pre-processing edge fn()
+/// - abort recursion fn()
 /// - Path return fn()
 /// - node state fn()
 trait DFSearch {
+    type Item = Vec<Node>;
     /// work to be done before edges are explored, that is, discovered but not processed
-    fn pre_process_node(&mut self, node: Node);
+    /// uses incl. measuring entry time, set node state, etc
+    fn pre_process_node(&mut self, node: Node) -> &mut Self;
     /// work to be done after the edges have been explored; hence the node is now processed
-    fn post_process_node(&mut self, node: Node);
+    /// uses incl. measuring exit time, set node parent, save node in path, etc
+    fn post_process_node(&mut self, node: Node) -> &mut Self;
+    /// work to be done after the node pre-processed and before the edges is explored 
+    /// uses incl. check for loops, categorize edge into types, etc
+    /// default implementation does nothing otherwise you have to override
+    fn pre_process_edge(&mut self, _edge: Edge) -> &mut Self { self }
+    /// Abort the recursion
+    /// uses incl. detecting the graph is not Direct acyclic, etc
+    fn abort(&self) -> bool { false }
     /// return the path at position and given the pre/post processing steps
-    fn path(&self) -> &Vec<Node>;
+    fn path(&self) -> &Self::Item;
     /// return whether the node has been seen before
     fn is_discovered(&self, node: Node) -> bool;
     /// Default implementation of depth first search
-    fn path_search(&mut self, g: &Graph, start: Node) -> &Vec<Node> {
+    fn path_search(&mut self, g: &Graph, start: Node) -> Option<&Self::Item> {
         // Entering the node at time tick()
-        self.pre_process_node(start);
+        if self.pre_process_node(start).abort() { return None }
 
         // processing the edges
         // println!("Enter: {start}:{:?}", self.tracker[start]);
         if let Some(edges) = g.edges.get(&start) {
             for &dst in edges {
                 let d = dst.into();
+
+                if self.pre_process_edge(Edge(start,d)).abort() { return None };
+
                 if !self.is_discovered(d) {
                     self.path_search(g, d);
                 }
             }
         }
         // Exiting the node at time tick()
-        self.post_process_node(start);
+        if self.post_process_node(start).abort() { return None };
         // println!("Exit: {start}:{:?}", self.tracker[start]);
-        self.path()
+        Some(&self.path())
     }
 }
 // ANCHOR_END: graphs_abstract_dfs
@@ -69,21 +84,25 @@ impl GraphState {
 /// the calculation of the strongly connected components, in terms of node post/pre processing fn(),
 /// path return fn() and node state fn()
 impl DFSearch for GraphState {
+    type Item = Vec<Node>;
+
     /// capture time of entry and set node state to visited,
     /// given the node's edges have yet be visited
-    fn pre_process_node(&mut self, node: Node) {
+    fn pre_process_node(&mut self, node: Node) -> &mut Self {
         // Entering the node at time tick()
         self.time += 1;
         self.tracker[node].visited(Discovered).distance(self.time);
+        self
     }
     /// capture time of exit and set node state to processed,
     /// given all edges have also been processed
-    fn post_process_node(&mut self, node: Node) {
+    fn post_process_node(&mut self, node: Node) -> &mut Self {
         // Exiting the node at time tick()
         self.time += 1;
         self.tracker[node].visited(Processed).distance(self.time);
         self.queue.push(Step(node, self.time));
         self.path.push(node);
+        self
     }
     /// Return the path as it was calculated by the post processing step
     fn path(&self) -> &Vec<Node> {
@@ -132,7 +151,7 @@ impl ConnectedComponents for Graph {
             .fold(Vec::new(),|mut components, (node, _)| {
                 if !gs.tracker[node].is_discovered() {
                     // extract new component
-                    let component = gs.path_search(&tg, node );
+                    let component = gs.path_search(&tg, node ).unwrap();
                     println!("Pass 2: Component [{}]{:?}", component.len(), component);
                     // store component found
                     components.push(component.clone() );
@@ -169,7 +188,8 @@ impl Graph {
 /// for the topological sort algorithm
 struct TState {
     tracker: Tracker,
-    path: Vec<Node>
+    path: Vec<Node>,
+    abort: bool
 }
 
 impl TState {
@@ -177,7 +197,8 @@ impl TState {
     fn new(g: &Graph) -> TState {
         TState {
             tracker: g.get_tracker(Undiscovered, 0, None),
-            path: Vec::new()
+            path: Vec::new(),
+            abort: false
         }
     }
 }
@@ -186,16 +207,32 @@ impl TState {
 /// Here we only need to save the `node` in the `tracker.path` following its full processing
 impl DFSearch for TState {
     /// mark node as visited but not processed
-    fn pre_process_node(&mut self, node: Node) {
+    fn pre_process_node(&mut self, node: Node) -> &mut Self {
         self.tracker[node].visited(Discovered);
+        self
     }
     /// Important we store the node in the path following node processing complete
-    fn post_process_node(&mut self, node: Node) {
+    fn post_process_node(&mut self, node: Node) -> &mut Self {
         self.tracker[node].visited(Processed);
         self.path.push(node);
+        self
+    }
+    /// before we jump into the edge for further exploration
+    /// we check if the edge is actually a node already `Discovered` but not `Processed`
+    /// if that is the case, we set the abort flag to `True`
+    fn pre_process_edge(&mut self, edge: Edge) -> &mut Self {
+        let Edge(_,dst) = edge;
+        if self.tracker[dst].visited == Discovered {
+            self.abort = true;
+        }
+        self
+    }
+    /// Implement the abort fn() so we can stop the path search recursion
+    fn abort(&self) -> bool {
+        self.abort
     }
     /// extract the aggregate path stored
-    fn path(&self) -> &Vec<Node> {
+    fn path(&self) -> &Self::Item {
         &self.path
     }
     /// return true if node is either `Discovered` or `Processed`
@@ -207,32 +244,29 @@ impl DFSearch for TState {
 // ANCHOR: graphs_topological_sort
 /// Topological Sort trait
 trait TopologicalSort {
-    fn topological_sort(&self) -> Vec<Node>;
+    fn topological_sort(&self) -> Option<Vec<Node>>;
 }
 /// Graph implementation of Topological Sort
 impl TopologicalSort for Graph {
     /// Implementation of topological sort for Graph
-    fn topological_sort(&self) -> Vec<Node> {
+    fn topological_sort(&self) -> Option<Vec<Node>> {
         // initiate the run state structure for calculating the topological sort of the graph
         let mut ts = TState::new(self);
 
-        // Find path aggregate, that is, all paths joined up together
-        // Achieved by appending the path of each iteration onto tracker.path
+        // Construct a path aggregate, that is, each path found is joined up together
+        // achieved by appending the path of each iteration onto tracker.path
         // see post_processing() of TState implementation of DFSearch
-        self.nodes
-            .iter()
-            .for_each(|&start| {
-                // if node is not yet visited
-                if !ts.tracker[start].is_discovered() {
-                    // perform DFS from node and
-                    // append path found onto the tracker.path vector
-                    ts.path_search(self, start);
-                }
-            });
+        for &node in &self.nodes {
+            // if node is not yet visited && search hasn't thrown a NONE, that is, we've found a circle
+            if ts.tracker[node].visited == Undiscovered
+                && ts.path_search(self, node).is_none() {
+                return None
+            }
+        }
 
         // Extract & reverse path from tracker so we extract the topological sort
         ts.path.reverse();
-        ts.path
+        Some(ts.path)
     }
 }
 // ANCHOR_END: graphs_topological_sort
@@ -246,6 +280,7 @@ mod test {
     fn test_scc_small() {
         let test_data = vec![
             ("src/graphs/txt/scc_simple.txt", vec![3,2,1,1,0]),
+            ("src/graphs/txt/scc_da_small.txt", vec![5, 4, 2, 1, 1]),
             ("src/graphs/txt/scc_input_mostlyCycles_1_8.txt", vec![4,2,2,0,0]),
             ("src/graphs/txt/scc_input_mostlyCycles_8_16.txt", vec![13,1,1,1,0]),
             ("src/graphs/txt/scc_input_mostlyCycles_9_32.txt", vec![14,9,6,2,1]),
@@ -276,8 +311,9 @@ mod test {
     #[test]
     fn test_topological_sort() {
         let test_data = vec![
-            ("src/graphs/txt/ts_simple.txt", vec![4, 5, 1, 2, 3, 6])
-            // ,("src/graphs/txt/scc_simple.txt", vec![3,2,1,1,0])
+            ("src/graphs/txt/ts_simple.txt", vec![Some(vec![4, 5, 1, 2, 3, 6]),Some(vec![4, 1, 5, 2, 3, 6])])
+            // ,("src/graphs/txt/scc_da_small.txt", vec![Some(vec![9, 8, 2, 0, 1, 11, 12, 3, 5, 7, 6, 4, 10])])
+            ,("src/graphs/txt/scc_simple.txt", vec![None])
         ];
 
         test_data.into_iter()
@@ -286,7 +322,7 @@ mod test {
                 let g = Graph::import_text_graph(filename, ' ', '\0').unwrap_or_else(|| panic!("Cannot open file: {}", filename));
                 let ts = g.topological_sort();
                 println!("Found: {:?}, Expected {:?}",ts,out);
-                assert_eq!( ts, out );
+                assert!( out.contains(&ts) );
                 println!("--------------------");
             });
     }

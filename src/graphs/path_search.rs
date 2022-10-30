@@ -1,113 +1,183 @@
 use std::collections::{VecDeque, BinaryHeap};
 use super::{*, NodeType::{NC}, NodeState::{Discovered, Undiscovered}};
 
+trait BFSearch {
+    type Output;
+    type QueueItem;
+
+    /// Initialise the Path search given the starting node
+    fn initiate(&mut self, start:Node) -> &mut Self;
+    /// Pull an Item from the queue
+    fn pop(&mut self) -> Option<Self::QueueItem>;
+    /// Extract Node value from a Queued Item
+    fn node_from_queued(&self, qt: &Self::QueueItem) -> Node;
+    /// Pre-process item retrieved from the queue and before proceeding with queries the Edges
+    /// return true to proceed or false to abandon node processing
+    fn pre_process_node(&mut self, _node: Node) -> bool { true }
+    /// Process node after all edges have been processes and pushed in the queue
+    fn post_process_node(&mut self, _node: Node) { }
+    /// Has the node been Discovered ?
+    fn is_discovered(&self, _node: NodeType) -> bool;
+    /// Process the Edge node and
+    /// return 'true' to proceed with push or 'false' to skip the edge node
+    fn pre_process_edge(&mut self, src: Node, dst: NodeType) -> bool;
+    /// Construct a Queued Item from the Node
+    fn node_to_queued(&self, node: Node) -> Self::QueueItem;
+    /// Push to the queue
+    fn push(&mut self, item: Self::QueueItem);
+    /// Retrieve path
+    fn extract_path(&self, start: Node) -> Self::Output;
+    /// Path Search function
+    fn path_search(&mut self, g: &Graph, start: Node, goal:Node) -> Option<Self::Output> {
+        // initiate BFSearch given a start node
+        self.initiate(start);
+        // until no items left for processing
+        while let Some(qt) = self.pop() {
+            //Extract the src node
+            let src = self.node_from_queued(&qt);
+            // pre-process and if false abandon and proceed to next item
+            if !self.pre_process_node(src) { continue };
+            // if we have reached our goal return the path
+            if src == goal {
+                return Some(self.extract_path(goal))
+            }
+            // given graph's edges
+            g.edges
+                // get src node's edges and per their NodeType
+                .get(&src)
+                .unwrap_or_else(|| panic!("path_search(): Cannot extract edges for node {src}"))
+                .iter()
+                .for_each(|&dst| {
+                    // if dst hasn't been visited AND pre-processing results to true/proceed
+                    if !self.is_discovered(dst)
+                        && self.pre_process_edge(src, dst) {
+                        // push dst node for further processing
+                        self.push(self.node_to_queued(dst.into()))
+                    }
+                });
+            // Process node after edges have been discovered and pushed for further processing
+            self.post_process_node(src);
+        }
+        None
+    }
+}
+
 trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
 }
 
 impl PathSearch for Graph {
+
     // ANCHOR: graphs_search_path_shortest
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)> {
-
-        // setup queue
-        let mut queue = VecDeque::<Node>::new();
-
-        // holds whether a node has been visited, if yes, it's distance and parent node
-        let mut tracker= self.get_tracker(Undiscovered, 0, None);
-
-        queue.push_back(start);
-        tracker[start].visited(Discovered);
-
-        while let Some(src) = queue.pop_front() {
-
-            if src == goal {
-                return Some(tracker.extract(src))
-            }
-
-            self.edges
-                // get graph edges from src node
-                .get(&src)
-                .unwrap_or_else(|| panic!("path_distance(): Cannot extract edges for node {src}"))
-                // scan each dst from src node
-                .iter()
-                .map(|&ntype| ntype.into() )
-                .filter(|&dst| {
-                    // if visited do not proceed
-                    if tracker[dst].is_discovered() { false }
-                    else {
-                        let level = tracker[src].dist + 1;
-                        // mark visited, calculate distance & store parent for distance
-                        tracker[dst].visited(Discovered)
-                            .distance(level)
-                            .parent(src);
-                        true
-                    }
-                })
-                // push at the back of the queue for further scanning
-                .for_each(|dst| queue.push_back(dst) )
+        struct PDState {
+            tracker: Tracker,
+            queue: VecDeque<Node>
         }
-        None
+        impl PDState {
+            fn new(g: &Graph) -> PDState {
+                PDState {
+                    tracker: g.get_tracker(Undiscovered, 0, None),
+                    queue: VecDeque::<Node>::new()
+                }
+            }
+        }
+        impl BFSearch for PDState {
+            type Output = (Vec<Node>, Cost);
+            type QueueItem = Node;
+
+            fn initiate(&mut self, node:Node) -> &mut Self {
+                self.queue.push_back(node);
+                self.tracker[node].visited(Discovered);
+                self
+            }
+            fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop_front() }
+            fn node_from_queued(&self, node: &Self::QueueItem) -> Node { *node }
+            fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+            fn pre_process_edge(&mut self, src: Node, dst: NodeType) -> bool {
+                let level = self.tracker[src].dist + 1;
+                // mark visited, calculate distance & store parent for distance
+                self.tracker[dst.into()].visited(Discovered)
+                    .distance(level)
+                    .parent(src);
+                true
+            }
+            fn node_to_queued(&self, node: Node) -> Self::QueueItem { node }
+            fn push(&mut self, item: Self::QueueItem) { self.queue.push_back(item) }
+            fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
+        }
+
+        let mut pds = PDState::new(&self);
+        pds.initiate(start);
+        pds.path_search(&self, start, goal )
     }
     // ANCHOR_END: graphs_search_path_shortest
     // ANCHOR: graphs_search_path_min_cost
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
-
-        // We are using a BinaryHeap queue in order to always have first in the queue
-        // the node with lowest cost to explore next
-
-        let mut queue = BinaryHeap::new();
-
-        // reset all node costs to MAX value with no path-parent nodes
-        let mut tracker= self.get_tracker(Undiscovered, Cost::MAX, None);
-
-        // set cost at start node to zero with no parent node
-        tracker[start].distance(0);
-
-        // push start node in the BinaryHeap queue
-        queue.push(Step(start,0));
-
-        // while queue has nodes pick the node with the lowest cost
-        while let Some(Step(node, _)) = queue.pop() {
-
-            let path_cost= tracker[node].dist;
-            // if we have found the the target node
-            // then we have completed our search
-            // (Dijkstra's algo property - all nodes are processed once)
-            if node == goal {
-                let path = tracker.extract_path(node);
-                println!("\t Path!: {:?} [{path_cost}]", path);
-                return Some((path, path_cost));
-            }
-            if let Some(edges) = self.edges.get(&node) {
-                edges.iter()
-                    .map(|&edge|
-                        if let NC(node, cost) = edge { (node, cost) }
-                        else { panic!("Must use NodeType::NC") }
-                    )
-                    .filter_map(|(edge, cost)| {
-                        if tracker[edge].is_discovered() { None }
-                        else {
-                            // calc the new path cost to edge
-                            let edge_cost = path_cost + cost;
-                            // if new cost is better than previously found
-                            if edge_cost > tracker[edge].dist  { None }
-                            else {
-                                // set the new lower cost @node along with related parent Node
-                                tracker[edge].distance(edge_cost).parent(node);
-                                Some((edge, edge_cost))
-                            }
-                        }
-                    })
-                    .for_each(|(edge, edge_cost)| {
-                        // push unprocessed edge and cost to the queue
-                        queue.push(Step(edge, edge_cost));
-                    });
-            }
-            tracker[node].visited(Discovered);
+        struct PSState {
+            tracker: Tracker,
+            queue: BinaryHeap<Step>
         }
-        println!("Cannot find a path !!");
-        None
+        impl PSState {
+            fn new(g:&Graph) -> PSState {
+                PSState {
+                    // reset all node costs to MAX value with no path-parent nodes
+                    tracker: g.get_tracker(Undiscovered, Cost::MAX, None),
+                    // We are using a BinaryHeap queue in order to always have first in the queue
+                    // the node with lowest cost to explore next
+                    queue: BinaryHeap::new()
+                }
+            }
+        }
+        impl BFSearch for PSState {
+            type Output = (Vec<Node>,Cost);
+            type QueueItem = Step;
+
+            fn initiate(&mut self, start: Node) -> &mut Self {
+                // set cost at start node to zero with no parent node
+                self.tracker[start].distance(0);
+                // push start node in the BinaryHeap queue
+                self.queue.push(Step(start,0));
+                self
+            }
+            fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop() }
+            fn node_from_queued(&self, qt: &Self::QueueItem) -> Node {
+                let &Step(node, _) = qt;
+                node
+            }
+            fn post_process_node(&mut self, node: Node) {
+                self.tracker[node].visited(Discovered);
+            }
+            fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+            fn pre_process_edge(&mut self, src:Node, dst: NodeType) -> bool {
+                if let NC(dst, cost) = dst {
+                    // calc the new path cost to edge
+                    let edge_cost = self.tracker[src].dist + cost;
+                    // if new cost is better than previously found
+                    if edge_cost > self.tracker[dst].dist  { false }
+                    else {
+                        // set the new lower cost @node along with related parent Node
+                        self.tracker[dst].distance(edge_cost).parent(src);
+                        true
+                    }
+                }
+                else {
+                    panic!("pre_process_edge(): Must use NodeType::NC")
+                }
+            }
+            fn node_to_queued(&self, node: Node) -> Self::QueueItem {
+                Step(node, self.tracker[node].dist )
+            }
+            fn push(&mut self, item: Self::QueueItem) { self.queue.push(item) }
+            fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
+        }
+
+
+        let mut pds = PSState::new(self);
+        pds.initiate(start);
+        pds.path_search(self,start,goal)
+
     }
 // ANCHOR_END: graphs_search_path_min_cost
 }
@@ -195,6 +265,7 @@ mod test {
             .for_each(|(goal, cost)| {
                 let path = g.path_shortest(2, goal);
                 assert!(path.is_some());
+                println!("2->{goal} => {:?} :: Expect: {cost}", path);
                 assert_eq!(path.unwrap().1, cost);
             })
     }
@@ -218,6 +289,7 @@ mod test {
             .for_each(|(goal, cost)| {
                 let path = g.path_shortest(1, goal);
                 assert!(path.is_some());
+                println!("1->{goal} => {:?} :: Expect: {cost}", path);
                 assert_eq!(path.unwrap().1, cost);
             })
     }

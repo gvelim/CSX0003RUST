@@ -11,7 +11,7 @@ use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 /// - Path return fn()
 /// - node state fn()
 trait DFSearch {
-    type Item = Vec<Node>;
+    type Output;
     /// work to be done before edges are explored, that is, discovered but not processed
     /// uses incl. measuring entry time, set node state, etc
     fn pre_process_node(&mut self, node: Node) -> &mut Self;
@@ -26,11 +26,11 @@ trait DFSearch {
     /// uses incl. detecting the graph is not Direct acyclic, etc
     fn abort(&self) -> bool { false }
     /// return the path at position and given the pre/post processing steps
-    fn path(&self) -> &Self::Item;
+    fn path(&self) -> &Self::Output;
     /// return whether the node has been seen before
     fn is_discovered(&self, node: Node) -> bool;
     /// Default implementation of depth first search
-    fn path_search(&mut self, g: &Graph, start: Node) -> Option<&Self::Item> {
+    fn path_search(&mut self, g: &Graph, start: Node) -> Option<&Self::Output> {
         // Entering the node at time tick()
         if self.pre_process_node(start).abort() { return None }
 
@@ -84,7 +84,7 @@ impl GraphState {
 /// the calculation of the strongly connected components, in terms of node post/pre processing fn(),
 /// path return fn() and node state fn()
 impl DFSearch for GraphState {
-    type Item = Vec<Node>;
+    type Output = Vec<Node>;
 
     /// capture time of entry and set node state to visited,
     /// given the node's edges have yet be visited
@@ -105,7 +105,7 @@ impl DFSearch for GraphState {
         self
     }
     /// Return the path as it was calculated by the post processing step
-    fn path(&self) -> &Vec<Node> {
+    fn path(&self) -> &Self::Output {
         &self.path
     }
     /// return the state of the node
@@ -206,6 +206,8 @@ impl TState {
 /// There is no need for exit/entry time or tracking parent node.
 /// Here we only need to save the `node` in the `tracker.path` following its full processing
 impl DFSearch for TState {
+    type Output = Vec<Node>;
+
     /// mark node as visited but not processed
     fn pre_process_node(&mut self, node: Node) -> &mut Self {
         self.tracker[node].visited(Discovered);
@@ -232,7 +234,7 @@ impl DFSearch for TState {
         self.abort
     }
     /// extract the aggregate path stored
-    fn path(&self) -> &Self::Item {
+    fn path(&self) -> &Self::Output {
         &self.path
     }
     /// return true if node is either `Discovered` or `Processed`
@@ -258,7 +260,7 @@ impl TopologicalSort for Graph {
         // see post_processing() of TState implementation of DFSearch
         for &node in &self.nodes {
             // if node is not yet visited && search hasn't thrown a NONE, that is, we've found a circle
-            if ts.tracker[node].visited == Undiscovered
+            if !ts.tracker[node].is_discovered()
                 && ts.path_search(self, node).is_none() {
                 return None
             }
@@ -312,7 +314,7 @@ mod test {
     fn test_topological_sort() {
         let test_data = vec![
             ("src/graphs/txt/ts_simple.txt", vec![Some(vec![4, 5, 1, 2, 3, 6]),Some(vec![4, 1, 5, 2, 3, 6])])
-            // ,("src/graphs/txt/scc_da_small.txt", vec![Some(vec![9, 8, 2, 0, 1, 11, 12, 3, 5, 7, 6, 4, 10])])
+            ,("src/graphs/txt/ts_da_small.txt", vec![Some(vec![1,2,3,4]),Some(vec![1,3,2,4])])
             ,("src/graphs/txt/scc_simple.txt", vec![None])
         ];
 

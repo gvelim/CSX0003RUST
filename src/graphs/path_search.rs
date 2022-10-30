@@ -42,21 +42,21 @@ trait BFSearch {
                 return Some(self.extract_path(goal))
             }
             // given graph's edges
-            g.edges
-                // get src node's edges and per their NodeType
-                .get(&src)
-                .unwrap_or_else(|| panic!("path_search(): Cannot extract edges for node {src}"))
-                .iter()
-                .for_each(|&dst| {
-                    // if dst hasn't been visited AND pre-processing results to true/proceed
-                    if !self.is_discovered(dst)
-                        && self.pre_process_edge(src, dst) {
-                        // push dst node for further processing
-                        self.push(self.node_to_queued(dst.into()))
-                    }
-                });
-            // Process node after edges have been discovered and pushed for further processing
-            self.post_process_node(src);
+            // get src node's edges and per their NodeType
+            if let Some(edges) = g.edges.get(&src) {
+                edges.iter()
+                    .for_each(|&dst| {
+                        // if dst hasn't been visited AND pre-processing results to true,
+                        // then push to explore further
+                        if !self.is_discovered(dst)
+                            && self.pre_process_edge(src, dst) {
+                            // push dst node for further processing
+                            self.push(self.node_to_queued(dst.into()))
+                        }
+                    });
+                // Process node after edges have been discovered and pushed for further processing
+                self.post_process_node(src);
+            }
         }
         None
     }
@@ -108,9 +108,7 @@ impl PathSearch for Graph {
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }
 
-        let mut pds = PDState::new(&self);
-        pds.initiate(start);
-        pds.path_search(&self, start, goal )
+        PDState::new(&self).path_search(&self, start, goal )
     }
     // ANCHOR_END: graphs_search_path_shortest
     // ANCHOR: graphs_search_path_min_cost
@@ -173,10 +171,7 @@ impl PathSearch for Graph {
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }
 
-
-        let mut pds = PSState::new(self);
-        pds.initiate(start);
-        pds.path_search(self,start,goal)
+        PSState::new(self).path_search(self,start,goal)
 
     }
 // ANCHOR_END: graphs_search_path_min_cost

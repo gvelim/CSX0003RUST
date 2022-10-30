@@ -66,7 +66,7 @@ impl Edge {
 
 // ANCHOR: graphs_search_path_utils_Step
 #[derive(Debug,Copy, Clone)]
-struct Step(pub Node, pub Cost);
+struct Step(Node, Cost);
 
 impl Eq for Step {}
 impl PartialEq<Self> for Step {

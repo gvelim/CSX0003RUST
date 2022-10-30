@@ -23,6 +23,7 @@
     - [Contraction Algorithm](./graph_contraction.md)
   - [Graph Search](./graph_search.md)
     - [Node Processing State](graph_search_process_state.md)
+    - [Abstracting Breadth First Search](graph_path_bfs_abstract.md)
     - [Minimum Path Cost](./graph_path_minimum_cost.md)
     - [Shortest Distance](./graph_path_shortest_distance.md)
     - [Abstracting Depth First Search](graph_path_dfs_abstract.md)

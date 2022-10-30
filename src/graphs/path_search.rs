@@ -1,53 +1,99 @@
 use std::collections::{VecDeque, BinaryHeap};
 use super::{*, NodeType::{NC}, NodeState::{Discovered, Undiscovered}};
 
+trait BFSearch {
+    type Output;
+    type QueueItem;
+
+    fn initiate(&mut self, start:Node) -> &mut Self;
+    fn pop(&mut self) -> Option<Self::QueueItem>;
+    fn node_from_queue_type(qt: &Self::QueueItem) -> Node;
+    fn pre_process_queue_item(&mut self, _qt: &Self::QueueItem) -> &mut Self { self }
+    fn is_discovered(&self, _node: Node) -> bool;
+    fn pre_process_edge(&mut self, _edge: Edge) -> &mut Self;
+    fn node_to_queue_type(node: Node) -> Self::QueueItem;
+    fn push(&mut self, item: Self::QueueItem);
+    fn get_path(&self, start: Node) -> Self::Output;
+    fn path_search(&mut self, g: &Graph, start: Node, goal:Node) -> Option<Self::Output> {
+        self.initiate(start);
+        while let Some(qt) = self.pop() {
+            self.pre_process_queue_item(&qt);
+            let src = Self::node_from_queue_type(&qt);
+            if src == goal {
+                return Some(self.get_path(goal))
+            }
+            // for each edge
+            g.edges
+                // get graph edges from src node
+                .get(&src)
+                .unwrap_or_else(|| panic!("path_search(): Cannot extract edges for node {src}"))
+                // scan each dst from src node
+                .iter()
+                .map(|&ntype| ntype.into())
+                // push at the back of the queue for further scanning
+                .for_each(|dst| {
+                    // if visited do not proceed
+                    if !self.is_discovered(dst) {
+                        self.pre_process_edge(Edge(src, dst));
+                        // push_to_queue(QueueType)
+                        self.push(Self::node_to_queue_type(dst))
+                    }
+                })
+        }
+        None
+    }
+}
+
 trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
 }
 
 impl PathSearch for Graph {
+
     // ANCHOR: graphs_search_path_shortest
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)> {
-
-        // setup queue
-        let mut queue = VecDeque::<Node>::new();
-
-        // holds whether a node has been visited, if yes, it's distance and parent node
-        let mut tracker= self.get_tracker(Undiscovered, 0, None);
-
-        queue.push_back(start);
-        tracker[start].visited(Discovered);
-
-        while let Some(src) = queue.pop_front() {
-
-            if src == goal {
-                return Some(tracker.extract(src))
-            }
-
-            self.edges
-                // get graph edges from src node
-                .get(&src)
-                .unwrap_or_else(|| panic!("path_distance(): Cannot extract edges for node {src}"))
-                // scan each dst from src node
-                .iter()
-                .map(|&ntype| ntype.into() )
-                .filter(|&dst| {
-                    // if visited do not proceed
-                    if tracker[dst].is_discovered() { false }
-                    else {
-                        let level = tracker[src].dist + 1;
-                        // mark visited, calculate distance & store parent for distance
-                        tracker[dst].visited(Discovered)
-                            .distance(level)
-                            .parent(src);
-                        true
-                    }
-                })
-                // push at the back of the queue for further scanning
-                .for_each(|dst| queue.push_back(dst) )
+        struct PDState {
+            tracker: Tracker,
+            queue: VecDeque<Node>
         }
-        None
+        impl PDState {
+            fn new(g: &Graph) -> PDState {
+                PDState {
+                    tracker: g.get_tracker(Undiscovered, 0, None),
+                    queue: VecDeque::<Node>::new()
+                }
+            }
+        }
+        impl BFSearch for PDState {
+            type Output = (Vec<Node>, Cost);
+            type QueueItem = Node;
+
+            fn initiate(&mut self, node:Node) -> &mut Self {
+                self.queue.push_back(node);
+                self.tracker[node].visited(Discovered);
+                self
+            }
+            fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop_front() }
+            fn node_from_queue_type(node: &Self::QueueItem) -> Node { *node }
+            fn is_discovered(&self, node: Node) -> bool { self.tracker[node].is_discovered() }
+            fn pre_process_edge(&mut self, edge: Edge) -> &mut Self {
+                let Edge(src, dst) = edge;
+                let level = self.tracker[src].dist + 1;
+                // mark visited, calculate distance & store parent for distance
+                self.tracker[dst].visited(Discovered)
+                    .distance(level)
+                    .parent(src);
+                self
+            }
+            fn node_to_queue_type(node: Node) -> Self::QueueItem { node }
+            fn push(&mut self, item: Self::QueueItem) { self.queue.push_back(item) }
+            fn get_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
+        }
+
+        let mut pds = PDState::new(&self);
+        pds.initiate(start);
+        pds.path_search(&self,start,goal)
     }
     // ANCHOR_END: graphs_search_path_shortest
     // ANCHOR: graphs_search_path_min_cost

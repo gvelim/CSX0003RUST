@@ -36,7 +36,9 @@ With the ordered-queue logic in place, we still need to have the means to mainta
 
 The `Tracker` structure simplifies managing the [node processing state](graph_search_process_state.md) of the graph, and we will use as part of our implementation.
 
-As a result, the algorithm can now be realised through the following code
+Both `Tracker` and `BinaryHeap` structures are part the Graph processing State structure `PSState` which in turn, implements the [BFSearch abstraction](graph_path_bfs_abstract.md)
+
+As a result, the algorithm can now be realised by the following implementation 
 ```rust,no_run,noplayground
 {{#include ../../src/graphs/path_search.rs:graphs_search_path_min_cost}}
 ```

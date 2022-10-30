@@ -1,6 +1,7 @@
 use std::collections::{VecDeque, BinaryHeap};
 use super::{*, NodeType::{NC}, NodeState::{Discovered, Undiscovered}};
 
+// ANCHOR: graphs_search_bfs_abstraction
 trait BFSearch {
     type Output;
     type QueueItem;
@@ -61,7 +62,7 @@ trait BFSearch {
         None
     }
 }
-
+// ANCHOR_END: graphs_search_bfs_abstraction
 trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
@@ -71,10 +72,12 @@ impl PathSearch for Graph {
 
     // ANCHOR: graphs_search_path_shortest
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)> {
+        /// Structure for maintaining processing state while processing the graph
         struct PDState {
             tracker: Tracker,
             queue: VecDeque<Node>
         }
+        /// State Constructor from a given Graph and related the initiation requirements for the algo
         impl PDState {
             fn new(g: &Graph) -> PDState {
                 PDState {
@@ -83,18 +86,24 @@ impl PathSearch for Graph {
                 }
             }
         }
+        /// Implementation of Path Search abstraction
         impl BFSearch for PDState {
             type Output = (Vec<Node>, Cost);
             type QueueItem = Node;
 
+            /// Initiate search by pushing starting node and mark it as Discovered
             fn initiate(&mut self, node:Node) -> &mut Self {
                 self.queue.push_back(node);
                 self.tracker[node].visited(Discovered);
                 self
             }
+            /// Get the first item from the start of the queue
             fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop_front() }
+            /// extract Node from the queued Item
             fn node_from_queued(&self, node: &Self::QueueItem) -> Node { *node }
+            /// Has it seen before ?
             fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+            /// Process Edge before pushing it at the end of the queue
             fn pre_process_edge(&mut self, src: Node, dst: NodeType) -> bool {
                 let level = self.tracker[src].dist + 1;
                 // mark visited, calculate distance & store parent for distance
@@ -104,19 +113,24 @@ impl PathSearch for Graph {
                 true
             }
             fn node_to_queued(&self, node: Node) -> Self::QueueItem { node }
+            /// Push item at the end of the queue
             fn push(&mut self, item: Self::QueueItem) { self.queue.push_back(item) }
+            /// Extract path discovered so far
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }
 
+        // Construct the state structure and search for a path that exists between start -> goal
         PDState::new(&self).path_search(&self, start, goal )
     }
     // ANCHOR_END: graphs_search_path_shortest
     // ANCHOR: graphs_search_path_min_cost
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)> {
+        /// Structure for maintaining processing state while processing the graph
         struct PSState {
             tracker: Tracker,
             queue: BinaryHeap<Step>
         }
+        /// State Constructor from a given Graph and related shortest path initiation requirements
         impl PSState {
             fn new(g:&Graph) -> PSState {
                 PSState {
@@ -128,10 +142,12 @@ impl PathSearch for Graph {
                 }
             }
         }
+        /// Implementation of Path Search abstraction
         impl BFSearch for PSState {
             type Output = (Vec<Node>,Cost);
             type QueueItem = Step;
 
+            /// Processing of starting node
             fn initiate(&mut self, start: Node) -> &mut Self {
                 // set cost at start node to zero with no parent node
                 self.tracker[start].distance(0);
@@ -139,38 +155,52 @@ impl PathSearch for Graph {
                 self.queue.push(Step(start,0));
                 self
             }
+            /// get the element with the lowest cost from the queue
             fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop() }
+            /// extract node from the queued item retrieved
             fn node_from_queued(&self, qt: &Self::QueueItem) -> Node {
                 let &Step(node, _) = qt;
                 node
             }
+            /// Process current node after all edges have been discovered and marked for processing
             fn post_process_node(&mut self, node: Node) {
                 self.tracker[node].visited(Discovered);
             }
+            /// has the given node been seen before ?
             fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+            /// Process given edge and return `true` to proceed or `false` to abandon further edge processing
             fn pre_process_edge(&mut self, src:Node, dst: NodeType) -> bool {
                 if let NC(dst, cost) = dst {
                     // calc the new path cost to edge
                     let edge_cost = self.tracker[src].dist + cost;
                     // if new cost is better than previously found
-                    if edge_cost > self.tracker[dst].dist  { false }
+                    if edge_cost > self.tracker[dst].dist  {
+                        // Do no process this edge any further
+                        false
+                    }
                     else {
                         // set the new lower cost @node along with related parent Node
                         self.tracker[dst].distance(edge_cost).parent(src);
+                        // and ensure the edge is processed further
                         true
                     }
                 }
                 else {
+                    // somehow we got the wrong NodeType here
                     panic!("pre_process_edge(): Must use NodeType::NC")
                 }
             }
+            /// Construct the item to be queued, that is, (Node,Cost)
             fn node_to_queued(&self, node: Node) -> Self::QueueItem {
                 Step(node, self.tracker[node].dist )
             }
+            /// Push into (Node,Cost) into the queue
             fn push(&mut self, item: Self::QueueItem) { self.queue.push(item) }
+            /// Get search path discovered so far
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }
 
+        // Construct the state structure and search for a path that exists between start -> goal
         PSState::new(self).path_search(self,start,goal)
 
     }

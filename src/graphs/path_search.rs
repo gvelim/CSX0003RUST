@@ -2,33 +2,52 @@ use std::collections::{VecDeque, BinaryHeap};
 use super::{*, NodeType::{NC}, NodeState::{Discovered, Undiscovered}};
 
 // ANCHOR: graphs_search_bfs_abstraction
+/// Breadth First Search abstraction, that can be used to find shortest distance, lowest cost paths, etc
+/// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
+/// - initiate step fn()
+/// - Queue push & pop step fn()
+/// - Queue-to-Node and vice versa step fn()
+/// - Node pre/post-processing step fn()
+/// - Edge pre-processing step fn()
+/// - Path return fn()
+/// - node state fn()
 trait BFSearch {
     type Output;
     type QueueItem;
 
     /// Initialise the Path search given the starting node
     fn initiate(&mut self, start:Node) -> &mut Self;
+
     /// Pull an Item from the queue
     fn pop(&mut self) -> Option<Self::QueueItem>;
+
     /// Extract Node value from a Queued Item
     fn node_from_queued(&self, qt: &Self::QueueItem) -> Node;
+
     /// Pre-process item retrieved from the queue and before proceeding with queries the Edges
     /// return true to proceed or false to abandon node processing
     fn pre_process_node(&mut self, _node: Node) -> bool { true }
+
     /// Process node after all edges have been processes and pushed in the queue
     fn post_process_node(&mut self, _node: Node) { }
+
     /// Has the node been Discovered ?
     fn is_discovered(&self, _node: NodeType) -> bool;
+
     /// Process the Edge node and
     /// return 'true' to proceed with push or 'false' to skip the edge node
     fn pre_process_edge(&mut self, src: Node, dst: NodeType) -> bool;
+
     /// Construct a Queued Item from the Node
     fn node_to_queued(&self, node: Node) -> Self::QueueItem;
+
     /// Push to the queue
     fn push(&mut self, item: Self::QueueItem);
+
     /// Retrieve path
     fn extract_path(&self, start: Node) -> Self::Output;
-    /// Path Search function
+
+    /// Path Search Implementation
     fn path_search(&mut self, g: &Graph, start: Node, goal:Node) -> Option<Self::Output> {
         // initiate BFSearch given a start node
         self.initiate(start);
@@ -97,12 +116,16 @@ impl PathSearch for Graph {
                 self.tracker[node].visited(Discovered);
                 self
             }
+
             /// Get the first item from the start of the queue
             fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop_front() }
+
             /// extract Node from the queued Item
             fn node_from_queued(&self, node: &Self::QueueItem) -> Node { *node }
+
             /// Has it seen before ?
             fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+
             /// Process Edge before pushing it at the end of the queue
             fn pre_process_edge(&mut self, src: Node, dst: NodeType) -> bool {
                 let level = self.tracker[src].dist + 1;
@@ -112,15 +135,19 @@ impl PathSearch for Graph {
                     .parent(src);
                 true
             }
+
+            /// Construct queued item from Node
             fn node_to_queued(&self, node: Node) -> Self::QueueItem { node }
+
             /// Push item at the end of the queue
             fn push(&mut self, item: Self::QueueItem) { self.queue.push_back(item) }
+
             /// Extract path discovered so far
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }
 
         // Construct the state structure and search for a path that exists between start -> goal
-        PDState::new(&self).path_search(&self, start, goal )
+        PDState::new(self).path_search(self, start, goal )
     }
     // ANCHOR_END: graphs_search_path_shortest
     // ANCHOR: graphs_search_path_min_cost
@@ -130,6 +157,7 @@ impl PathSearch for Graph {
             tracker: Tracker,
             queue: BinaryHeap<Step>
         }
+
         /// State Constructor from a given Graph and related shortest path initiation requirements
         impl PSState {
             fn new(g:&Graph) -> PSState {
@@ -142,6 +170,7 @@ impl PathSearch for Graph {
                 }
             }
         }
+
         /// Implementation of Path Search abstraction
         impl BFSearch for PSState {
             type Output = (Vec<Node>,Cost);
@@ -155,19 +184,24 @@ impl PathSearch for Graph {
                 self.queue.push(Step(start,0));
                 self
             }
+
             /// get the element with the lowest cost from the queue
             fn pop(&mut self) -> Option<Self::QueueItem> { self.queue.pop() }
+
             /// extract node from the queued item retrieved
             fn node_from_queued(&self, qt: &Self::QueueItem) -> Node {
                 let &Step(node, _) = qt;
                 node
             }
+
             /// Process current node after all edges have been discovered and marked for processing
             fn post_process_node(&mut self, node: Node) {
                 self.tracker[node].visited(Discovered);
             }
+
             /// has the given node been seen before ?
             fn is_discovered(&self, node: NodeType) -> bool { self.tracker[node.into()].is_discovered() }
+
             /// Process given edge and return `true` to proceed or `false` to abandon further edge processing
             fn pre_process_edge(&mut self, src:Node, dst: NodeType) -> bool {
                 if let NC(dst, cost) = dst {
@@ -190,12 +224,15 @@ impl PathSearch for Graph {
                     panic!("pre_process_edge(): Must use NodeType::NC")
                 }
             }
+
             /// Construct the item to be queued, that is, (Node,Cost)
             fn node_to_queued(&self, node: Node) -> Self::QueueItem {
                 Step(node, self.tracker[node].dist )
             }
+
             /// Push into (Node,Cost) into the queue
             fn push(&mut self, item: Self::QueueItem) { self.queue.push(item) }
+
             /// Get search path discovered so far
             fn extract_path(&self, start: Node) -> Self::Output { self.tracker.extract(start) }
         }

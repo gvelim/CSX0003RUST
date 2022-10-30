@@ -12,23 +12,30 @@ use super::{*, NodeState::{ Discovered, Processed, Undiscovered }};
 /// - node state fn()
 trait DFSearch {
     type Output;
+
     /// work to be done before edges are explored, that is, discovered but not processed
     /// uses incl. measuring entry time, set node state, etc
     fn pre_process_node(&mut self, node: Node) -> &mut Self;
+
     /// work to be done after the edges have been explored; hence the node is now processed
     /// uses incl. measuring exit time, set node parent, save node in path, etc
     fn post_process_node(&mut self, node: Node) -> &mut Self;
-    /// work to be done after the node pre-processed and before the edges is explored 
+
+    /// work to be done after the node pre-processed and before the edges is explored
     /// uses incl. check for loops, categorize edge into types, etc
     /// default implementation does nothing otherwise you have to override
     fn pre_process_edge(&mut self, _edge: Edge) -> &mut Self { self }
+
     /// Abort the recursion
     /// uses incl. detecting the graph is not Direct acyclic, etc
     fn abort(&self) -> bool { false }
+
     /// return the path at position and given the pre/post processing steps
     fn path(&self) -> &Self::Output;
+
     /// return whether the node has been seen before
     fn is_discovered(&self, node: Node) -> bool;
+
     /// Default implementation of depth first search
     fn path_search(&mut self, g: &Graph, start: Node) -> Option<&Self::Output> {
         // Entering the node at time tick()
@@ -50,7 +57,7 @@ trait DFSearch {
         // Exiting the node at time tick()
         if self.post_process_node(start).abort() { return None };
         // println!("Exit: {start}:{:?}", self.tracker[start]);
-        Some(&self.path())
+        Some(self.path())
     }
 }
 // ANCHOR_END: graphs_abstract_dfs
@@ -74,6 +81,7 @@ impl GraphState {
             path: Vec::new()
         }
     }
+
     /// Extract from `BinaryHeap` the exit times per ordered from max -> min
     fn get_timings(&self) -> Vec<(Node, Cost)> {
         self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
@@ -94,6 +102,7 @@ impl DFSearch for GraphState {
         self.tracker[node].visited(Discovered).distance(self.time);
         self
     }
+
     /// capture time of exit and set node state to processed,
     /// given all edges have also been processed
     fn post_process_node(&mut self, node: Node) -> &mut Self {
@@ -104,10 +113,12 @@ impl DFSearch for GraphState {
         self.path.push(node);
         self
     }
+
     /// Return the path as it was calculated by the post processing step
     fn path(&self) -> &Self::Output {
         &self.path
     }
+
     /// return the state of the node
     fn is_discovered(&self, node: Node) -> bool {
         self.tracker[node].is_discovered()
@@ -149,7 +160,7 @@ impl ConnectedComponents for Graph {
         // Pass 2: Identify and store each strongly connected component identified
         v.into_iter()
             .fold(Vec::new(),|mut components, (node, _)| {
-                if !gs.tracker[node].is_discovered() {
+                if !gs.is_discovered(node) {
                     // extract new component
                     let component = gs.path_search(&tg, node ).unwrap();
                     println!("Pass 2: Component [{}]{:?}", component.len(), component);
@@ -202,6 +213,7 @@ impl TState {
         }
     }
 }
+
 /// Topological sort implementation of the TState
 /// There is no need for exit/entry time or tracking parent node.
 /// Here we only need to save the `node` in the `tracker.path` following its full processing
@@ -213,12 +225,14 @@ impl DFSearch for TState {
         self.tracker[node].visited(Discovered);
         self
     }
+
     /// Important we store the node in the path following node processing complete
     fn post_process_node(&mut self, node: Node) -> &mut Self {
         self.tracker[node].visited(Processed);
         self.path.push(node);
         self
     }
+
     /// before we jump into the edge for further exploration
     /// we check if the edge is actually a node already `Discovered` but not `Processed`
     /// if that is the case, we set the abort flag to `True`
@@ -229,14 +243,17 @@ impl DFSearch for TState {
         }
         self
     }
+
     /// Implement the abort fn() so we can stop the path search recursion
     fn abort(&self) -> bool {
         self.abort
     }
+
     /// extract the aggregate path stored
     fn path(&self) -> &Self::Output {
         &self.path
     }
+
     /// return true if node is either `Discovered` or `Processed`
     fn is_discovered(&self, node: Node) -> bool {
         self.tracker[node].is_discovered()
@@ -260,7 +277,7 @@ impl TopologicalSort for Graph {
         // see post_processing() of TState implementation of DFSearch
         for &node in &self.nodes {
             // if node is not yet visited && search hasn't thrown a NONE, that is, we've found a circle
-            if !ts.tracker[node].is_discovered()
+            if !ts.is_discovered(node)
                 && ts.path_search(self, node).is_none() {
                 return None
             }

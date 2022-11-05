@@ -1,5 +1,4 @@
 #![feature(int_log)]
-#![feature(associated_type_defaults)]
 
 extern crate core;
 
@@ -15,8 +14,10 @@ pub mod select;
 pub mod linkedlists;
 /// utility objects used across libraries like 'VirtualSlice'
 pub mod merge;
-
+/// Graph algorithms for Path search, strongly connected components,
 pub mod graphs;
+/// Greedy algorithms for scheduling, mimium spanning trees
+pub mod greedy;
 
 /// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait
 ///```

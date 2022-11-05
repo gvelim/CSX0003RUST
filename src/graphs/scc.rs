@@ -66,7 +66,7 @@ trait DFSearch {
 /// and while we apply a recursive approach in searching the graph
 struct GraphState {
     tracker: Tracker,
-    queue: BinaryHeap<Step>,
+    queue: BinaryHeap<Step<Node>>,
     time: Cost,
     path: Vec<Node>
 }

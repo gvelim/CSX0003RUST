@@ -29,7 +29,7 @@ impl From<Node> for NodeType {
 }
 
 #[derive(Clone,Copy,Hash,Eq, PartialEq)]
-pub struct Edge(pub Node, pub Node);
+pub struct Edge(pub Node, pub NodeType);
 
 impl Debug for Edge {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -117,7 +117,7 @@ impl NodeTrack {
 pub struct Tracker {
     list: HashMap<Node, NodeTrack>
 }
-trait Tracking {
+pub trait Tracking {
     fn extract(&self, start:Node) -> (Vec<Node>, Cost) {
         (self.extract_path(start), self.extract_cost(start))
     }
@@ -188,15 +188,14 @@ impl Graph {
         use NodeType::*;
 
         self.edges.iter()
-            .fold( HashSet::<Edge>::new(),|mut edges, (src_node, dst_nodes)| {
+            .fold( HashSet::<Edge>::new(),|mut edges, (&src, dst_nodes)| {
                 dst_nodes.iter()
                     .for_each(|&dst_node| {
+                        edges.insert(Edge(src, dst_node));
                         match dst_node {
-                            N(node) | NC(node, _) => {
-                                edges.insert(Edge(*src_node, node));
-                                edges.insert(Edge(node, *src_node));
-                            }
-                        }
+                            N(dst) => edges.insert(Edge(dst, N(src))),
+                            NC(dst,cost) => edges.insert(Edge(dst, NC(src, cost)))
+                        };
                     });
                 edges
             })

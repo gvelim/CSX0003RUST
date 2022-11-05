@@ -1,6 +1,7 @@
 use std::cmp::{Ordering};
 use std::collections::BinaryHeap;
 use crate::graphs::{Edge, Graph, NodeType, Cost, Step};
+use crate::graphs::NodeState::{Discovered, Undiscovered};
 
 trait MinimumSpanningTree {
     fn min_spanning_tree(&self) -> Graph;
@@ -9,8 +10,9 @@ trait MinimumSpanningTree {
 
 impl MinimumSpanningTree for Graph {
     fn min_spanning_tree(&self) -> Graph {
-        let heap = self.get_edges_by_cost();
-        let graph = Graph::new();
+
+        let mut heap = self.get_edges_by_cost();
+        let mut graph = Graph::new();
 
         graph
     }
@@ -51,8 +53,8 @@ impl Graph {
     fn get_edges_by_cost(&self) -> BinaryHeap<Step<Edge>> {
         self.edges.iter()
             .fold(BinaryHeap::new(),|mut heap, (&src, edges)| {
-                for d in edges {
-                    let &NodeType::NC(dst, cost) = d else { panic!("get_edges_by_cost(): NodeType is not of the NC(node, cost) format") };
+                for &dst in edges {
+                    let NodeType::NC(_,cost) = dst else { panic!("get_edges_by_cost(): Ops!") };
                     heap.push(Step(Edge(src,dst),cost));
                 }
                 heap

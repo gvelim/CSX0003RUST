@@ -34,4 +34,3 @@
   - [Minimum Spanning Trees](./graph_mst.md)
     - [Kruskal's Algorithm](./graph_mst_kruskal.md)
     - [Prim's Algorithm]()
-  - 

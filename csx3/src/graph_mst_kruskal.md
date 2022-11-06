@@ -12,20 +12,22 @@ Always when an edge is added to the tree, two components are joined as in the be
 
 ![Step 2 - merging up components one edge at a time](img/mst_step2.png)
 
-Finally, all nodes belong to the same component, and a minimum spanning tree has been found
+Finally and having added all edges in the graph, one by one, has resulted to all nodes form a single component, hence the minimum spanning tree has been found
 
 ![Step 3 - MST as a single component](img/mst_step3.png)
 
 Overall the approach can be summarised as following
 1. **Phase 1**: Sort Edges by minimum cost first
 2. **Phase 2**: Build Minimum Spanning Tree
-   1. While there are more than `one` components
+   1. Create an empty graph `G`
+   2. Initiate the graph components, that is, one per node
+   3. While there are `> 1` graph components remaining
       1. Retrieve edge with the lowest weight `(src,dst)`
       2. Find component for `src`, let's say it is `src'`
       3. Find component for `dst`, let's say it is `dst'`
       4. if `src'` is different to `dst'` then
-         1. Merge `src'` and `dst'`
-         2. Add edge `(src,dst)` into the graph
+         1. Merge `dst'` into the `src'` component 
+         2. Add edge `(src,dst)` into the graph `G`
 
 ### Super Nodes as Components
 The `SuperNodes` struct used to solve the **minimum cut** algorithm is more or less the right tool in this instance given that the definition of a `super node` is synonymous to a graph component.

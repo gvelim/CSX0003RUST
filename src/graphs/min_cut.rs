@@ -72,34 +72,46 @@ impl SuperEdges {
 // ANCHOR_END: graphs_min_cut_super_edges
 // ANCHOR: graphs_min_cut_super_nodes
 #[derive(Debug)]
+/// Helper Structure that holds the `set` of merged nodes under a super node `key`
+/// The HashMap therefore is used as [Key:Super Node, Value: Set of Merged Nodes]
+/// A super node's set is a `Graph Component` in itself, that is, you can visit a Node from any other Node within the set
 pub struct SuperNodes {
     super_nodes:HashMap<Node,HashSet<Node>>
 }
 
 impl SuperNodes {
-
+    /// Total size of `Graph Components`, that is, super nodes
     pub fn len(&self) -> usize { self.super_nodes.len() }
-    pub fn get_supernode(&self, node: &Node) -> Node {
-        if self.has_supernode(&node).is_some() {
-            // if node is the super node then return it
+    /// Given an Graph node, the function returns the Super Node that it belongs
+    /// for example given the super node [Key:1, Set:{1,2,3,4,5}]
+    /// querying for node `3` will return `1` as its super node
+    pub fn find_supernode(&self, node: &Node) -> Node {
+        // is this a super node ?
+        if self.contains_supernode(&node) {
+            // if yes, just return it
             *node
         } else {
             // otherwise find its super node and return it
-            self.supernode_from(&node).unwrap_or_else(|| panic!("get_supernode(): Unexpected error, cannot find super node for {node}"))
+            // get an Iterator for searching each super node
+            let mut sets = self.super_nodes.iter();
+            loop {
+                // If next returns [Super Node, Node Set] proceed otherwise exist with None
+                let Some((&src, set)) = sets.next() else { break None };
+                // Is the queried Node in the set ?
+                if set.contains(node) {
+                    // yes, return the super node
+                    break Some(src)
+                }
+            }.unwrap_or_else(|| panic!("find_supernode(): Unexpected error, cannot find super node for {node}"))
         }
     }
-    pub fn has_supernode(&self, node: &Node) -> Option<&HashSet<Node>> {
-        self.super_nodes.get(node)
+    /// Returns the graph component, aka `set` of nodes, for a given super node `key`,
+    /// otherwise `None` if it doesn't exist
+    pub fn contains_supernode(&self, node: &Node) -> bool {
+        self.super_nodes.contains_key(&node)
     }
-    fn supernode_from(&self, node: &Node) -> Option<Node> {
-        let mut sets = self.super_nodes.iter();
-        loop {
-            let Some((&src, set)) = sets.next() else { break None };
-            if set.contains(node) {
-                break Some(src)
-            }
-        }
-    }
+    /// The function takes two super nodes and merges them into one
+    /// The `dst` super node is merged onto the `src` super node
     pub fn merge_nodes(&mut self, src:Node, dst:Node) -> &mut HashSet<Node> {
         // remove both nodes that form the random edge and
         // hold onto the incoming/outgoing edges
@@ -111,24 +123,26 @@ impl SuperNodes {
         // re-insert the src node as the new super-node and attach the resulting union
         self.super_nodes.entry(src).or_insert(super_node)
     }
-
+    /// Provides an iterator that yields the Node Set of each super node
     pub fn iter(&self) -> SuperNodeIter {
         SuperNodeIter { iter: self.super_nodes.iter() }
     }
 }
-
+/// Ability for SuperNode struct to use indexing for search
+/// e.g super_node[3] will return the HashSet corresponding to key `3`
 impl Index<Node> for SuperNodes {
     type Output = HashSet<Node>;
-
     fn index(&self, index: Node) -> &Self::Output {
         &self.super_nodes[&index]
     }
 }
 
+/// HashNode Iterator structure
 pub struct SuperNodeIter<'a> {
     iter: hash_map::Iter<'a, Node, HashSet<Node>>
 }
 
+/// HashNode Iterator implementation yields a HashSet at a time
 impl<'a> Iterator for SuperNodeIter<'a> {
     type Item = &'a HashSet<Node>;
 
@@ -140,8 +154,9 @@ impl<'a> Iterator for SuperNodeIter<'a> {
 }
 // ANCHOR_END: graphs_min_cut_super_nodes
 // ANCHOR: graphs_min_cut_super_edges_graph
+/// Helper Graph functions
 impl Graph {
-
+    /// SuperEdges Constructor
     pub fn get_super_edges(&self) -> SuperEdges {
         let mut length = 0;
         let list = self.edges.iter()
@@ -152,8 +167,8 @@ impl Graph {
         // println!("get_super_edges(): [{length}]{:?}",list);
         SuperEdges { list, length }
     }
-
-   pub fn get_super_nodes(&self) -> SuperNodes {
+    /// SuperNodes Constructor
+    pub fn get_super_nodes(&self) -> SuperNodes {
         SuperNodes {
             super_nodes: self.nodes.iter()
                 .map(|&node| (node, HashSet::<Node>::new()))
@@ -262,6 +277,7 @@ impl MinimumCut for Graph {
     // ANCHOR_END: graphs_contraction
 
     // ANCHOR: graphs_crossing
+    /// Given two Super Node sets the function returns the crossing edges as a new Graph structure
     fn get_crossing_edges(&self, src_set: &HashSet<Node>, dst_set: &HashSet<Node>) -> Graph {
          src_set.iter()
             .map(|src|

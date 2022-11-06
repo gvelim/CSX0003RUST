@@ -2,15 +2,20 @@ use std::cmp::{Ordering};
 use std::collections::BinaryHeap;
 use crate::graphs::{Edge, Graph, NodeType, Cost, Step, Node};
 
+// ANCHOR: graphs_mst
+/// Trait defining the capability calculate the minimum spanning tree of a graph
 trait MinimumSpanningTree {
     fn min_spanning_tree(&self) -> Option<Graph>;
 }
 
+/// Implementation of the Minimum Spanning Tree by the Graph struct
 impl MinimumSpanningTree for Graph {
+    /// MST using Kruskal's algorithm implementation
     fn min_spanning_tree(&self) -> Option<Graph> {
 
+        // Get the ordered heap by lowest cost Edge on top
         let mut heap = self.get_edges_by_cost();
-        // Store the graph components, that is, a super node is a graph component's lead node
+        // Keeps the graph's components, that is, a super node is a graph component's lead node
         // The initial state is for each node to be a lead component node with a component of its own
         let mut snodes = self.get_super_nodes();
         // the output graph that will hold *only* the edges
@@ -27,9 +32,9 @@ impl MinimumSpanningTree for Graph {
             print!("({src:2}->{:2?}):{cost:6} - ",<NodeType as Into<Node>>::into(dst));
 
             // if src is not a super node then get its super node
-            let src = snodes.get_supernode(&src);
+            let src = snodes.find_supernode(&src);
             // if dst is not a super node then get its super node
-            let dst = snodes.get_supernode(&dst.into());
+            let dst = snodes.find_supernode(&dst.into());
 
             // if src component differs from dst component then merge the two and save the edge connecting them
             if src != dst {
@@ -43,8 +48,11 @@ impl MinimumSpanningTree for Graph {
         Some(graph)
     }
 }
-
-/// Implement Heap Step Structure for a MinHeap behaviour
+// ANCHOR_END: graphs_mst
+// ANCHOR: graphs_mst_step
+/// BinaryHeap Step structure containing (Edge, Cost) tuple
+/// The `cost` is only used as the prioritisation key for the `Heap`
+/// Implementing MinHeap through reverse comparison of Other against Self
 impl Eq for Step<Edge> {}
 impl PartialEq<Self> for Step<Edge> {
     fn eq(&self, other: &Self) -> bool {
@@ -61,9 +69,11 @@ impl Ord for Step<Edge> {
         other.1.cmp(&self.1)
     }
 }
-
-/// Implement Graph functions for getting Edges ordered by lowest cost first
+// ANCHOR_END: graphs_mst_step
+/// Implement Helper Graph functions for minimum spanning tree algorithm
 impl Graph {
+    // ANCHOR: graphs_mst_graph
+    /// Sums up the cost of all weighted edges
     pub fn get_edges_cost(&self) -> Cost {
         self.edges
             .values()
@@ -75,6 +85,7 @@ impl Graph {
                 cost
             })
     }
+    /// Adds a new Edge to the graph
     pub fn push_edge(&mut self, edge: Edge) {
         let Edge(src, dst) = edge;
         self.nodes.insert(src);
@@ -83,6 +94,8 @@ impl Graph {
             .or_default()
             .insert(dst);
     }
+    /// Returns Graph's edges in the form of a MinHeap, that is,
+    /// the lowest cost edge at the top of the heap
     pub fn get_edges_by_cost(&self) -> BinaryHeap<Step<Edge>> {
         self.edges.iter()
             .fold(BinaryHeap::new(),|mut heap, (&src, edges)| {
@@ -94,6 +107,8 @@ impl Graph {
             })
 
     }
+    // ANCHOR_END: graphs_mst_graph
+    /// Private function that contracts a `Graph` struct given an MST test file
     fn load_file_mst(&mut self, filename: &str) -> &mut Graph {
         use std::fs::File;
         use std::io::{BufReader, BufRead};

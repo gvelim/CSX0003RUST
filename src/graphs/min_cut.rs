@@ -71,6 +71,7 @@ impl SuperEdges {
 }
 // ANCHOR_END: graphs_min_cut_super_edges
 // ANCHOR: graphs_min_cut_super_nodes
+#[derive(Debug)]
 pub struct SuperNodes {
     super_nodes:HashMap<Node,HashSet<Node>>
 }
@@ -78,7 +79,18 @@ pub struct SuperNodes {
 impl SuperNodes {
 
     pub fn len(&self) -> usize { self.super_nodes.len() }
-
+    pub fn has_supernode(&self, node: &Node) -> Option<&HashSet<Node>> {
+        self.super_nodes.get(node)
+    }
+    pub fn supernode_from(&self, node: &Node) -> Option<Node> {
+        let mut sets = self.super_nodes.iter();
+        loop {
+            let Some((&src, set)) = sets.next() else { break None };
+            if set.contains(node) {
+                break Some(src)
+            }
+        }
+    }
     pub fn merge_nodes(&mut self, src:Node, dst:Node) -> &mut HashSet<Node> {
         // remove both nodes that form the random edge and
         // hold onto the incoming/outgoing edges

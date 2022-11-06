@@ -155,7 +155,7 @@ impl PathSearch for Graph {
         /// Structure for maintaining processing state while processing the graph
         struct PSState {
             tracker: Tracker,
-            queue: BinaryHeap<Step>
+            queue: BinaryHeap<Step<Node>>
         }
 
         /// State Constructor from a given Graph and related shortest path initiation requirements
@@ -174,7 +174,7 @@ impl PathSearch for Graph {
         /// Implementation of Path Search abstraction
         impl BFSearch for PSState {
             type Output = (Vec<Node>,Cost);
-            type QueueItem = Step;
+            type QueueItem = Step<Node>;
 
             /// Processing of starting node
             fn initiate(&mut self, start: Node) -> &mut Self {
@@ -252,7 +252,7 @@ mod test {
     #[test]
     fn  test_path_search_small_graph() {
         // ( input graph, starting node, array with expected distances)
-        let test_data:(Vec<Vec<Node>>, Node, Vec<(Node, Option<(Vec<Node>,usize)>)>) =
+        let test_data:(Vec<Vec<Node>>, Node, Vec<(Node, Option<(Vec<Node>,Cost)>)>) =
             (
                 vec![
                     vec![1, 2, 3],

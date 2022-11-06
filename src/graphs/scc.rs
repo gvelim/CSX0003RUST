@@ -49,8 +49,8 @@ trait DFSearch {
 
                 if self.pre_process_edge(Edge(start,d)).abort() { return None };
 
-                if !self.is_discovered(d) {
-                    self.path_search(g, d);
+                if !self.is_discovered(d.into()) {
+                    self.path_search(g, d.into());
                 }
             }
         }
@@ -66,7 +66,7 @@ trait DFSearch {
 /// and while we apply a recursive approach in searching the graph
 struct GraphState {
     tracker: Tracker,
-    queue: BinaryHeap<Step>,
+    queue: BinaryHeap<Step<Node>>,
     time: Cost,
     path: Vec<Node>
 }
@@ -238,7 +238,7 @@ impl DFSearch for TState {
     /// if that is the case, we set the abort flag to `True`
     fn pre_process_edge(&mut self, edge: Edge) -> &mut Self {
         let Edge(_,dst) = edge;
-        if self.tracker[dst].visited == Discovered {
+        if self.tracker[dst.into()].visited == Discovered {
             self.abort = true;
         }
         self

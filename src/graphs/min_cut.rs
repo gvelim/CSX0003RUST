@@ -5,14 +5,14 @@ use hashbag::HashBag;
 
 // ANCHOR: graphs_min_cut_super_edges
 #[derive(Debug)]
-struct SuperEdges {
-    list: HashMap<Node, HashBag<Node>>,
+pub struct SuperEdges {
+    list: HashMap<Node, HashBag<NodeType>>,
     length: usize
 }
 
 impl SuperEdges {
 
-    fn get_random_edge(&self) -> Edge {
+    pub fn get_random_edge(&self) -> Edge {
         let mut idx = thread_rng().gen_range(0..self.length);
 
         let mut iter = self.list.iter();
@@ -38,15 +38,15 @@ impl SuperEdges {
         }
     }
 
-    fn remove_edge(&mut self, src: Node, dst: Node) {
+    pub fn remove_edge(&mut self, src: Node, dst: Node) {
         // print!("remove_edge(): {:?} IN:{:?} -> Out:", edge, self);
         let edges = self.list.get_mut(&src).unwrap_or_else(|| panic!("remove_edge(): Node({src}) cannot be found within SuperEdges"));
-        self.length -= edges.contains(&dst);
-        while edges.remove(&dst) != 0 { };
+        self.length -= edges.contains(&dst.into());
+        while edges.remove(&dst.into()) != 0 { };
         // println!("{:?}",self);
     }
     
-    fn move_edges(&mut self, old: Node, new: Node) {
+    pub fn move_edges(&mut self, old: Node, new: Node) {
         // Fix direction OLD -> *
         let old_edges = self.list
             .remove(&old)
@@ -59,27 +59,39 @@ impl SuperEdges {
         // Fix Direction * -> OLD
         self.list.values_mut()
             .filter_map( |e| {
-                let count = e.contains(&old);
+                let count = e.contains(&old.into());
                 if  count > 0  { Some((count, e)) } else { None }
             })
             .for_each(|(mut count, edges)| {
-                while edges.remove(&old) != 0 {};
-                while count != 0 { edges.insert(new); count -= 1; }
+                while edges.remove(&old.into()) != 0 {};
+                while count != 0 { edges.insert(new.into()); count -= 1; }
             });
         // println!(" -> {:?}",self.list[&new]);
     }
 }
 // ANCHOR_END: graphs_min_cut_super_edges
 // ANCHOR: graphs_min_cut_super_nodes
-struct SuperNodes {
+#[derive(Debug)]
+pub struct SuperNodes {
     super_nodes:HashMap<Node,HashSet<Node>>
 }
 
 impl SuperNodes {
 
-    fn len(&self) -> usize { self.super_nodes.len() }
-
-    fn merge_nodes(&mut self, src:Node, dst:Node) -> &mut HashSet<Node> {
+    pub fn len(&self) -> usize { self.super_nodes.len() }
+    pub fn has_supernode(&self, node: &Node) -> Option<&HashSet<Node>> {
+        self.super_nodes.get(node)
+    }
+    pub fn supernode_from(&self, node: &Node) -> Option<Node> {
+        let mut sets = self.super_nodes.iter();
+        loop {
+            let Some((&src, set)) = sets.next() else { break None };
+            if set.contains(node) {
+                break Some(src)
+            }
+        }
+    }
+    pub fn merge_nodes(&mut self, src:Node, dst:Node) -> &mut HashSet<Node> {
         // remove both nodes that form the random edge and
         // hold onto the incoming/outgoing edges
         let super_src = self.super_nodes.remove(&src).unwrap();
@@ -91,7 +103,7 @@ impl SuperNodes {
         self.super_nodes.entry(src).or_insert(super_node)
     }
 
-    fn iter(&self) -> SuperNodeIter {
+    pub fn iter(&self) -> SuperNodeIter {
         SuperNodeIter { iter: self.super_nodes.iter() }
     }
 }
@@ -104,7 +116,7 @@ impl Index<Node> for SuperNodes {
     }
 }
 
-struct SuperNodeIter<'a> {
+pub struct SuperNodeIter<'a> {
     iter: hash_map::Iter<'a, Node, HashSet<Node>>
 }
 
@@ -121,10 +133,10 @@ impl<'a> Iterator for SuperNodeIter<'a> {
 // ANCHOR: graphs_min_cut_super_edges_graph
 impl Graph {
 
-    fn get_super_edges(&self) -> SuperEdges {
+    pub fn get_super_edges(&self) -> SuperEdges {
         let mut length = 0;
         let list = self.edges.iter()
-            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect::<HashBag<Node>>())
+            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect::<HashBag<NodeType>>())
             )
             .inspect(|(_,c)| length += c.len() )
             .collect();
@@ -132,7 +144,7 @@ impl Graph {
         SuperEdges { list, length }
     }
 
-    fn get_super_nodes(&self) -> SuperNodes {
+   pub fn get_super_nodes(&self) -> SuperNodes {
         SuperNodes {
             super_nodes: self.nodes.iter()
                 .map(|&node| (node, HashSet::<Node>::new()))
@@ -146,7 +158,7 @@ impl Graph {
 }
 // ANCHOR_END: graphs_min_cut_super_edges_graph
 
-trait MinimumCut {
+pub trait MinimumCut {
     fn minimum_cut(&self) -> Option<Graph>;
     fn contract_graph(&self) -> Option<Graph>;
     fn get_crossing_edges(&self, src_set:&HashSet<Node>, dst_set:&HashSet<Node>) -> Graph;
@@ -218,15 +230,15 @@ impl MinimumCut for Graph {
                 // hold onto the incoming/outgoing edges
                 // combine the incoming/outgoing edges for attaching onto the new super-node
                 // re-insert the src node as the new super-node and attach the resulting union
-            super_nodes.merge_nodes(src, dst);
+            super_nodes.merge_nodes(src, dst.into());
 
             // STEP C : Collapse/Remove newly formed edge loops since src & dst is the new super node
-            super_edges.remove_edge( src, dst);
-            super_edges.remove_edge( dst, src);
+            super_edges.remove_edge( src, dst.into());
+            super_edges.remove_edge( dst.into(), src);
 
             // STEP D : Identify all edges that still point to the dst removed as part of collapsing src and dst nodes
             // STEP E : Repoint all affected edges to the new super node src
-            super_edges.move_edges(dst, src);
+            super_edges.move_edges(dst.into(), src);
         }
 
         // STEP 3 : find the edges between the two super node sets

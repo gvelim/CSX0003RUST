@@ -79,10 +79,19 @@ pub struct SuperNodes {
 impl SuperNodes {
 
     pub fn len(&self) -> usize { self.super_nodes.len() }
+    pub fn get_supernode(&self, node: &Node) -> Node {
+        if self.has_supernode(&node).is_some() {
+            // if node is the super node then return it
+            *node
+        } else {
+            // otherwise find its super node and return it
+            self.supernode_from(&node).unwrap_or_else(|| panic!("get_supernode(): Unexpected error, cannot find super node for {node}"))
+        }
+    }
     pub fn has_supernode(&self, node: &Node) -> Option<&HashSet<Node>> {
         self.super_nodes.get(node)
     }
-    pub fn supernode_from(&self, node: &Node) -> Option<Node> {
+    fn supernode_from(&self, node: &Node) -> Option<Node> {
         let mut sets = self.super_nodes.iter();
         loop {
             let Some((&src, set)) = sets.next() else { break None };

@@ -4,7 +4,6 @@ use crate::graphs::{Edge, Graph, NodeType, Cost, Step, Node};
 
 trait MinimumSpanningTree {
     fn min_spanning_tree(&self) -> Option<Graph>;
-    fn get_mst_cost(&self) -> Cost;
 }
 
 impl MinimumSpanningTree for Graph {
@@ -25,17 +24,12 @@ impl MinimumSpanningTree for Graph {
             // then the graph IS NOT CONNECTED
             let Some(Step(edge,cost)) = heap.pop() else { return None };
             let Edge(src,dst) = edge;
-            print!("({src:2}->{:2?}):{cost:7} - ",<NodeType as Into<Node>>::into(dst));
+            print!("({src:2}->{:2?}):{cost:6} - ",<NodeType as Into<Node>>::into(dst));
 
             // if src is not a super node then get its super node
-            let src = if snodes.has_supernode(&src).is_none() {
-                snodes.supernode_from(&src).unwrap()
-            } else { src };
-
+            let src = snodes.get_supernode(&src);
             // if dst is not a super node then get its super node
-            let dst = if snodes.has_supernode(&dst.into()).is_none() {
-                snodes.supernode_from(&dst.into()).unwrap()
-            } else { dst.into() };
+            let dst = snodes.get_supernode(&dst.into());
 
             // if src component differs from dst component then merge the two and save the edge connecting them
             if src != dst {
@@ -47,18 +41,6 @@ impl MinimumSpanningTree for Graph {
             }
         }
         Some(graph)
-    }
-
-    fn get_mst_cost(&self) -> Cost {
-        self.edges
-            .values()
-            .fold(0, |mut cost, edges| {
-                for dst in edges {
-                    let NodeType::NC(_,c) = dst else { panic!("get_mst_cost(): NodeType is not of the NC(node, cost) format") };
-                    cost += c;
-                }
-                cost
-            })
     }
 }
 
@@ -82,7 +64,18 @@ impl Ord for Step<Edge> {
 
 /// Implement Graph functions for getting Edges ordered by lowest cost first
 impl Graph {
-    fn push_edge(&mut self, edge: Edge) {
+    pub fn get_edges_cost(&self) -> Cost {
+        self.edges
+            .values()
+            .fold(0, |mut cost, edges| {
+                for dst in edges {
+                    let NodeType::NC(_,c) = dst else { panic!("get_mst_cost(): NodeType is not of the NC(node, cost) format") };
+                    cost += c;
+                }
+                cost
+            })
+    }
+    pub fn push_edge(&mut self, edge: Edge) {
         let Edge(src, dst) = edge;
         self.nodes.insert(src);
         self.nodes.insert(dst.into());
@@ -90,7 +83,7 @@ impl Graph {
             .or_default()
             .insert(dst);
     }
-    fn get_edges_by_cost(&self) -> BinaryHeap<Step<Edge>> {
+    pub fn get_edges_by_cost(&self) -> BinaryHeap<Step<Edge>> {
         self.edges.iter()
             .fold(BinaryHeap::new(),|mut heap, (&src, edges)| {
                 for &dst in edges {
@@ -137,7 +130,7 @@ mod test {
         let filename = "src/greedy/input_random_1_10.txt";
         let mut g = Graph::new();
         println!("{:?}", g.load_file_mst(filename).get_edges_by_cost() );
-        println!("{:?}", g.get_mst_cost());
+        println!("{:?}", g.get_edges_cost());
         assert!(true)
     }
     #[test]
@@ -152,8 +145,10 @@ mod test {
         for (filename, result) in test_data {
             let mut g = Graph::new();
             println!("{filename}");
-            let graph = g.load_file_mst(filename).min_spanning_tree().unwrap();
-            let cost = graph.get_mst_cost();
+            let mst = g.load_file_mst(filename).min_spanning_tree();
+            assert!(mst.is_some());
+            let graph = mst.unwrap();
+            let cost = graph.get_edges_cost();
             println!("Min Spanning Tree: ({cost}) {:?}",graph);
             assert_eq!(result, cost);
         }

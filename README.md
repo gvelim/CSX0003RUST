@@ -18,7 +18,7 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Minimum Cut
   - Path Search
   - Strong Connectivity
-- [Greedy Algorithms]()
+- [Greedy Algorithms](./src/greedy/README.md)
   - Minimum Spanning Trees
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

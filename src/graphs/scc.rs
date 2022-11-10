@@ -45,7 +45,7 @@ trait DFSearch {
         // println!("Enter: {start}:{:?}", self.tracker[start]);
         if let Some(edges) = g.edges.get(&start) {
             for &dst in edges {
-                let d = dst.into();
+                let d = dst;
 
                 if self.pre_process_edge(Edge(start,d)).abort() { return None };
 

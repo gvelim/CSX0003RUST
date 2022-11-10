@@ -87,7 +87,7 @@ impl SuperNodes {
     /// querying for node `3` will return `1` as its super node
     pub fn find_supernode(&self, node: &Node) -> Node {
         // is this a super node ?
-        if self.contains_supernode(&node) {
+        if self.contains_supernode(node) {
             // if yes, just return it
             *node
         } else {
@@ -108,7 +108,7 @@ impl SuperNodes {
     /// Returns the graph component, aka `set` of nodes, for a given super node `key`,
     /// otherwise `None` if it doesn't exist
     pub fn contains_supernode(&self, node: &Node) -> bool {
-        self.super_nodes.contains_key(&node)
+        self.super_nodes.contains_key(node)
     }
     /// The function takes two super nodes and merges them into one
     /// The `dst` super node is merged onto the `src` super node
@@ -160,7 +160,7 @@ impl Graph {
     pub fn get_super_edges(&self) -> SuperEdges {
         let mut length = 0;
         let list = self.edges.iter()
-            .map(|(n,e)| (*n, e.iter().map(|&nt| nt.into()).collect::<HashBag<NodeType>>())
+            .map(|(&n,e)| (n, e.iter().copied().collect::<HashBag<NodeType>>())
             )
             .inspect(|(_,c)| length += c.len() )
             .collect();

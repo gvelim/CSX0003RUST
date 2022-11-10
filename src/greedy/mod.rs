@@ -123,7 +123,7 @@ impl Graph {
             .for_each(| line| {
                 let str = line.unwrap_or_else(|e| panic!("load_file_mst(): {e}"));
 
-                let mut iter = str.split(' ').into_iter();
+                let mut iter = str.split(' ');
                 let src = usize::from_str(iter.next().unwrap()).unwrap_or_else(|e| panic!("load_file_mst(): {e}"));
                 let dst = usize::from_str(iter.next().unwrap()).unwrap_or_else(|e| panic!("load_file_mst(): {e}"));
                 let cost = i32::from_str(iter.next().unwrap()).unwrap_or_else(|e| panic!("load_file_mst(): {e}"));

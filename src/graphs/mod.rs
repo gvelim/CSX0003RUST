@@ -171,7 +171,7 @@ impl Graph {
 }
 // ANCHOR_END: graphs_search_path_utils_NodeTrack_graph
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Default)]
 pub struct Graph {
     pub edges: HashMap<Node, HashSet<NodeType>>,
     pub nodes: HashSet<Node>
@@ -179,10 +179,7 @@ pub struct Graph {
 
 impl Graph {
     pub fn new() -> Graph {
-        Graph {
-            edges: HashMap::new(),
-            nodes: HashSet::new()
-        }
+        Graph::default()
     }
     pub fn export_edges(&self) -> HashSet<Edge> {
         use NodeType::*;

@@ -4,15 +4,19 @@ In Kruskal’s algorithm, we start with the spanning tree containing **only** th
 Then the algorithm goes through, adding the edges one at a time, ordered by their weights, and as long as the edge is not creating a cycle.
 
 ## Approach
+Let's look at the following input `graph` as an example.
+
+![](img/mst_graph.png)
+
 The algorithm maintains the components of the tree. Initially, each node of the graph belongs to a separate component. As shown below there are six components since none of the nodes are connected.
 
 ![Step 1 - Number of components equal to number of nodes](img/mst_step1.png)
 
-Always when an edge is added to the tree, two components are joined as in the below example where nodes `5` and `6` form a new component
+We always start with the lowest weighted edge by adding it to the tree, in this case `(5,6)`. As result, two components are now merged into one as in the below example where nodes `5` and `6` form a new component
 
 ![Step 2 - merging up components one edge at a time](img/mst_step2.png)
 
-Finally and having added all edges in the graph, one by one, has resulted to all nodes form a single component, hence the minimum spanning tree has been found
+Next in order are edges `(6,3),(1,2),...` and so on, until finally we have added all edges in the graph, one by one and with all nodes now merged into a single component, hence the minimum spanning tree has been found
 
 ![Step 3 - MST as a single component](img/mst_step3.png)
 
@@ -54,5 +58,5 @@ Additionally, we have the following helper `Graph` functions that provide us wit
 ## Implementation
 As a result, the following implementation consolidates all of the above into the Kruskal's algorithm implementation.
 ```rust,no_run,noplayground
-{{#include ../../src/greedy/mod.rs:graphs_mst}}
+{{#include ../../src/greedy/mod.rs:graphs_mst_graph_kruska}}
 ```

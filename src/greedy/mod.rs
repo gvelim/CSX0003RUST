@@ -41,15 +41,9 @@ impl Graph {
         while g.nodes != self.nodes {
             // spawn a new edge node from the queue with the smallest edge weight
             let src = match heap.pop() {
-                // if the queue is empty, find a node from those that have not yet been spawned
-                None => {
-                    let mut diff = self.nodes.difference(&g.nodes);
-                    println!(">> Pull Node from {:?}",diff);
-                    match diff.next() {
-                        None => panic!("mst_prim(): Anomaly detection, heap empty with no node remaining to spawn"),
-                        Some(&dst) => dst
-                    }
-                },
+                // if the queue is empty, but still have nodes to spawn
+                // then either (a) the graph is not connected or (b) is a directed graph
+                None => return None,
                 // spawn the destination node from edge
                 Some(Edge(_, NC(dst,_))) => dst,
                 Some(Edge(_, N(_))) => panic!("mst_prim(): Extracted edge using wrong NodeType::N"),
@@ -58,7 +52,7 @@ impl Graph {
             // Find all edge nodes that crossing Component X from this node
             // and have not yet been spawned, that is, they are NOT already part of Component X
             self.edges.get(&src)
-                .unwrap()
+                .unwrap_or_else(|| panic!("mst_prim(): Node ({src}) has not edges; Graph is not undirected or connected"))
                 .iter()
                 // remove any edge node already in the mst, part of Component X
                 .filter(|&&dst| !g.nodes.contains(&dst.into()))

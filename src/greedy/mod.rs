@@ -24,12 +24,12 @@ impl Graph {
     // ANCHOR: graphs_mst_graph_prim
     pub fn mst_prim(&self) -> Option<Graph> {
 
-        // Great empty graph to add one edge at a time
-        // we'll be using g.node as the X Component invariant,
-        // that is, all vertices spawned in the mst
-        let mut g = Graph::new();
+        // Create an empty Graph/Tree to add one edge at a time
+        // we'll be using g.node as the Tree's Component invariant,
+        // that is, the Component that contains all vertices absorbed by the Tree
+        let mut tree = Graph::new();
 
-        // Min-Ordered heap with all edges found crossing the X Component
+        // Min-Ordered heap with all edges found crossing the evolving tree
         let mut heap = BinaryHeap::<Edge>::new();
 
         // seed with first vertex
@@ -37,8 +37,8 @@ impl Graph {
         heap.push( Edge(start,NC(start,0)));
 
         // spawn a node at a time until we have spawned all graph nodes
-        // While X != V
-        while g.nodes != self.nodes {
+        // while tree component isn't equal input component
+        while tree.nodes != self.nodes {
             // spawn a new edge node from the queue with the smallest edge weight
             let src = match heap.pop() {
                 // if the queue is empty, but still have nodes to spawn
@@ -49,41 +49,42 @@ impl Graph {
                 Some(Edge(_, N(_))) => panic!("mst_prim(): Extracted edge using wrong NodeType::N"),
             };
 
-            // Find all edge nodes that crossing Component X from this node
-            // and have not yet been spawned, that is, they are NOT already part of Component X
+            // Add all edges that are crossing the tree Component given the spawned node
+            // and have not yet been spawned, that is, they are NOT already part of tree component
             self.edges.get(&src)
                 .unwrap_or_else(|| panic!("mst_prim(): Node ({src}) has not edges; Graph is not undirected or connected"))
                 .iter()
                 // remove any edge node already in the mst, part of Component X
-                .filter(|&&dst| !g.nodes.contains(&dst.into()))
+                .filter(|&&dst| !tree.nodes.contains(&dst.into()))
                 // push edges crossing Component X, that is,
                 // src IN Component X, dst NOT IN Component X
                 .for_each(|&dst| {
                     heap.push(Edge(src,dst));
                 });
 
-            // find the small edge crossing current component X
-            // don't remove from heap as we need the dst node for the next iteration
+            // find the min-weigh edge that is crossing the current tree component
+            // don't remove from heap as we need to spawn dst node for the next iteration
             while let Some(&edge) = heap.peek() {
                 let Edge(src,dst) = edge;
-                // Is edge a valid one, that is, crosses the Component X
-                if g.nodes.contains(&src) && g.nodes.contains(&dst.into()) {
-                    // Some times heap holds older edges that, after been added, had both nodes moved into Component X
+                // Is this edge a stale or a valid one, that is, crosses the tree component
+                if tree.nodes.contains(&src) && tree.nodes.contains(&dst.into()) {
+                    // Some times heap holds older edges that, after few iterations they get stale,
+                    // that is, both edges nodes have been moved into the tree component
                     heap.pop();
                 } else {
-                    // either src or dst edge node are outside the component X
-                    // hence add the edge into the mst
-                    g.push_edge(edge);
-                    // exit the while loop since we found the edge with the min weight
+                    // either src or dst edge nodes are outside the tree component
+                    // hence add the edge into the tree
+                    tree.push_edge(edge);
+                    // exit the while loop since we've found the edge with the min weight
                     break
                 }
             }
         }
-        Some(g)
+        Some(tree)
     }
     // ANCHOR_END: graphs_mst_graph_prim
 
-    // ANCHOR: graphs_mst_graph
+    // ANCHOR: graphs_mst_graph_kruska
     /// MST using Kruskal's algorithm implementation
     pub fn mst_kruska(&self) -> Option<Graph> {
 
@@ -121,6 +122,7 @@ impl Graph {
         }
         Some(graph)
     }
+    // ANCHOR_END: graphs_mst_graph_kruska
     // ANCHOR_END: graphs_mst
 
     /// Sums up the cost of all weighted edges
@@ -190,7 +192,7 @@ impl Graph {
 }
 
 // ANCHOR: graphs_mst_step
-/// BinaryHeap Step structure containing (Edge, Cost) tuple
+/// BinaryHeap Step structure containing `Edge(src,(dst,cost))` tuple
 /// The `cost` is only used as the prioritisation key for the `Heap`
 /// Implementing MinHeap through reverse comparison of Other against Self
 impl PartialOrd for Edge {

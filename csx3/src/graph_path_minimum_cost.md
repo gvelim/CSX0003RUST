@@ -1,4 +1,4 @@
-# Minimum Path Cost Algorithm
+# Dijkstra's Minimum Path Cost
 Here we cover problems involving finding the shortest path between vertices in a
 graph with weights (lengths) on the edges. One obvious application is in finding the shortest
 route from one address to another, however shortest paths have many other application[^note] 

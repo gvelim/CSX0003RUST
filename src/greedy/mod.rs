@@ -1,24 +1,27 @@
 use std::cmp::{Ordering};
 use std::collections::{BinaryHeap};
-use crate::graphs::{Edge, Graph, NodeType, Cost};
-use crate::graphs::NodeType::{N,NC};
+use crate::graphs::{Edge, Graph, Cost, NodeType::{N, NC}};
 
 // ANCHOR: graphs_mst
 /// Trait defining the capability calculate the minimum spanning tree of a graph
+/// given an input algorithm function()
 trait MinimumSpanningTree {
-    type Algo = fn(&Graph)->Option<Graph>;
-    fn min_spanning_tree(&self, _:Self::Algo) -> Option<Graph>;
+    type Output = Option<Graph>;
+    type Algo = fn(&Graph)->Self::Output;
+    fn min_spanning_tree(&self, _:Self::Algo) -> Self::Output;
 }
 
 /// Implementation of the Minimum Spanning Tree by the Graph struct
 impl MinimumSpanningTree for Graph {
-    fn min_spanning_tree(&self, algo:Self::Algo) -> Option<Graph> {
+    /// Implements function with algorithm parameterization
+    fn min_spanning_tree(&self, algo:Self::Algo) -> Self::Output {
         algo(self)
     }
 }
 
 /// Implement Helper Graph functions for minimum spanning tree algorithm
 impl Graph {
+    // ANCHOR: graphs_mst_graph_prim
     pub fn mst_prim(&self) -> Option<Graph> {
 
         // Great empty graph to add one edge at a time
@@ -42,35 +45,36 @@ impl Graph {
                 None => {
                     let mut diff = self.nodes.difference(&g.nodes);
                     println!(">> Pull Node from {:?}",diff);
-                    *diff.next()?
+                    match diff.next() {
+                        None => panic!("mst_prim(): Anomaly detection, heap empty with no node remaining to spawn"),
+                        Some(&dst) => dst
+                    }
                 },
                 // spawn the destination node from edge
                 Some(Edge(_, NC(dst,_))) => dst,
-                Some(Edge(_, N(_))) => panic!(""),
+                Some(Edge(_, N(_))) => panic!("mst_prim(): Extracted edge using wrong NodeType::N"),
             };
-            println!("Pop ({src})");
 
             // Find all edge nodes that crossing Component X from this node
             // and have not yet been spawned, that is, they are NOT already part of Component X
             self.edges.get(&src)
                 .unwrap()
                 .iter()
-                // remove any edge node already in the mst, Component X
+                // remove any edge node already in the mst, part of Component X
                 .filter(|&&dst| !g.nodes.contains(&dst.into()))
-                // push edges crossing the Component X, that is,
-                // src in Component X, dst NOT in Component X
+                // push edges crossing Component X, that is,
+                // src IN Component X, dst NOT IN Component X
                 .for_each(|&dst| {
-                    println!("\tPush ({src},{:?}) -> {:?}",dst, g.nodes);
                     heap.push(Edge(src,dst));
                 });
 
             // find the small edge crossing current component X
+            // don't remove from heap as we need the dst node for the next iteration
             while let Some(&edge) = heap.peek() {
                 let Edge(src,dst) = edge;
                 // Is edge a valid one, that is, crosses the Component X
-                // Some times heap holds older edges that had, in follow up iterations, both nodes pulled into Component X
                 if g.nodes.contains(&src) && g.nodes.contains(&dst.into()) {
-                    println!("\tInvalid!!! ({src},{:?}",dst);
+                    // Some times heap holds older edges that, after been added, had both nodes moved into Component X
                     heap.pop();
                 } else {
                     // either src or dst edge node are outside the component X
@@ -83,6 +87,7 @@ impl Graph {
         }
         Some(g)
     }
+    // ANCHOR_END: graphs_mst_graph_prim
 
     // ANCHOR: graphs_mst_graph
     /// MST using Kruskal's algorithm implementation
@@ -109,7 +114,7 @@ impl Graph {
             // if src is not a super node then get its super node
             let src = snodes.find_supernode(&src);
             // if dst is not a super node then get its super node
-            let dst = snodes.find_supernode(&dst.into());
+            let dst = snodes.find_supernode(&dst);
 
             // if src component differs from dst component then merge the two and save the edge connecting them
             if src != dst {
@@ -122,19 +127,20 @@ impl Graph {
         }
         Some(graph)
     }
-
-// ANCHOR_END: graphs_mst
+    // ANCHOR_END: graphs_mst
 
     /// Sums up the cost of all weighted edges
     pub fn get_edges_cost(&self) -> Cost {
         self.edges
             .values()
-            .fold(0, |mut cost, edges| {
-                for dst in edges {
-                    let &NC(_,c) = dst else { panic!("get_mst_cost(): NodeType is not of the NC(node, cost) format") };
-                    cost += c;
-                }
-                cost
+            .fold(0, |cost, edges| {
+                cost + edges.iter()
+                    .map(|&dst| {
+                        let NC(_,c) = dst else { panic!("get_mst_cost(): Destination node is not of type NodeType::NC") };
+                        c
+                    })
+                    .reduce(|acc,c| acc + c )
+                    .unwrap()
             }) >> 1 // in an undirected graph we count twice the edge hence dividing by 2
     }
     /// Adds a new Edge to the graph
@@ -154,12 +160,12 @@ impl Graph {
     /// the lowest cost edge at the top of the heap
     pub fn get_edges_by_cost(&self) -> BinaryHeap<Edge> {
         self.edges.iter()
-            .fold(BinaryHeap::new(),|mut heap, (&src, edges)| {
-                for &dst in edges {
-                    heap.push(Edge(src,dst));
-                }
-                heap
-            })
+            .fold(BinaryHeap::new(), |mut heap, (&src, edges)| {
+                    heap.extend(
+                        edges.iter().map(|&dst| Edge(src,dst))
+                    );
+                    heap
+                })
 
     }
     // ANCHOR_END: graphs_mst_graph

@@ -11,7 +11,8 @@ use crate::graphs::NodeType::NC;
 pub type Node = usize;
 pub type Cost = i32;
 
-#[derive(Debug,Clone,Copy,Hash, PartialEq, Eq)]
+// ANCHOR: graphs_search_path_utils_Step
+#[derive(Debug,Clone,Copy,Hash,Eq,PartialEq)]
 pub enum NodeType {
     N(Node),
     NC(Node, Cost)
@@ -27,6 +28,24 @@ impl From<Node> for NodeType {
         NodeType::N(value)
     }
 }
+
+impl Ord for NodeType {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+impl PartialOrd for NodeType {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match other {
+            NodeType::N(_) => other.partial_cmp(self),
+            NC(_, cost) => {
+                let NC(_,sc) = self else { panic!("") };
+                cost.partial_cmp(sc)
+            }
+        }
+    }
+}
+// ANCHOR_END: graphs_search_path_utils_Step
 
 #[derive(Clone,Copy,Hash,Eq, PartialEq)]
 pub struct Edge(pub Node, pub NodeType);
@@ -61,30 +80,6 @@ impl Edge {
     //     if self.0 == from { self.0 = to } else if self.1 == from { self.1 = to }
     // }
 }
-
-// ANCHOR: graphs_search_path_utils_Step
-#[derive(Debug,Copy, Clone)]
-pub struct Step<T>(pub T, pub Cost);
-
-impl Eq for Step<Node> {}
-impl PartialEq<Self> for Step<Node> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0 && self.1 == other.1
-    }
-}
-impl PartialOrd<Self> for Step<Node> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl Ord for Step<Node> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // binary head is a max-heap implementation pushing to the top the biggest element self.cmp(other)
-        // hence we need to reverse the comparison other.cmp(self)
-        other.1.cmp(&self.1) //then_with(|| other.0.cmp(&self.0))
-    }
-}
-// ANCHOR_END: graphs_search_path_utils_Step
 
 // ANCHOR: graphs_search_path_utils_NodeTrack
 #[derive(Debug,Copy,Clone,PartialEq)]

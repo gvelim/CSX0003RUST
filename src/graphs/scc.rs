@@ -66,7 +66,7 @@ trait DFSearch {
 /// and while we apply a recursive approach in searching the graph
 struct GraphState {
     tracker: Tracker,
-    queue: BinaryHeap<Step<Node>>,
+    queue: BinaryHeap<NodeType>,
     time: Cost,
     path: Vec<Node>
 }
@@ -84,7 +84,10 @@ impl GraphState {
 
     /// Extract from `BinaryHeap` the exit times per ordered from max -> min
     fn get_timings(&self) -> Vec<(Node, Cost)> {
-        self.queue.iter().rev().map(|&s| (s.0, s.1) ).collect::<Vec<_>>()
+        self.queue.iter().rev().map(|&s| {
+            let NC(n, c) = s else { panic!("get_timings(): node type is not NodeType::NC") };
+            (n,c)
+        }  ).collect::<Vec<_>>()
     }
 }
 
@@ -109,7 +112,7 @@ impl DFSearch for GraphState {
         // Exiting the node at time tick()
         self.time += 1;
         self.tracker[node].visited(Processed).distance(self.time);
-        self.queue.push(Step(node, self.time));
+        self.queue.push(NC(node, self.time));
         self.path.push(node);
         self
     }

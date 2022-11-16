@@ -155,7 +155,7 @@ impl PathSearch for Graph {
         /// Structure for maintaining processing state while processing the graph
         struct PSState {
             tracker: Tracker,
-            queue: BinaryHeap<Step<Node>>
+            queue: BinaryHeap<NodeType>
         }
 
         /// State Constructor from a given Graph and related shortest path initiation requirements
@@ -174,14 +174,14 @@ impl PathSearch for Graph {
         /// Implementation of Path Search abstraction
         impl BFSearch for PSState {
             type Output = (Vec<Node>,Cost);
-            type QueueItem = Step<Node>;
+            type QueueItem = NodeType;
 
             /// Processing of starting node
             fn initiate(&mut self, start: Node) -> &mut Self {
                 // set cost at start node to zero with no parent node
                 self.tracker[start].distance(0);
                 // push start node in the BinaryHeap queue
-                self.queue.push(Step(start,0));
+                self.queue.push(NC(start,0));
                 self
             }
 
@@ -190,8 +190,7 @@ impl PathSearch for Graph {
 
             /// extract node from the queued item retrieved
             fn node_from_queued(&self, qt: &Self::QueueItem) -> Node {
-                let &Step(node, _) = qt;
-                node
+                (*qt).into()
             }
 
             /// Process current node after all edges have been discovered and marked for processing
@@ -227,7 +226,7 @@ impl PathSearch for Graph {
 
             /// Construct the item to be queued, that is, (Node,Cost)
             fn node_to_queued(&self, node: Node) -> Self::QueueItem {
-                Step(node, self.tracker[node].dist )
+                NC(node, self.tracker[node].dist )
             }
 
             /// Push into (Node,Cost) into the queue

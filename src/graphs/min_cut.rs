@@ -189,6 +189,7 @@ pub trait MinimumCut {
 }
 
 impl MinimumCut for Graph {
+    //noinspection RsExternalLinter
     // ANCHOR: graphs_min_cut
     fn minimum_cut(&self) -> Option<Graph> {
 

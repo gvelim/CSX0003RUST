@@ -58,5 +58,5 @@ Additionally, we have the following helper `Graph` functions that provide us wit
 ## Implementation
 As a result, the following implementation consolidates all of the above into the Kruskal's algorithm implementation.
 ```rust,no_run,noplayground
-{{#include ../../src/greedy/mod.rs:graphs_mst_graph_kruska}}
+{{#include ../../src/greedy/mst.rs:graphs_mst_graph_kruska}}
 ```

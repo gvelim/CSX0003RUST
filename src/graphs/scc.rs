@@ -130,7 +130,7 @@ impl DFSearch for GraphState {
 // ANCHOR_END: graphs_scc_state
 
 // ANCHOR: graphs_scc
-trait ConnectedComponents {
+pub trait ConnectedComponents {
     fn strongly_connected(&self) -> Vec<Vec<Node>>;
 }
 
@@ -179,7 +179,7 @@ impl ConnectedComponents for Graph {
 // ANCHOR_END: graphs_scc
 // ANCHOR: graphs_scc_traversal
 impl Graph {
-    fn transpose(&self) -> Graph {
+    pub fn transpose(&self) -> Graph {
         self.nodes.iter()
             .fold(Graph::new(), |mut g, &node| {
                 g.nodes.insert(node);
@@ -265,7 +265,7 @@ impl DFSearch for TState {
 // ANCHOR_END: graphs_topological_sort_state
 // ANCHOR: graphs_topological_sort
 /// Topological Sort trait
-trait TopologicalSort {
+pub trait TopologicalSort {
     fn topological_sort(&self) -> Option<Vec<Node>>;
 }
 /// Graph implementation of Topological Sort

@@ -82,7 +82,7 @@ trait BFSearch {
     }
 }
 // ANCHOR_END: graphs_search_bfs_abstraction
-trait PathSearch {
+pub trait PathSearch {
     fn path_distance(&self, start:Node, goal:Node) -> Option<(Vec<Node>, Cost)>;
     fn path_shortest(&self, start: Node, goal: Node) -> Option<(Vec<Node>, Cost)>;
 }

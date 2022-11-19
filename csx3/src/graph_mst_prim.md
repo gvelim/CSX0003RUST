@@ -41,5 +41,5 @@ Few key points related to the below implementation
 
 As a result, the following implementation consolidates all of the above into the Prim's algorithm implementation.
 ```rust,no_run,noplayground
-{{#include ../../src/greedy/mod.rs:graphs_mst_graph_prim}}
+{{#include ../../src/greedy/mst.rs:graphs_mst_graph_prim}}
 ```

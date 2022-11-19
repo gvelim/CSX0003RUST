@@ -3,7 +3,7 @@ use std::collections::{BinaryHeap, HashSet};
 
 /// Trait defining the capability calculate the minimum spanning tree of a graph
 /// given an input algorithm function()
-trait MinimumSpanningTree {
+pub trait MinimumSpanningTree {
     type Output;
     type Algo;
     fn min_spanning_tree(&self, _:Self::Algo) -> Self::Output;
@@ -151,11 +151,11 @@ mod test {
     #[test]
     fn test_mst_prim() {
         let test_data = vec![
-            ("src/greedy/mst_cpb.txt", 20)
-            ,("src/greedy/input_random_1_10.txt", -7430)
-            ,("src/greedy/input_random_2_10.txt", -12829)
-            ,("src/greedy/input_random_6_20.txt", -15557)
-            ,("src/greedy/input_random_20_100.txt", -183953)
+            ("src/greedy/txt/mst_cpb.txt", 20)
+            ,("src/greedy/txt/input_random_1_10.txt", -7430)
+            ,("src/greedy/txt/input_random_2_10.txt", -12829)
+            ,("src/greedy/txt/input_random_6_20.txt", -15557)
+            ,("src/greedy/txt/input_random_20_100.txt", -183953)
         ];
         for (filename, result) in test_data {
             let mut g = Graph::new();

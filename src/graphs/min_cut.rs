@@ -78,7 +78,11 @@ impl SuperEdges {
 pub struct SuperNodes {
     super_nodes:HashMap<Node,HashSet<Node>>
 }
-
+impl Clone for SuperNodes {
+    fn clone(&self) -> Self {
+        SuperNodes { super_nodes: self.super_nodes.clone() }
+    }
+}
 impl SuperNodes {
     /// Total size of `Graph Components`, that is, super nodes
     pub fn len(&self) -> usize { self.super_nodes.len() }

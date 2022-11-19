@@ -1,4 +1,5 @@
 mod mst;
+mod cluster;
 
 use std::{ cmp::Ordering, collections::BinaryHeap };
 use crate::graphs::{ Edge, Graph, Cost, NodeType::{N, NC} };
@@ -12,7 +13,7 @@ impl Graph {
             .fold(0, |cost, edges| {
                 cost + edges.iter()
                     .map(|&dst| {
-                        let NC(_,c) = dst else { panic!("get_mst_cost(): Destination node is not of type NodeType::NC") };
+                        let NC(_,c) = dst else { panic!("get_mst_cost(): Edge destination node is not of type NodeType::NC") };
                         c
                     })
                     .reduce(|acc,c| acc + c )

@@ -1,6 +1,6 @@
-mod min_cut;
-mod path_search;
-mod scc;
+pub mod min_cut;
+pub mod path_search;
+pub mod scc;
 
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -22,25 +22,23 @@ impl From<NodeType> for Node {
         match nt { NodeType::N(node)|NC(node, _) => node }
     }
 }
-
 impl From<Node> for NodeType {
     fn from(value: Node) -> Self {
         NodeType::N(value)
     }
 }
-
 impl Ord for NodeType {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
+        other.partial_cmp(self).unwrap_or_else(|| panic!("Edge::cmp() - cannot compare nodes with type NodeType::N"))
     }
 }
 impl PartialOrd for NodeType {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match other {
-            NodeType::N(_) => other.partial_cmp(self),
+            NodeType::N(_) => None,
             NC(_, cost) => {
-                let NC(_,sc) = self else { panic!("") };
-                cost.partial_cmp(sc)
+                let NC(_,sc) = self else { panic!("Edge::partial_cmp() - cannot compare NodeType::NC against NodeType::N") };
+                Some(cost.cmp(sc))
             }
         }
     }

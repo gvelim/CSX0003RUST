@@ -34,3 +34,4 @@
   - [Minimum Spanning Trees](./graph_mst.md)
     - [Kruskal's Algorithm](./graph_mst_kruskal.md)
     - [Prim's Algorithm](./graph_mst_prim.md)
+    - [Single-linkage clustering](./graph_mst_cluster.md)

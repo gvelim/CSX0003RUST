@@ -100,7 +100,7 @@ mod test {
 
     #[test]
     fn test_file_load_edge_by_cost() {
-        let filename = "src/greedy/input_random_1_10.txt";
+        let filename = "src/greedy/txt/input_random_1_10.txt";
         let mut g = Graph::new();
         println!("{:?}", g.load_file_mst(filename).get_edges_by_cost() );
         println!("{:?}", g.sum_edges());

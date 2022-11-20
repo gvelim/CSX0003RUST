@@ -16,6 +16,8 @@ pub mod merge;
 pub mod graphs;
 /// Greedy algorithms for scheduling, mimium spanning trees
 pub mod greedy;
+/// Greedy algorithms for scheduling, mimium spanning trees
+pub mod hash_heap;
 
 /// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait
 ///```

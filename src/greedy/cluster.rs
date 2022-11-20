@@ -14,8 +14,8 @@ impl ClusterSet {
     /// spacing of a clustering. It's the distance between the closest together pair of separated points
     /// We want all of the separated points to be as far apart as possible.
     /// That is, we want the spacing to be big. The bigger the better
-    fn spacing(&self) -> Option<Edge> {
-        self.crossing_edges().pop()
+    fn spacing(&self) -> Edge {
+        self.crossing_edges().pop().unwrap_or_else(|| panic!("spacing(): no edges found spanning the clusters"))
     }
     fn crossing_edges(&self) -> BinaryHeap<Edge>{
 
@@ -31,6 +31,7 @@ impl ClusterSet {
         output
     }
 }
+
 // ANCHOR_END: graphs_mst_cluster_def
 // ANCHOR: graphs_mst_cluster_impl
 trait Clustering {
@@ -49,7 +50,7 @@ impl Clustering for Graph {
         // the output graph that will hold *only* the edges
         // that form the minimum spanning tree
         let mut graph = Graph::new();
-        let mut clt = None;
+        let mut clusters = None;
 
         // As long as more than 2 components
         while snodes.len() > 1 {
@@ -74,12 +75,12 @@ impl Clustering for Graph {
                 // println!("Skip");
             }
             if snodes.len() == k {
-                clt = Some(snodes.clone())
+                clusters = Some(snodes.clone())
             }
         }
         Some(ClusterSet{
             mst: graph,
-            clusters: clt.unwrap()
+            clusters: clusters.unwrap()
         })
     }
 }
@@ -102,8 +103,7 @@ mod test {
             let edge = g.load_file_mst(filename)
                 .find_clusters(4)
                 .unwrap_or_else(|| panic!("Returned None instead of a ClusterSet"))
-                .spacing()
-                .unwrap();
+                .spacing();
             print!("Edge: {:?}", edge);
             let Edge(_,NC(_,distance)) = edge else { panic!("NodeType::N used instead of NodeType::NC") };
             println!(" => Expected {:?}", result);

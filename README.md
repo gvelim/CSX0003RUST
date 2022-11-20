@@ -20,5 +20,7 @@ Writing algorithms is a good way of learning the "ways", or better, the expressi
   - Strong Connectivity
 - [Greedy Algorithms](./src/greedy/README.md)
   - Minimum Spanning Trees
+  - Single-linkage clustering
+  - Scheduling
 - [Linked list](./src/linkedlists/README.md)
 - [Binary tree](./src/trees/README.md)

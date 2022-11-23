@@ -7,11 +7,16 @@ pub fn two_sum_all(nums: Vec<i32>, target: i32) -> Vec<(i32,i32)> {
         .map(|b| target-b)
         .zip(0..)
         .filter_map(|(a,n)|
-            match map.get(&a)  {
-                Some(&i) => Some((i, n)),
-                None => {
-                    map.insert(target-a,n);
-                    None
+            {
+                match map.get(&a) {
+                    Some(&i) => {
+                        map.insert(target-a,n);
+                        Some((i, n))
+                    }
+                    None => {
+                        map.insert(target-a,n);
+                        None
+                    }
                 }
             }
         )
@@ -61,7 +66,7 @@ mod test {
     #[test]
     fn test_2_sum_all() {
         let data = vec![
-            (vec![1,6,2,8,7,11,15], 9, vec![(0,3), (2,4)]),
+            (vec![1,6,2,8,1,5,3,7,11,15], 9, vec![(0, 3), (3, 4), (1, 6), (2, 7)]),
             (vec![3,2,4], 6, vec![(1,2)]),
             (vec![3,3], 6, vec![(0,1)]),
         ];

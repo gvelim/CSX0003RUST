@@ -4,19 +4,16 @@ use std::collections::{HashMap};
 pub fn two_sum_all(nums: Vec<i32>, target: i32) -> Vec<(i32,i32)> {
     let mut map : HashMap<_,_> = HashMap::new();
     nums.iter()
-        .map(|b| target-b)
         .zip(0..)
-        .filter_map(|(a,n)|
-            {
-                match map.get(&a) {
-                    Some(&i) => {
-                        map.insert(target-a,n);
-                        Some((i, n))
-                    }
-                    None => {
-                        map.insert(target-a,n);
-                        None
-                    }
+        .filter_map(|(b,n)|
+            match map.get(&(target-b)) {
+                Some(&i) => {
+                    map.insert(b,n);
+                    Some((i, n))
+                }
+                None => {
+                    map.insert(b,n);
+                    None
                 }
             }
         )
@@ -30,13 +27,12 @@ pub fn two_sum_all(nums: Vec<i32>, target: i32) -> Vec<(i32,i32)> {
 pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
     let mut map : HashMap<i32,i32> = HashMap::new();
     let s = nums.iter()
-        .map(|b| target-b)
         .zip(0..)
-        .filter_map(|(a,n)|
-            match map.get(&a) {
+        .filter_map(|(&b,n)|
+            match map.get(&(target-b)) {
                 Some(&i) => Some((n, i)),
                 None => {
-                    map.insert(target-a,n);
+                    map.insert(b,n);
                     None
                 }
             }

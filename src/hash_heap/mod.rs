@@ -1,7 +1,7 @@
 use std::collections::{HashMap};
 
 /// Finds ALL pairs that have their sum equal to the target value
-pub fn two_sum_all(nums: Vec<i32>, target: i32) -> Vec<(i32,i32)> {
+pub fn two_sum_all(nums: Vec<i64>, target: i64) -> Vec<(i64,i64)> {
     let mut map : HashMap<_,_> = HashMap::new();
     nums.iter()
         .zip(0..)
@@ -24,9 +24,9 @@ pub fn two_sum_all(nums: Vec<i32>, target: i32) -> Vec<(i32,i32)> {
 }
 
 /// Returns ONLY the first pair that sums up to the target value
-pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-    let mut map : HashMap<i32,i32> = HashMap::new();
-    let s = nums.iter()
+pub fn two_sum(nums: &Vec<i64>, target: i64) -> Option<Vec<i64>> {
+    let mut map : HashMap<_,_> = HashMap::new();
+    match nums.iter()
         .zip(0..)
         .filter_map(|(&b,n)|
             match map.get(&(target-b)) {
@@ -38,13 +38,54 @@ pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
             }
         )
         .next()
-        .unwrap_or_else(||panic!("No two sum results to {target}"));
-    vec![s.1, s.0]
+    {
+        Some(s) => Some(vec![s.1, s.0]),
+        None => None
+    }
 }
 
 #[cfg(test)]
 mod test {
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+    use std::str::FromStr;
     use super::*;
+
+    fn load_file(filename: &str) -> Vec<i64> {
+
+        let fd = File::open(filename).unwrap_or_else(|e| panic!("{e}"));
+        let buf = BufReader::new(fd);
+
+        buf.lines()
+            .into_iter()
+            .filter_map(|ln| ln.ok())
+            .fold(vec![], |mut out, line| {
+                out.push(
+                    i64::from_str(line.as_str()).unwrap_or_else(|e| panic!("{e}"))
+                );
+                out
+            })
+    }
+
+    #[test]
+    fn test_2_sum_file() {
+        let data = vec![
+            ("src/hash_heap/txt/input_random_1_10.txt", 2)
+            ,("src/hash_heap/txt/input_random_5_20.txt", 4)
+            ,("src/hash_heap/txt/input_random_10_40.txt", 11)
+        ];
+        for (f,result) in data {
+            let inp = load_file(f);
+            let out = (-10000..=10000)
+                .fold( vec![], |mut acc, e| {
+                    two_sum(&inp,e)
+                    .and_then(|e| Some(acc.push(e)));
+                    acc
+            });
+            println!("Expected: {result} => Found: {}, {:?}",out.len(), out);
+            assert_eq!(out.len(),result);
+        }
+    }
 
     #[test]
     fn test_2_sum() {
@@ -55,7 +96,7 @@ mod test {
         ];
 
         for (nums, target, res) in data {
-            assert_eq!(two_sum(nums, target), res)
+            assert_eq!(two_sum(&nums, target), Some(res))
         }
     }
 

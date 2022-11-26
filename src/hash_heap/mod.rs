@@ -46,9 +46,7 @@ pub fn two_sum(nums: &Vec<i64>, target: i64) -> Option<Vec<i64>> {
 
 #[cfg(test)]
 mod test {
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
-    use std::str::FromStr;
+    use std::{ fs::File, io::{BufRead, BufReader}, str::FromStr};
     use super::*;
 
     fn load_file(filename: &str) -> Vec<i64> {
@@ -79,7 +77,7 @@ mod test {
             let out = (-10000..=10000)
                 .fold( vec![], |mut acc, e| {
                     two_sum(&inp,e)
-                    .and_then(|e| Some(acc.push(e)));
+                    .and_then(|pair| Some(acc.push(pair)));
                     acc
             });
             println!("Expected: {result} => Found: {}, {:?}",out.len(), out);

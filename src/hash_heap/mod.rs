@@ -1,7 +1,8 @@
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet, VecDeque};
+
 
 /// Finds ALL pairs that have their sum equal to the target value
-pub fn two_sum_all(nums: Vec<i64>, target: i64) -> Vec<(i64,i64)> {
+pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<(i64,i64)> {
     let mut map : HashMap<_,_> = HashMap::new();
     nums.iter()
         .zip(0..)
@@ -44,6 +45,36 @@ pub fn two_sum(nums: &Vec<i64>, target: i64) -> Option<Vec<i64>> {
     }
 }
 
+pub fn three_sum(nums: Vec<i64>) -> Vec<Vec<i64>> {
+    let mut map = HashSet::<Vec<i64>>::new();
+    nums.iter()
+        .zip(0..)
+        .filter_map(|(&a, i)| {
+            two_sum(&nums, 0 - a)
+                .and_then(|n|{
+                    if n.contains(&i) {
+                        None
+                    } else {
+                        Some(vec![nums[n[0] as usize], nums[n[1] as usize], nums[i as usize]])
+                    }
+                })
+                .and_then(|mut v| {
+                    println!("{:?}",v);
+                    v.sort();
+                    if map.contains(&v) {
+                        None
+                    } else {
+                        map.insert(v.clone());
+                        Some(v)
+                    }
+                })
+        })
+        .fold(VecDeque::new(), |mut out, v| {
+            out.push_front(v);
+            out
+        }).into()
+}
+
 #[cfg(test)]
 mod test {
     use std::{ fs::File, io::{BufRead, BufReader}, str::FromStr};
@@ -84,7 +115,6 @@ mod test {
             assert_eq!(out.len(),result);
         }
     }
-
     #[test]
     fn test_2_sum() {
         let data = vec![
@@ -97,7 +127,6 @@ mod test {
             assert_eq!(two_sum(&nums, target), Some(res))
         }
     }
-
     #[test]
     fn test_2_sum_all() {
         let data = vec![
@@ -107,7 +136,22 @@ mod test {
         ];
 
         for (nums, target, res) in data {
-            assert_eq!(two_sum_all(nums, target), res)
+            assert_eq!(two_sum_all(&nums, target), res)
+        }
+    }
+    #[test]
+    fn test_3_sum() {
+        let data = [
+            (vec![-1,0,1,2,-1,-4], vec![[-1,-1,2],[-1,0,1]]),
+            (vec![0,1,1], vec![]),
+            (vec![0,0,0], vec![[0,0,0]]),
+            (vec![1,2,-2,-1], vec![]),
+            (vec![-1,0,1,2,-1,-4,-2,-3,3,0,4],vec![[-4,0,4],[-4,1,3],[-3,-1,4],[-3,0,3],[-3,1,2],[-2,-1,3],[-2,0,2],[-1,-1,2],[-1,0,1]])
+        ];
+        for (inp, res) in data {
+            let out = three_sum(inp);
+            println!("Result: {:?} - Expected: {:?}",out,res);
+            assert_eq!(out, res);
         }
     }
 }

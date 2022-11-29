@@ -1,5 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
-
+use std::collections::{HashMap, HashSet};
 
 /// Finds ALL pairs that have their sum equal to the target value
 pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<Vec<i64>> {
@@ -49,30 +48,27 @@ pub fn three_sum(nums: Vec<i64>) -> Vec<Vec<i64>> {
     let mut map = HashSet::<Vec<i64>>::new();
     nums.iter()
         .zip(0..)
-        .filter_map(|(&a, i)| {
-            two_sum(&nums, 0 - a)
-                .and_then(|n|{
-                    if n.contains(&i) {
-                        None
-                    } else {
-                        Some(vec![nums[n[0] as usize], nums[n[1] as usize], nums[i as usize]])
-                    }
-                })
-                .and_then(|mut v| {
-                    println!("{:?}",v);
-                    v.sort();
-                    if map.contains(&v) {
-                        None
-                    } else {
+        .map(|(&a, i)|
+            two_sum_all(&nums, 0 - a)
+                .iter_mut()
+                .filter(|v| !v.contains(&i) )
+                .map(|n|
+                    vec![nums[n[0] as usize], nums[n[1] as usize], nums[i as usize]]
+                )
+                .map(|mut v| { v.sort(); v })
+                .filter(|v| {
+                    if !map.contains(v) {
                         map.insert(v.clone());
-                        Some(v)
-                    }
+                        true
+                    } else { false }
                 })
-        })
-        .fold(VecDeque::new(), |mut out, v| {
-            out.push_front(v);
+                .collect::<Vec<Vec<_>>>()
+        )
+        .fold(vec![], |mut out, v| {
+            out.extend(v);
+            out.sort();
             out
-        }).into()
+        })
 }
 
 #[cfg(test)]
@@ -148,9 +144,10 @@ mod test {
             (vec![1,2,-2,-1], vec![]),
             (vec![-1,0,1,2,-1,-4,-2,-3,3,0,4],vec![[-4,0,4],[-4,1,3],[-3,-1,4],[-3,0,3],[-3,1,2],[-2,-1,3],[-2,0,2],[-1,-1,2],[-1,0,1]])
         ];
-        for (inp, res) in data {
+        for (i,(inp, res)) in data.into_iter().enumerate() {
+            println!("Test Run {i} =================");
             let out = three_sum(inp);
-            println!("Result: {:?} - Expected: {:?}",out,res);
+            println!("Result: {:?} \nExpected: {:?}",out,res);
             assert_eq!(out, res);
         }
     }

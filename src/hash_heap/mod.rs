@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 
 /// Finds ALL pairs that have their sum equal to the target value
-pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<(i64,i64)> {
+pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<Vec<i64>> {
     let mut map : HashMap<_,_> = HashMap::new();
     nums.iter()
         .zip(0..)
@@ -19,7 +19,7 @@ pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<(i64,i64)> {
             }
         )
         .fold(vec![], |mut out, pair| {
-            out.push(pair);
+            out.push(vec![pair.0,pair.1]);
             out
         })
 }
@@ -130,9 +130,9 @@ mod test {
     #[test]
     fn test_2_sum_all() {
         let data = vec![
-            (vec![1,6,2,8,1,5,3,7,11,15], 9, vec![(0, 3), (3, 4), (1, 6), (2, 7)]),
-            (vec![3,2,4], 6, vec![(1,2)]),
-            (vec![3,3], 6, vec![(0,1)]),
+            (vec![1,6,2,8,1,5,3,7,11,15], 9, vec![[0, 3], [3, 4], [1, 6], [2, 7]]),
+            (vec![3,2,4], 6, vec![[1,2]]),
+            (vec![3,3], 6, vec![[0,1]]),
         ];
 
         for (nums, target, res) in data {

@@ -13,10 +13,12 @@ fn is_subsequence_v1(s: &str, t: &str) -> bool {
                 .is_some()
         )
 }
+
 fn is_subsequence_v2(s: &str, t: &str) -> bool {
     let mut iter = t.bytes();
     s.bytes().all(|e| iter.any(|tc| tc == e ) )
 }
+
 fn num_matching_subseq(s: &str, words: &[&str]) -> i32 {
     words.iter()
         .fold(0, |mut count, word| {

@@ -58,12 +58,18 @@ mod test {
 
     #[test]
     fn test_wis() {
-        // let (g,res) = (parse_graph("src/dp/txt/input_random_1_10.txt"), 98);
-        let (g,res) = (vec![1,4,5,4],8);
+        let data: Vec<(Vec<usize>,usize)> = vec![
+            (vec![1,4,5,4],8),
+            (vec![10, 280, 618, 762, 908, 409, 34, 59, 277, 246, 779],2626),
+            (vec![10, 460, 250, 730, 63, 379, 638, 122, 435, 705, 84],2533),
+            (parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
+        ];
 
-        let set = weight_independent_set(&g);
-        println!("Weight Independent set {:?}", set);
-        assert_eq!(set.0,res);
+        for (g,res) in data {
+            let set = weight_independent_set(&g);
+            println!("Weight Independent set {:?}\n\n", set);
+            assert_eq!(set.0,res);
+        }
     }
 
     #[test]

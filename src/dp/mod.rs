@@ -51,10 +51,17 @@ fn extract(solution: &[usize], set: &[usize]) -> Vec<bool> {
     positions
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
+
+    fn to_string(v: &[bool]) -> String {
+        v.iter()
+            .filter_map(|&d|
+                if d { Some('1') } else { Some('0') }
+            )
+            .collect::<String>()
+    }
 
     #[test]
     fn test_wis() {
@@ -67,7 +74,7 @@ mod test {
 
         for (g,res) in data {
             let set = weight_independent_set(&g);
-            println!("Weight Independent set {:?}\n\n", set);
+            println!("Weight Independent set {:?},{:?}\n\n", set.0, to_string(&set.1));
             assert_eq!(set.0,res);
         }
     }

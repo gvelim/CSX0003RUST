@@ -1,3 +1,4 @@
+use std::cmp::max;
 use std::str::FromStr;
 
 fn parse_graph(filename: &str) -> Vec<usize> {
@@ -18,9 +19,38 @@ fn parse_graph(filename: &str) -> Vec<usize> {
     g
 }
 
-fn wis(g:&[usize]) -> Vec<usize> {
-    vec![]
+fn weight_independent_set(set: &[usize]) -> (usize,Vec<bool>) {
+    let mut solution = vec![0; set.len()+1];
+    solution[0] = 0;
+    solution[1] = set[0];
+
+    (2..solution.len())
+        .all(|i| {
+            solution[i] = max(solution[i-1], solution[i-2]+set[i-1]);
+            println!("{:?}",(i,set[i-1],&set,&solution));
+            true
+        });
+    (*solution.last().unwrap(), extract(&solution, set))
 }
+
+fn extract(solution: &[usize], set: &[usize]) -> Vec<bool> {
+    let mut positions = vec![false;solution.len()-1];
+    let mut i = solution.len()-1;
+    while i > 0 {
+        println!("{:?}",(i,solution[i-2],solution[i],set[i-1]));
+        if solution[i-2] == solution[i]-set[i-1] {
+            positions[i-1] = true;
+            i -= 1;
+        }
+        i -= 1;
+        if i == 1 {
+            positions[i-1] = true;
+            i -= 1;
+        }
+    }
+    positions
+}
+
 
 #[cfg(test)]
 mod test {
@@ -28,9 +58,12 @@ mod test {
 
     #[test]
     fn test_wis() {
-        let g = parse_graph("src/dp/txt/input_random_1_10.txt");
+        // let (g,res) = (parse_graph("src/dp/txt/input_random_1_10.txt"), 98);
+        let (g,res) = (vec![1,4,5,4],8);
 
-        println!("Weight Independent set {:?}", wis(&g))
+        let set = weight_independent_set(&g);
+        println!("Weight Independent set {:?}", set);
+        assert_eq!(set.0,res);
     }
 
     #[test]

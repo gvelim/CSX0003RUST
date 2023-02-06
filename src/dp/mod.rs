@@ -18,50 +18,51 @@ fn parse_graph(filename: &str) -> Vec<usize> {
     }
     g
 }
-fn weight_independent_set(set: &[usize]) -> WIS {
-    let mut solution = vec![0; set.len()+1];
-    solution[0] = 0;
-    solution[1] = set[0];
-
-    (2..solution.len())
-        .all(|i| {
-            solution[i] = max(solution[i-1], solution[i-2]+set[i-1]);
-            println!("{:?}",(i,set[i-1],&set,&solution));
-            true
-        });
-
-    WIS { set, solution }
-}
 
 struct WIS<'a> {
     set: &'a [usize],
-    solution: Vec<usize>
+    dp: Vec<usize>
 }
 
 impl WIS<'_> {
-    fn weight(&self) -> usize {
-        *self.solution.last().unwrap()
+    fn new(set: &[usize]) -> WIS {
+        let mut dp = vec![0; set.len()+1];
+        dp[0] = 0;
+        dp[1] = set[0];
+
+        (2..dp.len())
+            .all(|i| {
+                dp[i] = max(dp[i - 1], dp[i - 2] + set[i - 1]);
+                println!("{:?}", (i, set[i - 1], &set, &dp));
+                true
+            });
+
+        WIS { set, dp }
     }
-    fn reconstruct(&self) -> Vec<bool> {
-        let mut positions = vec![false; self.solution.len() - 1];
-        let mut i = self.solution.len() - 1;
+
+    fn weight(&self) -> usize {
+        *self.dp.last().unwrap()
+    }
+    fn positions_in_set(&self) -> Vec<bool> {
+        let mut positions = vec![false; self.dp.len() - 1];
+        let mut i = self.dp.len() - 1;
         while i > 0 {
-            if self.solution[i - 2] == self.solution[i] - self.set[i - 1] {
-                println!("{:?}", (i, self.solution[i - 2], self.solution[i], self.set[i - 1]));
+            if self.dp[i - 2] == self.dp[i] - self.set[i - 1] {
+                println!("{:?}", (i, self.dp[i - 2], self.dp[i], self.set[i - 1]));
                 positions[i - 1] = true;
                 i -= 1;
             }
             i -= 1;
             if i == 1 {
-                println!("{:?}", (i, self.solution[i], self.set[i - 1]));
+                println!("{:?}", (i, self.dp[i], self.set[i - 1]));
                 positions[i - 1] = true;
                 i -= 1;
             }
         }
         positions
     }
-    fn to_binary_form(&self) -> String {
-        self.reconstruct().iter()
+    fn to_binary_string(&self) -> String {
+        self.positions_in_set().iter()
             .filter_map(|&d|
                 if d { Some('1') } else { Some('0') }
             )
@@ -83,9 +84,9 @@ mod test {
         ];
 
         for (g,res) in data {
-            let set = weight_independent_set(&g);
-            let n = set.weight();
-            println!("Weight Independent set: {:?},{:?}\n\n", (n,set.reconstruct()), set.to_binary_form());
+            let wis = WIS::new(&g);
+            let n = wis.weight();
+            println!("Weight Independent set: {:?},{:?}\n\n", (n, wis.positions_in_set()), wis.to_binary_string());
             assert_eq!(n,res);
         }
     }

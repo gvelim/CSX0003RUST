@@ -1,3 +1,5 @@
+extern crate core;
+
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 
@@ -16,7 +18,7 @@ pub mod graphs;
 pub mod greedy;
 /// Greedy algorithms for scheduling, mimium spanning trees
 pub mod hash_heap;
-/// Dynamic Programming
+/// Dynamic Programming algorithms
 pub mod dp;
 
 /// Generates a list of random values based on the assigned variable type. The assigned variable must implement the `FromIterator` trait

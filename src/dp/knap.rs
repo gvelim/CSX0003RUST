@@ -1,53 +1,27 @@
+use std::cmp::max;
+use std::fmt::{Debug, Formatter};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Debug)]
 struct Object {
     value: usize,
     weight: usize
 }
-
-fn parse(input: &str) -> Result<(usize,Vec<Object>),ParseIntError> {
-
-    fn parse_line(line: &str) -> Result<(usize, usize),ParseIntError> {
-        let mut parts = line.split(' ');
-        Ok((
-            parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?,
-            parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?
-        ))
+impl Debug for Object {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,"(v:{},w:{})",self.value,self.weight)
     }
-
-    let mut lines = input.lines();
-    let (knapsack, items) = parse_line( lines.next().unwrap() )?;
-
-    let mut sack = Vec::with_capacity(items);
-    while let Some(line) = lines.next() {
-        let (value, weight) = parse_line( line )?;
-        sack.push( Object{ value, weight } );
-    }
-    Ok((knapsack,sack))
 }
 
-#[cfg(test)]
-mod test {
-    use std::cmp::max;
-    use super::*;
+struct KnapSack<'a> {
+    list: &'a [Object],
+    capacity: usize,
+    dp: Vec<Vec<usize>>
+}
 
-    fn print_knapsack(ks: &[Vec<usize>]) {
-        for (i,item) in ks.iter().enumerate() {
-            println!("{i}th :: {:?}", item);
-        }
-    }
-
-    #[test]
-    fn test_knapsack() {
-        let inp = std::fs::read_to_string("src/dp/txt/input_random_5_10_10.txt").unwrap_or_else(|e| panic!("{}",e));
-        let (capacity, list) = parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
-
-        println!("{:?}",(capacity, &list));
-
+impl KnapSack<'_> {
+    fn new(list: &[Object], capacity: usize ) -> KnapSack {
         let mut dp = vec![ vec![ 0; capacity+1 ]; list.len()+1 ];
-
         (1..dp.len())
             .for_each(|i| {
                 for w in 1..=capacity {
@@ -59,16 +33,85 @@ mod test {
                             max(dp[i-1][w], dp[i-1][w-item.weight] + item.value )
                         }
                 }
-        });
-        print_knapsack(&dp);
+            });
 
-        assert_eq!( dp[list.len()-1][capacity], 14 );
+        KnapSack { list, capacity, dp }
+    }
+    fn positions(&self) -> Vec<bool> {
+        let mut pos = vec![false; self.dp.len()-1];
+        let mut w = self.capacity;
+        (1..self.dp.len())
+            .rev()
+            .for_each(|i|{
+                print!("{:?}",(i, w, self.dp[i][w],self.dp[i-1][w]));
+                if self.dp[i][w] != self.dp[i-1][w] {
+                    pos[i-1] = true;
+                    w -= self.list[i-1].weight;
+                    print!(" :: {:?}",&self.list[i-1])
+                }
+                println!();
+            });
+        pos
+    }
+    fn max_value(&self) -> usize {
+        *self.dp.last().unwrap().last().unwrap()
+    }
+    fn parse(input: &str) -> Result<(usize,Vec<Object>),ParseIntError> {
+
+        fn parse_line(line: &str) -> Result<(usize, usize),ParseIntError> {
+            let mut parts = line.split(' ');
+            Ok((
+                parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?,
+                parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?
+            ))
+        }
+
+        let mut lines = input.lines();
+        let (knapsack, items) = parse_line( lines.next().unwrap() )?;
+
+        let mut sack = Vec::with_capacity(items);
+        while let Some(line) = lines.next() {
+            let (value, weight) = parse_line( line )?;
+            sack.push( Object{ value, weight } );
+        }
+        Ok((knapsack,sack))
+    }
+}
+
+impl Debug for KnapSack<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for (i,item) in self.dp.iter().enumerate().rev() {
+            write!(f,"{:2}th :: {:2?}", i, item)?;
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_knapsack() {
+        let inp = std::fs::read_to_string("src/dp/txt/input_random_5_10_10.txt").unwrap_or_else(|e| panic!("{}",e));
+        // let inp = std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e));
+        let (capacity, list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
+
+        println!("{:?}",(capacity, &list));
+
+        let ks = KnapSack::new( &list, capacity );
+
+        println!("{:?}",ks);
+        println!("{:?}",ks.positions());
+
+        assert_eq!( ks.max_value(), 14 );
     }
 
     #[test]
     fn test_parse() {
         let inp = std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e));
-        println!("{:?}", parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}")) );
+        println!("{:?}", KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}")) );
         assert!(true)
     }
 }

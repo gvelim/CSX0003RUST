@@ -43,15 +43,18 @@ impl KnapSack<'_> {
         (1..self.dp.len())
             .rev()
             .for_each(|i|{
-                print!("{:?}",(i, w, self.dp[i][w],self.dp[i-1][w]));
                 if self.dp[i][w] != self.dp[i-1][w] {
                     pos[i-1] = true;
                     w -= self.list[i-1].weight;
-                    print!(" :: {:?}",&self.list[i-1])
                 }
-                println!();
             });
         pos
+    }
+    fn get_items(&self) -> Vec<&Object> {
+        self.positions().iter()
+            .zip(self.list)
+            .filter_map(|(i,v)| if *i {Some(v)} else {None})
+            .collect::<Vec<_>>()
     }
     fn max_value(&self) -> usize {
         *self.dp.last().unwrap().last().unwrap()
@@ -94,18 +97,27 @@ mod test {
 
     #[test]
     fn test_knapsack() {
-        let inp = std::fs::read_to_string("src/dp/txt/input_random_5_10_10.txt").unwrap_or_else(|e| panic!("{}",e));
-        // let inp = std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e));
-        let (capacity, list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
+        let data = vec![
+            (std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e)), 4)
+            ,(std::fs::read_to_string("src/dp/txt/input_random_5_10_10.txt").unwrap_or_else(|e| panic!("{}",e)), 14)
+            ,(std::fs::read_to_string("src/dp/txt/input_random_14_100_100.txt").unwrap_or_else(|e| panic!("{}",e)), 478)
+        ];
 
-        println!("{:?}",(capacity, &list));
+        for (inp,res) in data {
+            let (capacity, list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
 
-        let ks = KnapSack::new( &list, capacity );
-
-        println!("{:?}",ks);
-        println!("{:?}",ks.positions());
-
-        assert_eq!( ks.max_value(), 14 );
+            let ks = KnapSack::new( &list, capacity );
+            if list.len() < 20 {
+                println!("{:?}",(capacity, &list));
+                println!("{:?}",&ks);
+            }
+            println!("Total value: {} given capacity {}\nSelected items: {:?}\n",
+                   ks.max_value(),
+                   capacity,
+                   ks.get_items()
+            );
+            assert_eq!( ks.max_value(), res );
+        }
     }
 
     #[test]

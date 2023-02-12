@@ -83,6 +83,8 @@ impl KnapSack<'_> {
 
 impl Debug for KnapSack<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let v = (0..self.capacity+1).collect::<Vec<usize>>();
+        writeln!(f," Cap :: {:2?}", v)?;
         for (i,item) in self.dp.iter().enumerate().rev() {
             write!(f,"{:2}th :: {:2?}", i, item)?;
             writeln!(f)?;
@@ -101,12 +103,14 @@ mod test {
             (std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e)), 4)
             ,(std::fs::read_to_string("src/dp/txt/input_random_5_10_10.txt").unwrap_or_else(|e| panic!("{}",e)), 14)
             ,(std::fs::read_to_string("src/dp/txt/input_random_14_100_100.txt").unwrap_or_else(|e| panic!("{}",e)), 478)
+            ,(std::fs::read_to_string("src/dp/txt/input_random_24_1000_100.txt").unwrap_or_else(|e| panic!("{}",e)), 6475)
         ];
 
         for (inp,res) in data {
-            let (capacity, list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
-
+            let (capacity, mut list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
+            list.sort_by_key(|obj| obj.weight );
             let ks = KnapSack::new( &list, capacity );
+            println!("==========================");
             if list.len() < 20 {
                 println!("{:?}",(capacity, &list));
                 println!("{:?}",&ks);

@@ -1,0 +1,364 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Count sort - Rusting along</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Topics</li><li class="chapter-item expanded "><a href="merge.html"><strong aria-hidden="true">1.</strong> Merging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="merge_in_place.html"><strong aria-hidden="true">1.1.</strong> In-place merge with O(n+m) swaps</a></li><li class="chapter-item expanded "><a href="merge_sequencial_access.html"><strong aria-hidden="true">1.2.</strong> Sequential access across multiple slices</a></li><li class="chapter-item expanded "><a href="merge_lazy.html"><strong aria-hidden="true">1.3.</strong> Lazy merge and deferred slice mutability</a></li><li class="chapter-item expanded "><a href="merge_denormalise.html"><strong aria-hidden="true">1.4.</strong> Pattern matching: De-normalising control flow</a></li></ol></li><li class="chapter-item expanded "><a href="sort.html"><strong aria-hidden="true">2.</strong> Sorting</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sort_mergesort.html"><strong aria-hidden="true">2.1.</strong> Merge sort</a></li><li class="chapter-item expanded "><a href="sort_quicksort.html"><strong aria-hidden="true">2.2.</strong> Quick sort</a></li><li class="chapter-item expanded "><a href="sort_count.html" class="active"><strong aria-hidden="true">2.3.</strong> Count sort</a></li></ol></li><li class="chapter-item expanded "><a href="selection.html"><strong aria-hidden="true">3.</strong> Selecting</a></li><li class="chapter-item expanded "><a href="graph.html"><strong aria-hidden="true">4.</strong> Graphs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_min_cut.html"><strong aria-hidden="true">4.1.</strong> Krager's Minimum Cut</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_contraction.html"><strong aria-hidden="true">4.1.1.</strong> Contraction Algorithm</a></li></ol></li><li class="chapter-item expanded "><a href="graph_search.html"><strong aria-hidden="true">4.2.</strong> Graph Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_search_process_state.html"><strong aria-hidden="true">4.2.1.</strong> Node Processing State</a></li><li class="chapter-item expanded "><a href="graph_path_bfs_abstract.html"><strong aria-hidden="true">4.2.2.</strong> Abstracting Breadth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_shortest_distance.html"><strong aria-hidden="true">4.2.2.1.</strong> Shortest Distance</a></li><li class="chapter-item expanded "><a href="graph_path_minimum_cost.html"><strong aria-hidden="true">4.2.2.2.</strong> Dijktra's Min Path Cost</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.2.3.</strong> Bellman–Ford algorithm</div></li></ol></li><li class="chapter-item expanded "><a href="graph_path_dfs_abstract.html"><strong aria-hidden="true">4.2.3.</strong> Abstracting Depth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_topological_sort.html"><strong aria-hidden="true">4.2.3.1.</strong> Topological Sort</a></li><li class="chapter-item expanded "><a href="graph_connect.html"><strong aria-hidden="true">4.2.3.2.</strong> Strong Connectivity</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_connect_scc.html"><strong aria-hidden="true">4.2.3.2.1.</strong> Kosaraju’s algorithm</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><a href="graph_mst.html"><strong aria-hidden="true">4.3.</strong> Minimum Spanning Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_mst_kruskal.html"><strong aria-hidden="true">4.3.1.</strong> Kruskal's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_prim.html"><strong aria-hidden="true">4.3.2.</strong> Prim's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_cluster.html"><strong aria-hidden="true">4.3.3.</strong> Single-linkage clustering</a></li></ol></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rusting along</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="count-sort"><a class="header" href="#count-sort">Count Sort</a></h1>
+<p>A sorting algorithm with <strong>O(n) time complexity</strong> with the following key points</p>
+<ul>
+<li>Sorts the array in 2 passes</li>
+<li>Does not make use of comparisons</li>
+<li>Keeps a Bookkeeping array for counting number of occurrences per array item.</li>
+</ul>
+<p>The algorithm's limitation is that in its worst case it could consume <code>2 ^ bits</code> of memory especially when </p>
+<ul>
+<li>32 &amp; 64 bit types are used,</li>
+<li>with arrays where the distance between the array's MIN and MAX values is significantly large</li>
+</ul>
+<h2 id="challenges-working-with-integer-arrays"><a class="header" href="#challenges-working-with-integer-arrays">Challenges working with integer arrays</a></h2>
+<p>The algorithm requires the ability to <strong>translate</strong> </p>
+<ul>
+<li>Array values (positive or negative) to BookKeeping indexes (positive)</li>
+<li>BookKeeping Index positions (positive) to negative or positive values</li>
+</ul>
+<pre><code>+---+---+---+---+---+---+---+---+     Type: Integer or Unsigned
+| 2 | 2 | 5 | 5 | 8 | 1 | 5 | 3 |     (Min, Max) = (1,8)
++---+---+---+---+---+---+---+---+     (distance) = Min - Max + 1 = 8
+  |   |   |   |    \______|__
+   \__|    \___\_________/   \
+      |           |           |
++---+---+---+---+---+---+---+---+    Type: Unsigned
+| 1 | 2 | 1 | 0 | 3 | 0 | 0 | 1 |    BookKeeping (BK) capacity(8)
++---+---+---+---+---+---+---+---+    holding counts from BK[min..max]   
+min(1)  BK['5'] = ^         max(8)       
+</code></pre>
+<h3 id="distance-calculation"><a class="header" href="#distance-calculation">Distance calculation</a></h3>
+<p>Therefore, knowing the <code>distance</code> between <code>min</code> &amp; <code>max</code> values is fundamental to the algorithm's logic.</p>
+<p>However, integer values can easily cause an overflow when the <code>distance</code> between <code>min</code> and <code>max</code> exceeds the <code>[-127..0]</code> or <code>[0..127]</code> ranges</p>
+<pre><code>-127            0            +127
+  |-------------|-------------|        Both Min and Max are negative
+   &lt;-- dist ---&gt;                        Safe: Dist = (max - min)
+
+-127            0            +127
+  |-------------|-------------|        Min is negative, Max is positive
+                                       Unsafe: (max - min) overflows
+    &lt;-------- dist ---------&gt;                
+
+-127            0            +127
+  |-------------|-------------|        Both Min &amp; Max are positive
+                  &lt;-- dist --&gt;         Safe: Dist = (max - min)
+</code></pre>
+<p>Therefore, when <code>min</code> and <code>max</code> have opposite signs we have to convert both to <code>usize</code> before we calculate the <code>distance</code>. Therefore the below implementation will calculate the distance correctly for both <code>signed</code> and <code>unsigned</code> types.</p>
+<pre><code class="language-rust noplayground">fn dist_from(&amp;self, min: i8) -&gt; usize {
+    if *self &gt; min {
+        (*self as usize).wrapping_sub(min as usize)
+    } else {
+        (min as usize).wrapping_sub(*self as usize)
+    }
+}
+
+let len: usize = max.dist_from(min);
+</code></pre>
+<p>Now that we know how to calculate the <code>distance</code> we can proceed with <strong>value-to-index</strong> and <strong>index-to-value</strong> translations.</p>
+<h3 id="value-to-index-translation"><a class="header" href="#value-to-index-translation">Value-to-index translation</a></h3>
+<p>We know that </p>
+<ul>
+<li><code>Min</code> maps to <code>Bookkeeping[0]</code> position and</li>
+<li><code>Max</code> maps to <code>BookKeeping[distance]</code> position</li>
+<li>where <code>Min &lt;= array[..] &lt;= Max</code></li>
+</ul>
+<p>Therefore, the index is found as <code>index = value - Min</code> which more or less is the <code>distance</code> from <code>min</code>, which we already know how to calculate.
+As a result the translation is given by the following implementation ...</p>
+<pre><code class="language-rust noplayground">let idx = value.dist_from(min);     // Map array value -&gt; BK index 
+BookKeeping[idx] += 1;              // increment count by 1
+</code></pre>
+<h3 id="index-to-value-translation"><a class="header" href="#index-to-value-translation">Index-to-value translation</a></h3>
+<p>This is the reverse effect, where we need to translate the <code>index</code> from the BookKeeping onto the corresponding array <code>value</code>, since we know that BookKeeping position <code>[0]</code> is the <code>min</code> value wihtin the input array.</p>
+<p>For example, if <code>min == 6</code> then the array's <code>value</code> at position <code>index</code> will be given as</p>
+<ul>
+<li>for <code>index = 0</code>, <code>array[0] = MIN + 0</code></li>
+<li>for <code>index = 1</code>, <code>array[1] = MIN + 1</code></li>
+<li>for <code>index = 2</code>, <code>array[2] = MIN + 2</code></li>
+<li>etc</li>
+</ul>
+<p>Recall that the <code>max(index) == distance</code> and <code>distance</code> </p>
+<ul>
+<li>always <strong><em>fits</em></strong> the unsigned numbers value range</li>
+<li><strong><em>overflows</em></strong> the signed numbers value range as shown below</li>
+</ul>
+<pre><code>-127            0            +127
+  |-------------|-------------|        (Min,Max) = (-123,122)
+    -123 &lt;----- dist -----&gt; 122        distance = 245
+     min                    max        value = (Min: -123 + index: 245)
+                                       ^^^^^ ** OVERFLOW **
+</code></pre>
+<p>For example, <code>i8</code> has <code>i8::MIN</code> value of <code>-128</code>, and by adding <code>index</code> with value <code>245</code> will cause an overflow of <code>-11</code>; this is equivalent to <code>245 % i8::MIN</code>.
+However, the trick here is that by adding <code>-11</code> to <code>min</code> and wrapping around, will yield the desired <code>value</code>.</p>
+<p>Therefore, the steps  to translate <code>index/unsigned</code> to <code>value/signed</code> are</p>
+<ol>
+<li>Convert <code>index</code> to <code>i8</code> given by <code>index % i8:MIN</code></li>
+<li>and do a <strong>modular add</strong> with <code>min</code></li>
+</ol>
+<pre><code>Value = (Min  + (   index as i8  )) % 128                
+=====   =====   ===================   ===
+82    = (-123 + (-51 = 205 % -128)) % 128
+113   = (-123 + (-20 = 236 % -128)) % 128
+122   = (-123 + (-11 = 245 % -128)) % 128
+</code></pre>
+<p>Rust performs then above operation with the following statement and implemented as<code>Distance::add_index()</code></p>
+<pre><code class="language-rust noplayground">array[index] = min.wrapping_add( index as i8 );
+</code></pre>
+<h2 id="final-implementation"><a class="header" href="#final-implementation">Final implementation</a></h2>
+<p>Hence, by putting all the above together, we have the following implementation for the <code>CountSort</code> trait</p>
+<pre><code class="language-rust no_run noplayground">/// Sorts a given array using the Count Sort algorithm.
+/// Input array NuType shouldn't exceed u16 to avoid memory issues
+/// ```
+/// use csx3::sort::count::CountSort;
+///
+/// let v = &amp;mut [3i8,5,8,1,2,4,6,0];
+///
+/// v.count_sort();
+/// assert_eq!(v, &amp;[0,1,2,3,4,5,6,8]);
+/// ```
+pub trait CountSort {
+
+    fn count_sort(&amp;mut self);
+}
+
+// CountSort macro implementation for singed and unsigned types
+impl&lt;T&gt; CountSort for [T]
+    where T: Distance&lt;T&gt; + Copy + Ord + Debug{
+
+    fn count_sort(&amp;mut self) {
+
+        if self.len() &lt; 2 {
+            return;
+        }
+        // find min and max elements
+        // so we can construct the boundaries of the counting array
+        // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+        let (min, max) = min_max(self);
+
+        // construct a counting array with length = Max - Min + 1
+        let len: usize = max.dist_from(min);
+        // initialise it with zero counts
+        let mut count = vec![0usize; len + 1];
+        // and finally measure counts per item
+        self.iter()
+            .for_each(|x| {
+                // construct index offset based on Min value, such as, Min is at [0] position
+                let idx: usize = x.dist_from(min);
+                count[idx] += 1;
+            });
+
+        // play back onto the input slice the counts collected with Sum of all counts == slice.len()
+        let iter = &amp;mut self.iter_mut();
+        count.into_iter()
+            .enumerate()
+            .filter(|(_, x)| *x &gt; 0)
+            .for_each(|(i, x)| {
+                // place value at `x` positions
+                iter.take(x)
+                    // translate index -&gt; value
+                    // given value = Min + index
+                    .for_each(|n| { *n = min.add_index(i ) });
+            });
+    }
+}
+/// Distance calculation between two types that are either both signed or unsigned
+/// Returns the distance as unsigned type
+pub trait Distance&lt;T&gt; {
+    fn dist_from(&amp;self, min: T) -&gt; usize;
+    fn add_index(&amp;self, idx: usize) -&gt; T;
+}
+
+/// Macro implementation of Distance trait for all signed types
+macro_rules! impl_dist_signed {
+    ( $($x:ty),*) =&gt; {
+        $( impl Distance&lt;$x&gt; for $x {
+            #[inline]
+            fn dist_from(&amp;self, min: $x) -&gt; usize {
+                if *self &gt; min {
+                    (*self as usize).wrapping_sub(min as usize)
+                } else {
+                    (min as usize).wrapping_sub(*self as usize)
+                }
+            }
+            #[inline]
+            fn add_index(&amp;self, idx: usize) -&gt; $x { self.wrapping_add(idx as $x) }
+        } )*
+    }
+}
+impl_dist_signed!(i8,i16,i32,isize,u8,u16,u32,usize);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="sort_quicksort.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="selection.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="sort_quicksort.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="selection.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

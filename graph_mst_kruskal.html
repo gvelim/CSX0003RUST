@@ -1,0 +1,415 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Kruskal&#x27;s Algorithm - Rusting along</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Topics</li><li class="chapter-item expanded "><a href="merge.html"><strong aria-hidden="true">1.</strong> Merging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="merge_in_place.html"><strong aria-hidden="true">1.1.</strong> In-place merge with O(n+m) swaps</a></li><li class="chapter-item expanded "><a href="merge_sequencial_access.html"><strong aria-hidden="true">1.2.</strong> Sequential access across multiple slices</a></li><li class="chapter-item expanded "><a href="merge_lazy.html"><strong aria-hidden="true">1.3.</strong> Lazy merge and deferred slice mutability</a></li><li class="chapter-item expanded "><a href="merge_denormalise.html"><strong aria-hidden="true">1.4.</strong> Pattern matching: De-normalising control flow</a></li></ol></li><li class="chapter-item expanded "><a href="sort.html"><strong aria-hidden="true">2.</strong> Sorting</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sort_mergesort.html"><strong aria-hidden="true">2.1.</strong> Merge sort</a></li><li class="chapter-item expanded "><a href="sort_quicksort.html"><strong aria-hidden="true">2.2.</strong> Quick sort</a></li><li class="chapter-item expanded "><a href="sort_count.html"><strong aria-hidden="true">2.3.</strong> Count sort</a></li></ol></li><li class="chapter-item expanded "><a href="selection.html"><strong aria-hidden="true">3.</strong> Selecting</a></li><li class="chapter-item expanded "><a href="graph.html"><strong aria-hidden="true">4.</strong> Graphs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_min_cut.html"><strong aria-hidden="true">4.1.</strong> Krager's Minimum Cut</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_contraction.html"><strong aria-hidden="true">4.1.1.</strong> Contraction Algorithm</a></li></ol></li><li class="chapter-item expanded "><a href="graph_search.html"><strong aria-hidden="true">4.2.</strong> Graph Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_search_process_state.html"><strong aria-hidden="true">4.2.1.</strong> Node Processing State</a></li><li class="chapter-item expanded "><a href="graph_path_bfs_abstract.html"><strong aria-hidden="true">4.2.2.</strong> Abstracting Breadth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_shortest_distance.html"><strong aria-hidden="true">4.2.2.1.</strong> Shortest Distance</a></li><li class="chapter-item expanded "><a href="graph_path_minimum_cost.html"><strong aria-hidden="true">4.2.2.2.</strong> Dijktra's Min Path Cost</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.2.3.</strong> Bellman–Ford algorithm</div></li></ol></li><li class="chapter-item expanded "><a href="graph_path_dfs_abstract.html"><strong aria-hidden="true">4.2.3.</strong> Abstracting Depth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_topological_sort.html"><strong aria-hidden="true">4.2.3.1.</strong> Topological Sort</a></li><li class="chapter-item expanded "><a href="graph_connect.html"><strong aria-hidden="true">4.2.3.2.</strong> Strong Connectivity</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_connect_scc.html"><strong aria-hidden="true">4.2.3.2.1.</strong> Kosaraju’s algorithm</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><a href="graph_mst.html"><strong aria-hidden="true">4.3.</strong> Minimum Spanning Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_mst_kruskal.html" class="active"><strong aria-hidden="true">4.3.1.</strong> Kruskal's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_prim.html"><strong aria-hidden="true">4.3.2.</strong> Prim's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_cluster.html"><strong aria-hidden="true">4.3.3.</strong> Single-linkage clustering</a></li></ol></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rusting along</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="kruskals-mst-algorithm"><a class="header" href="#kruskals-mst-algorithm">Kruskal's MST Algorithm</a></h1>
+<p>In Kruskal’s algorithm, we start with the spanning tree containing <strong>only</strong> the nodes of the graph and with no any edges connecting the nodes. </p>
+<p>Then the algorithm goes through, adding the edges one at a time, ordered by their weights, and as long as the edge is not creating a cycle.</p>
+<h2 id="approach"><a class="header" href="#approach">Approach</a></h2>
+<p>Let's look at the following input <code>graph</code> as an example.</p>
+<p><img src="img/mst_graph.png" alt="" /></p>
+<p>The algorithm maintains the components of the tree. Initially, each node of the graph belongs to a separate component. As shown below there are six components since none of the nodes are connected.</p>
+<p><img src="img/mst_step1.png" alt="Step 1 - Number of components equal to number of nodes" /></p>
+<p>We always start with the lowest weighted edge by adding it to the tree, in this case <code>(5,6)</code>. As result, two components are now merged into one as in the below example where nodes <code>5</code> and <code>6</code> form a new component</p>
+<p><img src="img/mst_step2.png" alt="Step 2 - merging up components one edge at a time" /></p>
+<p>Next in order are edges <code>(6,3),(1,2),...</code> and so on, until finally we have added all edges in the graph, one by one and with all nodes now merged into a single component, hence the minimum spanning tree has been found</p>
+<p><img src="img/mst_step3.png" alt="Step 3 - MST as a single component" /></p>
+<p>Overall the approach can be summarised as following</p>
+<ol>
+<li><strong>Phase 1</strong>: Sort Edges by minimum cost first</li>
+<li><strong>Phase 2</strong>: Build Minimum Spanning Tree
+<ol>
+<li>Create an empty graph <code>G</code></li>
+<li>Initiate the graph components, that is, one per node</li>
+<li>While there are <code>&gt; 1</code> graph components remaining
+<ol>
+<li>Retrieve edge with the lowest weight <code>(src,dst)</code></li>
+<li>Find component for <code>src</code>, let's say it is <code>src'</code></li>
+<li>Find component for <code>dst</code>, let's say it is <code>dst'</code></li>
+<li>if <code>src'</code> is different to <code>dst'</code> then
+<ol>
+<li>Merge <code>dst'</code> into the <code>src'</code> component </li>
+<li>Add edge <code>(src,dst)</code> into the graph <code>G</code></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="super-nodes-as-components"><a class="header" href="#super-nodes-as-components">Super Nodes as Components</a></h3>
+<p>The <code>SuperNodes</code> struct used to solve the <strong>minimum cut</strong> algorithm is more or less the right tool in this instance given that the definition of a <code>super node</code> is synonymous to a graph component.</p>
+<p>The <code>SuperNodes</code> structure, provides us with the</p>
+<ul>
+<li>merging of two super node components into a super node
+<ul>
+<li>finding of the super node component that a given node belongs to</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug)]
+/// Helper Structure that holds the `set` of merged nodes under a super node `key`
+/// The HashMap therefore is used as [Key:Super Node, Value: Set of Merged Nodes]
+/// A super node's set is a `Graph Component` in itself, that is, you can visit a Node from any other Node within the set
+pub struct SuperNodes {
+    super_nodes:HashMap&lt;Node,HashSet&lt;Node&gt;&gt;
+}
+impl Clone for SuperNodes {
+    fn clone(&amp;self) -&gt; Self {
+        SuperNodes { super_nodes: self.super_nodes.clone() }
+    }
+}
+impl SuperNodes {
+    /// Total size of `Graph Components`, that is, super nodes
+    pub fn len(&amp;self) -&gt; usize { self.super_nodes.len() }
+    /// Given an Graph node, the function returns the Super Node that it belongs
+    /// for example given the super node [Key:1, Set:{1,2,3,4,5}]
+    /// querying for node `3` will return `1` as its super node
+    pub fn find_supernode(&amp;self, node: &amp;Node) -&gt; Node {
+        // is this a super node ?
+        if self.contains_supernode(node) {
+            // if yes, just return it
+            *node
+        } else {
+            // otherwise find its super node and return it
+            // get an Iterator for searching each super node
+            let mut sets = self.super_nodes.iter();
+            loop {
+                // If next returns [Super Node, Node Set] proceed otherwise exist with None
+                let Some((&amp;src, set)) = sets.next() else { break None };
+                // Is the queried Node in the set ?
+                if set.contains(node) {
+                    // yes, return the super node
+                    break Some(src)
+                }
+            }.unwrap_or_else(|| panic!(&quot;find_supernode(): Unexpected error, cannot find super node for {node}&quot;))
+        }
+    }
+    /// Returns the graph component, aka `set` of nodes, for a given super node `key`,
+    /// otherwise `None` if it doesn't exist
+    pub fn contains_supernode(&amp;self, node: &amp;Node) -&gt; bool {
+        self.super_nodes.contains_key(node)
+    }
+    /// The function takes two super nodes and merges them into one
+    /// The `dst` super node is merged onto the `src` super node
+    pub fn merge_nodes(&amp;mut self, src:Node, dst:Node) -&gt; &amp;mut HashSet&lt;Node&gt; {
+        // remove both nodes that form the random edge and
+        // hold onto the incoming/outgoing edges
+        let super_src = self.super_nodes.remove(&amp;src).unwrap();
+        let super_dst = self.super_nodes.remove(&amp;dst).unwrap();
+
+        // combine the incoming/outgoing edges for attaching onto the new super-node
+        let super_node = super_src.union(&amp;super_dst).copied().collect::&lt;HashSet&lt;Node&gt;&gt;();
+        // re-insert the src node as the new super-node and attach the resulting union
+        self.super_nodes.entry(src).or_insert(super_node)
+    }
+    /// Provides an iterator that yields the Node Set of each super node
+    pub fn iter(&amp;self) -&gt; SuperNodeIter {
+        SuperNodeIter { iter: self.super_nodes.iter() }
+    }
+}
+/// Ability for SuperNode struct to use indexing for search
+/// e.g super_node[3] will return the HashSet corresponding to key `3`
+impl Index&lt;Node&gt; for SuperNodes {
+    type Output = HashSet&lt;Node&gt;;
+    fn index(&amp;self, index: Node) -&gt; &amp;Self::Output {
+        &amp;self.super_nodes[&amp;index]
+    }
+}
+
+/// HashNode Iterator structure
+pub struct SuperNodeIter&lt;'a&gt; {
+    iter: hash_map::Iter&lt;'a, Node, HashSet&lt;Node&gt;&gt;
+}
+
+/// HashNode Iterator implementation yields a HashSet at a time
+impl&lt;'a&gt; Iterator for SuperNodeIter&lt;'a&gt; {
+    type Item = &amp;'a HashSet&lt;Node&gt;;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if let Some(super_node) = self.iter.next() {
+            Some(super_node.1)
+        } else { None }
+    }
+}
+</code></pre>
+<h3 id="binaryheap-for-edge-ordering"><a class="header" href="#binaryheap-for-edge-ordering">BinaryHeap for edge Ordering</a></h3>
+<p>To provide an ordered edge list we use the <code>BinaryHeap</code> collection that uses the edge's <code>weight</code> as the prioritisation key. The following <code>Step</code> implementation provide us with the desirable result.</p>
+<pre><code class="language-rust no_run noplayground">/// BinaryHeap Step structure containing `Edge(src,(dst,cost))` tuple
+/// The `cost` is only used as the prioritisation key for the `Heap`
+/// Implementing MinHeap through reverse comparison of Other against Self
+impl PartialOrd for Edge {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other.1 {
+            N(_) =&gt; other.partial_cmp(self),
+            NC(_, cost) =&gt; {
+                let Edge(_,NC(_,sc)) = self else { panic!(&quot;&quot;) };
+                cost.partial_cmp(sc)
+            }
+        }
+    }
+}
+impl Ord for Edge {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+</code></pre>
+<p>Additionally, we have the following helper <code>Graph</code> functions that provide us with </p>
+<ul>
+<li>the ordered edge list</li>
+<li>the sum of weights for all edges in the graph</li>
+<li>adding an edge into the graph</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">    /// Sums up the cost of all weighted edges
+    pub fn sum_edges(&amp;self) -&gt; Cost {
+        self.edges
+            .values()
+            .fold(0, |cost, edges| {
+                cost + edges.iter()
+                    .map(|&amp;dst| {
+                        let NC(_,c) = dst else { panic!(&quot;get_mst_cost(): Edge destination node is not of type NodeType::NC&quot;) };
+                        c
+                    })
+                    .reduce(|acc,c| acc + c )
+                    .unwrap()
+            }) &gt;&gt; 1 // in an undirected graph we count twice the edge hence dividing by 2
+    }
+    /// Adds a new Edge to the graph
+    pub fn push_edge(&amp;mut self, edge: Edge) {
+        let Edge(src, dst) = edge;
+        self.nodes.insert(src);
+        self.edges.entry(src)
+            .or_default()
+            .insert(dst);
+        let NC(dst,cost) = dst else { panic!(&quot;&quot;) };
+        self.nodes.insert(dst);
+        self.edges.entry(dst)
+            .or_default()
+            .insert(NC(src,cost));
+    }
+    /// Returns Graph's edges in the form of a MinHeap, that is,
+    /// the lowest cost edge at the top of the heap
+    pub fn get_edges_by_cost(&amp;self) -&gt; BinaryHeap&lt;Edge&gt; {
+        self.edges.iter()
+            .fold(BinaryHeap::new(), |mut heap, (&amp;src, edges)| {
+                    heap.extend(
+                        edges.iter().map(|&amp;dst| Edge(src,dst))
+                    );
+                    heap
+                })
+
+    }
+</code></pre>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>As a result, the following implementation consolidates all of the above into the Kruskal's algorithm implementation.</p>
+<pre><code class="language-rust no_run noplayground">    /// MST using Kruskal's algorithm implementation
+    pub fn mst_kruska(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        // Get the ordered heap by lowest cost Edge on top
+        let mut heap = self.get_edges_by_cost();
+        // Keeps the graph's components, that is, a super node is a graph component's lead node
+        // The initial state is for each node to be a lead component node with a component of its own
+        let mut snodes = self.get_super_nodes();
+        // the output graph that will hold *only* the edges
+        // that form the minimum spanning tree
+        let mut graph = Graph::new();
+
+        // As long as more than 2 components
+        while snodes.len() &gt; 1 {
+            // get the edge with the lowest cost
+            // otherwise if we've run out of edges while there are 2 or more components
+            // then the graph IS NOT CONNECTED
+            let Some(edge) = heap.pop() else { return None };
+            let Edge(src, NC(dst, _)) = edge else { panic!(&quot;mst_kruska() - Cannot find NodeType::NC&quot;) };
+            // print!(&quot;({src:2}-&gt;{dst:2}):{cost:6} - &quot;);
+
+            // if src is not a super node then get its super node
+            let src = snodes.find_supernode(&amp;src);
+            // if dst is not a super node then get its super node
+            let dst = snodes.find_supernode(&amp;dst);
+
+            // if src component differs from dst component then merge the two and save the edge connecting them
+            if src != dst {
+                snodes.merge_nodes(src, dst);
+                graph.push_edge(edge);
+                // println!(&quot;Store&quot;);
+            } else {
+                // println!(&quot;Skip&quot;);
+            }
+        }
+        Some(graph)
+    }
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="graph_mst.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="graph_mst_prim.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="graph_mst.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="graph_mst_prim.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

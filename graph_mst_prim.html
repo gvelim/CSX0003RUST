@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Prim&#x27;s Algorithm - Rusting along</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Topics</li><li class="chapter-item expanded "><a href="merge.html"><strong aria-hidden="true">1.</strong> Merging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="merge_in_place.html"><strong aria-hidden="true">1.1.</strong> In-place merge with O(n+m) swaps</a></li><li class="chapter-item expanded "><a href="merge_sequencial_access.html"><strong aria-hidden="true">1.2.</strong> Sequential access across multiple slices</a></li><li class="chapter-item expanded "><a href="merge_lazy.html"><strong aria-hidden="true">1.3.</strong> Lazy merge and deferred slice mutability</a></li><li class="chapter-item expanded "><a href="merge_denormalise.html"><strong aria-hidden="true">1.4.</strong> Pattern matching: De-normalising control flow</a></li></ol></li><li class="chapter-item expanded "><a href="sort.html"><strong aria-hidden="true">2.</strong> Sorting</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sort_mergesort.html"><strong aria-hidden="true">2.1.</strong> Merge sort</a></li><li class="chapter-item expanded "><a href="sort_quicksort.html"><strong aria-hidden="true">2.2.</strong> Quick sort</a></li><li class="chapter-item expanded "><a href="sort_count.html"><strong aria-hidden="true">2.3.</strong> Count sort</a></li></ol></li><li class="chapter-item expanded "><a href="selection.html"><strong aria-hidden="true">3.</strong> Selecting</a></li><li class="chapter-item expanded "><a href="graph.html"><strong aria-hidden="true">4.</strong> Graphs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_min_cut.html"><strong aria-hidden="true">4.1.</strong> Krager's Minimum Cut</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_contraction.html"><strong aria-hidden="true">4.1.1.</strong> Contraction Algorithm</a></li></ol></li><li class="chapter-item expanded "><a href="graph_search.html"><strong aria-hidden="true">4.2.</strong> Graph Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_search_process_state.html"><strong aria-hidden="true">4.2.1.</strong> Node Processing State</a></li><li class="chapter-item expanded "><a href="graph_path_bfs_abstract.html"><strong aria-hidden="true">4.2.2.</strong> Abstracting Breadth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_shortest_distance.html"><strong aria-hidden="true">4.2.2.1.</strong> Shortest Distance</a></li><li class="chapter-item expanded "><a href="graph_path_minimum_cost.html"><strong aria-hidden="true">4.2.2.2.</strong> Dijktra's Min Path Cost</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.2.3.</strong> Bellman–Ford algorithm</div></li></ol></li><li class="chapter-item expanded "><a href="graph_path_dfs_abstract.html"><strong aria-hidden="true">4.2.3.</strong> Abstracting Depth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_topological_sort.html"><strong aria-hidden="true">4.2.3.1.</strong> Topological Sort</a></li><li class="chapter-item expanded "><a href="graph_connect.html"><strong aria-hidden="true">4.2.3.2.</strong> Strong Connectivity</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_connect_scc.html"><strong aria-hidden="true">4.2.3.2.1.</strong> Kosaraju’s algorithm</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><a href="graph_mst.html"><strong aria-hidden="true">4.3.</strong> Minimum Spanning Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_mst_kruskal.html"><strong aria-hidden="true">4.3.1.</strong> Kruskal's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_prim.html" class="active"><strong aria-hidden="true">4.3.2.</strong> Prim's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_cluster.html"><strong aria-hidden="true">4.3.3.</strong> Single-linkage clustering</a></li></ol></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rusting along</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="prims-mst-algorithm"><a class="header" href="#prims-mst-algorithm">Prim's MST Algorithm</a></h1>
+<p>Prim’s algorithm resembles Dijkstra’s algorithm. The difference is that Dijkstra’s algorithm always selects an edge whose distance from the starting node is minimum, but Prim’s algorithm simply selects the minimum weight edge that adds a new node to the tree</p>
+<h2 id="approach"><a class="header" href="#approach">Approach</a></h2>
+<p>The algorithm first adds an arbitrary node to the tree. After this, the algorithm always chooses a minimum-weight edge that adds a new node to the tree. Finally, all nodes have been added to the tree and a minimum spanning tree has been found</p>
+<p>To illustrate how the algorithm works let's consider the following <code>input</code> graph</p>
+<p><img src="img/mst_graph.png" alt="" /></p>
+<p>When we start, the minimum spanning tree has no edges</p>
+<p><img src="img/mst_prim_s1.png" alt="" /></p>
+<p>We then select an arbitrary node, in this case <code>1</code>, and from edges <code>(1,2),(1,5)</code> we choose the edge <code>(1,2)</code> that has the lowest weight, and we then add it into the output tree. At this point in time, nodes <code>[1,2]</code> are spawned into the evolving tree.</p>
+<p><img src="img/mst_prim_s2.png" alt="" /></p>
+<p>With edge <code>(1,2)</code> added to the tree, we're looking to all edges that cross between the tree and the non-tree nodes. In this case we have edges <code>[(1,5),(2,5),(2,3)]</code> with <code>(2,3)</code> being the one that has the lowest weight from all known crossing edges.</p>
+<p>At this point the tree contains nodes <code>[1,2,3]</code> with nodes remaining outside the tree as <code>[5,6,4]</code></p>
+<p><img src="img/mst_prim_s3.png" alt="" /></p>
+<p>We repeat the process, always expanding one node at a time and adding to the tree the lowest weight edge each time and until there are no more nodes remaining outside the tree.</p>
+<p><img src="img/mst_prim_s4.png" alt="" /></p>
+<h2 id="min-ordered-edge-binaryheap"><a class="header" href="#min-ordered-edge-binaryheap">Min-Ordered edge BinaryHeap</a></h2>
+<p>To provide a minimum-ordered edge list, we make use of the BinaryHeap collection with the edge's weight as the prioritisation key. The following Step implementation provide us with the desirable result</p>
+<pre><code class="language-rust no_run noplayground">/// BinaryHeap Step structure containing `Edge(src,(dst,cost))` tuple
+/// The `cost` is only used as the prioritisation key for the `Heap`
+/// Implementing MinHeap through reverse comparison of Other against Self
+impl PartialOrd for Edge {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other.1 {
+            N(_) =&gt; other.partial_cmp(self),
+            NC(_, cost) =&gt; {
+                let Edge(_,NC(_,sc)) = self else { panic!(&quot;&quot;) };
+                cost.partial_cmp(sc)
+            }
+        }
+    }
+}
+impl Ord for Edge {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+</code></pre>
+<h2 id="implementation"><a class="header" href="#implementation">Implementation</a></h2>
+<p>Few key points related to the below implementation</p>
+<ol>
+<li>We hold the evolving tree in a <code>Graph</code> structure with its <code>nodes</code> <code>HashSet</code> representing the tree's Component for queries</li>
+<li>When we spawn a new node, we don't search for the minimum weight edge, rather we store all crossing edges in the <code>heap</code>;</li>
+<li>Edges added in the <code>heap</code> might go <strong>stale</strong>, that is, future iterations cause edges nodes to be pulled inside the <code>tree</code> component, hence when extracting the min-weight edge from the <code>heap</code> we need to ensure the edge isn't stale.</li>
+</ol>
+<p>As a result, the following implementation consolidates all of the above into the Prim's algorithm implementation.</p>
+<pre><code class="language-rust no_run noplayground">    /// MST using Prim's algorithm implementation
+    pub fn mst_prim(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        // Create an empty Graph/Tree to add one edge at a time
+        // we'll be using g.node as the Tree's Component invariant,
+        // that is, the Component that contains all vertices absorbed by the Tree
+        let mut tree = Graph::new();
+
+        // Min-Ordered heap with all edges found crossing the evolving tree
+        let mut heap = BinaryHeap::&lt;Edge&gt;::new();
+
+        // seed with first vertex
+        let &amp;start = self.nodes.iter().next().unwrap();
+        heap.push(Edge(start, NC(start, 0)));
+
+        // spawn a node at a time until we have spawned all graph nodes
+        // while tree component isn't equal input component
+        while tree.nodes != self.nodes {
+            // spawn a new edge node from the queue with the smallest edge weight
+            let src = match heap.pop() {
+                // if the queue is empty, but still have nodes to spawn
+                // then either (a) the graph is not connected or (b) is a directed graph
+                None =&gt; return None,
+                // spawn the destination node from edge
+                Some(Edge(_, NC(dst, _))) =&gt; dst,
+                Some(Edge(_, N(_))) =&gt; panic!(&quot;mst_prim(): Extracted edge using wrong NodeType::N&quot;),
+            };
+
+            // Add all edges that are crossing the tree Component given the spawned node
+            // and have not yet been spawned, that is, they are NOT already part of tree component
+            heap.extend(self.edges.get(&amp;src)
+                .unwrap_or_else(|| panic!(&quot;mst_prim(): Node ({src}) has not edges; Graph is not undirected or connected&quot;))
+                .iter()
+                // remove any edge node already in the mst, part of Component X
+                .filter(|&amp;&amp;dst| !tree.nodes.contains(&amp;dst.into()))
+                // push edges crossing Component X, that is,
+                // src IN Component X, dst NOT IN Component X
+                .map(|&amp;dst| Edge(src, dst))
+            );
+
+            // find the min-weigh edge that is crossing the current tree component
+            // don't remove from heap as we need to spawn dst node for the next iteration
+            while let Some(&amp;edge) = heap.peek() {
+                let Edge(src, dst) = edge;
+                // Is this edge a stale or a valid one, that is, crosses the tree component
+                if HashSet::from([src, dst.into()]).is_subset(&amp;tree.nodes) {
+                    // Some times heap holds older edges that, after few iterations they get stale,
+                    // that is, both edges nodes have been moved into the tree component
+                    heap.pop();
+                } else {
+                    // either src or dst edge nodes are outside the tree component
+                    // hence add the edge into the tree
+                    tree.push_edge(edge);
+                    // exit the while loop since we've found the edge with the min weight
+                    break
+                }
+            }
+        }
+        Some(tree)
+    }
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="graph_mst_kruskal.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="graph_mst_cluster.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="graph_mst_kruskal.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="graph_mst_cluster.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

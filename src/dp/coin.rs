@@ -1,6 +1,6 @@
 use std::cmp::min;
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 #[test]
 fn test_sum_of_coins() {
@@ -56,7 +56,7 @@ impl Coins {
             if sum < c { continue }
             best = min(best, self.recursive(sum-c, coins ) + 1 )
         }
-        println!("={:?}",(sum,best));
+        // println!("={:?}",(sum,best));
         self.map.insert(sum,best);
         best
     }

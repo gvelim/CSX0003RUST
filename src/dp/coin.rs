@@ -1,6 +1,6 @@
 use std::cmp::min;
 use std::collections::HashMap;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 #[test]
 fn test_sum_of_coins() {
@@ -31,7 +31,6 @@ impl Default for Coins {
 impl Coins {
     fn iterative(sum: usize, coins:&[usize]) -> usize {
         let mut dp = vec![0;sum+1];
-        dp[0] = 0;
         (1..dp.len())
             .for_each(|sum| {
                 dp[sum] = coins
@@ -56,7 +55,7 @@ impl Coins {
             if sum < c { continue }
             best = min(best, self.recursive(sum-c, coins ) + 1 )
         }
-        println!("={:?}",(sum,best));
+        // println!("={:?}",(sum,best));
         self.map.insert(sum,best);
         best
     }

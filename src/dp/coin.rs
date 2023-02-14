@@ -22,13 +22,13 @@ fn test_sum_of_coins() {
 }
 
 struct Coins {
-    map: HashMap<usize,usize>,
+    map: Option<HashMap<usize,usize>>,
     dp: Option<Vec<usize>>,
     coins: Option<Vec<usize>>
 }
 impl Default for Coins {
     fn default() -> Self {
-        Coins { map: HashMap::new(), dp: None, coins: None }
+        Coins { map: Some(HashMap::new()), dp: None, coins: None }
     }
 }
 impl Coins {
@@ -45,7 +45,7 @@ impl Coins {
                     .unwrap();
             });
         Coins {
-            map: HashMap::new(),
+            map: None,
             dp: Some(dp),
             coins: Some(cs)
         }
@@ -69,17 +69,21 @@ impl Coins {
     fn recursive(&mut self, sum: usize, coins:&[usize]) -> usize {
         if sum == 0 {
             return 0;
+        } else {
+            let Some(map) = &self.map else { unimplemented!() };
+            if let Some(&best) = map.get(&sum) {
+                return best;
+            }
         }
-        if let Some(&best) = self.map.get(&sum) {
-            return best;
-        }
+
         let mut best = usize::MAX;
         for &c in coins {
             if sum < c { continue }
             best = min(best, self.recursive(sum-c, coins ) + 1 )
         }
         // println!("={:?}",(sum,best));
-        self.map.insert(sum,best);
+        let Some(map) = &mut self.map else { unimplemented!() };
+        map.insert(sum,best);
         best
     }
 }

@@ -1,4 +1,3 @@
-use std::cmp::min;
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -22,13 +21,13 @@ fn test_sum_of_coins() {
 }
 
 struct Coins {
-    map: HashMap<usize,usize>,
+    map: Option<HashMap<usize,usize>>,
     dp: Option<Vec<usize>>,
     coins: Option<Vec<usize>>
 }
 impl Default for Coins {
     fn default() -> Self {
-        Coins { map: HashMap::new(), dp: None, coins: None }
+        Coins { map: Some(HashMap::new()), dp: None, coins: None }
     }
 }
 impl Coins {
@@ -45,7 +44,7 @@ impl Coins {
                     .unwrap();
             });
         Coins {
-            map: HashMap::new(),
+            map: None,
             dp: Some(dp),
             coins: Some(cs)
         }
@@ -67,19 +66,25 @@ impl Coins {
         output
     }
     fn recursive(&mut self, sum: usize, coins:&[usize]) -> usize {
-        if sum == 0 {
-            return 0;
+        if sum == 0 { return 0 }
+        else {
+            if let Some(&best) =
+                self.map
+                    .as_ref()
+                    .expect("recursive(): HashMap not initialised. Use with Coins::default()")
+                    .get(&sum) { return best }
         }
-        if let Some(&best) = self.map.get(&sum) {
-            return best;
-        }
-        let mut best = usize::MAX;
-        for &c in coins {
-            if sum < c { continue }
-            best = min(best, self.recursive(sum-c, coins ) + 1 )
-        }
-        // println!("={:?}",(sum,best));
-        self.map.insert(sum,best);
+
+        let best = coins.iter()
+            .filter(|&c| sum >= *c )
+            .map(|&c| self.recursive(sum-c, coins ) + 1 )
+            .min()
+            .unwrap();
+
+       self.map
+            .as_mut()
+            .expect("recursive(): HashMap not initialised. Use with Coins::default()")
+            .insert(sum,best);
         best
     }
 }

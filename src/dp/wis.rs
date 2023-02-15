@@ -1,24 +1,6 @@
 use std::cmp::max;
 use std::str::FromStr;
 
-fn parse_graph(filename: &str) -> Vec<usize> {
-    let input = std::fs::read_to_string(filename).unwrap_or_else(|e| panic!("{e}"));
-
-    let mut lines = input.lines();
-    let mut n = lines.next().and_then(|num| {
-        Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
-    }).unwrap();
-    let mut g = Vec::with_capacity(n);
-    while n > 0 {
-        let val = lines.next().and_then(|num| {
-            Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
-        }).unwrap();
-        g.push(val);
-        n -= 1;
-    }
-    g
-}
-
 struct WIS<'a> {
     set: &'a [usize],
     dp: Vec<usize>
@@ -82,6 +64,23 @@ impl WIS<'_> {
             )
             .collect::<String>()
     }
+    fn parse_graph(filename: &str) -> Vec<usize> {
+        let input = std::fs::read_to_string(filename).unwrap_or_else(|e| panic!("{e}"));
+
+        let mut lines = input.lines();
+        let mut n = lines.next().and_then(|num| {
+            Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
+        }).unwrap();
+        let mut g = Vec::with_capacity(n);
+        while n > 0 {
+            let val = lines.next().and_then(|num| {
+                Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
+            }).unwrap();
+            g.push(val);
+            n -= 1;
+        }
+        g
+    }
 }
 
 #[cfg(test)]
@@ -93,7 +92,7 @@ mod test {
         let data = [
             (vec![1,4,5,4],8),
             (vec![10, 280, 618, 762, 908, 409, 34, 59, 277, 246, 779],2626),
-            (parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
+            (WIS::parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
         ];
         data.into_iter()
             .all(|(set,res)| {
@@ -109,8 +108,8 @@ mod test {
             (vec![1,4,5,4],8)
             ,(vec![10, 280, 618, 762, 908, 409, 34, 59, 277, 246, 779],2626)
             ,(vec![10, 460, 250, 730, 63, 379, 638, 122, 435, 705, 84],2533)
-            ,(parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
-            ,(parse_graph("src/dp/txt/input_random_10_40.txt"), 19639)
+            ,(WIS::parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
+            ,(WIS::parse_graph("src/dp/txt/input_random_10_40.txt"), 19639)
             // ,(parse_graph("src/dp/txt/input_random_30_1000.txt"), 288082919)
         ];
 
@@ -124,6 +123,6 @@ mod test {
 
     #[test]
     fn test_parse() {
-        println!("{:?}", parse_graph("src/dp/txt/input_random_1_10.txt"));
+        println!("{:?}", WIS::parse_graph("src/dp/txt/input_random_1_10.txt"));
     }
 }

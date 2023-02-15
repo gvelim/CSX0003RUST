@@ -25,6 +25,20 @@ struct WIS<'a> {
 }
 
 impl WIS<'_> {
+    fn recursive(set: &[usize]) -> usize {
+        println!("->: {:?}",set);
+        if set.len() == 0 {
+            println!("<-: -0 : {:?}",set);
+            return 0
+        }
+        let cur = set.len()-1;
+        let best = max(
+            if cur >=2 { WIS::recursive(&set[..cur - 2]) + set[cur - 1] } else { set[cur] },
+            if cur >=1 { WIS::recursive(&set[..cur - 1]) + set[cur] } else { set[cur] }
+        );
+        println!("<-: {best} : {:?}",(cur,&set));
+        best
+    }
     fn new(set: &[usize]) -> WIS {
         let mut dp = vec![0; set.len()+1];
         dp[0] = 0;
@@ -32,7 +46,7 @@ impl WIS<'_> {
 
         (2..dp.len())
             .all(|i| {
-                dp[i] = max(dp[i - 1], dp[i - 2] + set[i - 1]);
+                dp[i] = max(dp[i - 1], dp[i - 2] + set[i-1]);
                 println!("{:?}", (i, set[i - 1], &set, &dp));
                 true
             });
@@ -73,6 +87,21 @@ impl WIS<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_recursive() {
+        let data = [
+            (vec![1,4,5,4],8),
+            (vec![10, 280, 618, 762, 908, 409, 34, 59, 277, 246, 779],2626),
+            (parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
+        ];
+        data.into_iter()
+            .all(|(set,res)| {
+                println!("======================================");
+                assert_eq!(WIS::recursive(&set), res);
+                true
+            });
+    }
 
     #[test]
     fn test_wis() {

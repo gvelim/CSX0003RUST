@@ -1,4 +1,3 @@
-use std::cmp::min;
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -67,23 +66,25 @@ impl Coins {
         output
     }
     fn recursive(&mut self, sum: usize, coins:&[usize]) -> usize {
-        if sum == 0 {
-            return 0;
-        } else {
-            let Some(map) = &self.map else { unimplemented!() };
-            if let Some(&best) = map.get(&sum) {
-                return best;
-            }
+        if sum == 0 { return 0 }
+        else {
+            if let Some(&best) =
+                self.map
+                    .as_ref()
+                    .expect("recursive(): HashMap not initialised. Use with Coins::default()")
+                    .get(&sum) { return best }
         }
 
-        let mut best = usize::MAX;
-        for &c in coins {
-            if sum < c { continue }
-            best = min(best, self.recursive(sum-c, coins ) + 1 )
-        }
-        // println!("={:?}",(sum,best));
-        let Some(map) = &mut self.map else { unimplemented!() };
-        map.insert(sum,best);
+        let best = coins.iter()
+            .filter(|&c| sum >= *c )
+            .map(|&c| self.recursive(sum-c, coins ) + 1 )
+            .min()
+            .unwrap();
+
+       self.map
+            .as_mut()
+            .expect("recursive(): HashMap not initialised. Use with Coins::default()")
+            .insert(sum,best);
         best
     }
 }

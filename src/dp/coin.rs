@@ -2,22 +2,34 @@ use std::collections::HashMap;
 use std::time::SystemTime;
 
 #[test]
-fn test_sum_of_coins() {
-    let set = &[1,2,3,5];
-    let sum = 19;
-    let mut coins = Coins::default();
+fn test_coins() {
+    let data = [
+        (vec![1,2,3,5],19,5)
+        ,(vec![1,2,3,5],7,2)
+        ,(vec![1,2,3],11,4)
+        ,(vec![1,3,5],16,4)
+        ,(vec![1,2,3,5,10,50],139,8)
+    ];
 
-    let mut start = SystemTime::now();
-    println!("Recursive: {:?}, {:?}",
-             coins.recursive(sum, set),
-             SystemTime::now().duration_since(start)
-    );
-    start = SystemTime::now();
-    let coins = Coins::iterative(sum, set);
-    println!("Iterative: {sum} = {:?}, {:?}",
-             (coins.get_coins_num(),coins.get_coins()),
-             SystemTime::now().duration_since(start)
-    );
+    for (set, sum, res) in data {
+
+        let mut coins = Coins::default();
+        let mut start = SystemTime::now();
+        let n = coins.recursive(sum, &set);
+        println!("Recursive: {:?}, {:?}", n,
+                 SystemTime::now().duration_since(start)
+        );
+        assert_eq!(n,res);
+
+        start = SystemTime::now();
+        let coins = Coins::iterative(sum, &set);
+        println!("Iterative: {sum} = {:?}, {:?}",
+                 (coins.get_coins_num(),coins.get_coins()),
+                 SystemTime::now().duration_since(start)
+        );
+        assert_eq!(coins.get_coins_num(),res);
+    }
+
 }
 
 struct Coins {

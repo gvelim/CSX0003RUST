@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::time::SystemTime;
 
 #[test]
@@ -29,20 +29,53 @@ fn test_coins() {
         );
         assert_eq!(coins.get_coins_num(),res);
     }
+}
 
+#[test]
+fn test_combinations() {
+    let (set, sum) = (vec![1,3,5],8);
+
+    let mut coins = Coins::default();
+    coins.combinations(sum,&set);
+
+    println!("Combinations: {}", coins.combos.as_ref().unwrap().len());
+    coins.combos.as_ref().unwrap()
+        .iter()
+        .enumerate()
+        .for_each(|(i,combo)| println!("{:2}. {sum} = {:?}",i+1,combo) );
 }
 
 struct Coins {
     map: Option<HashMap<usize,usize>>,
     dp: Option<Vec<usize>>,
-    coins: Option<Vec<usize>>
+    coins: Option<Vec<usize>>,
+    combos: Option<HashSet<Vec<usize>>>
 }
 impl Default for Coins {
     fn default() -> Self {
-        Coins { map: Some(HashMap::new()), dp: None, coins: None }
+        Coins { map: Some(HashMap::new()), dp: None, coins: Some(vec![]), combos: Some(HashSet::new()) }
     }
 }
 impl Coins {
+    fn combinations(&mut self, sum: usize, coins:&[usize]) -> usize {
+        if sum == 0 {
+            let mut sol = self.coins.as_ref().unwrap().clone();
+            sol.sort();
+            self.combos.as_mut().unwrap().insert(sol);
+            return  1
+        }
+        let calc = coins
+            .iter()
+            .filter(|&c| sum >= *c )
+            .map(|&c| {
+                self.coins.as_mut().unwrap().push(c);
+                let sum = self.combinations(sum - c, coins);
+                self.coins.as_mut().unwrap().pop();
+                sum
+            })
+            .sum();
+        calc
+    }
     fn iterative(sum: usize, coins:&[usize]) -> Coins {
         let mut dp = vec![0;sum+1];
         let mut cs= vec![0;sum+1];
@@ -58,7 +91,8 @@ impl Coins {
         Coins {
             map: None,
             dp: Some(dp),
-            coins: Some(cs)
+            coins: Some(cs),
+            combos: None
         }
     }
     fn get_coins_num(&self) -> usize {

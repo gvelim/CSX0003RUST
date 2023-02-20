@@ -51,7 +51,7 @@ impl Debug for SquareSum<'_> {
                     .skip(1)
                     .zip(path)
                     .for_each(|p|
-                        write!(f, "{:2}:{:2} ", p.1, p.0).expect("")
+                        write!(f, "{:2}/{:2} ", p.1, p.0).expect("")
                     );
                 writeln!(f).expect("");
             });
@@ -62,14 +62,14 @@ impl Debug for SquareSum<'_> {
 #[test]
 fn test_max_sum_of_squares() {
     let data = vec![
-        (vec![vec![3,7,9,2,7], vec![9,8,3,5,5], vec![1,7,9,8,5], vec![3,8,6,4,10], vec![6,3,9,7,8]], 67),
         (vec![vec![2,3,4],vec![1,5,4],vec![6,1,2]], 16),
         (vec![vec![2,3,4,1],vec![1,4,5,4],vec![6,4,1,2],vec![3,1,3,2]], 22),
+        (vec![vec![3,7,9,2,7], vec![9,8,3,5,5], vec![1,7,9,8,5], vec![3,8,6,4,10], vec![6,3,9,7,8]], 67)
     ];
     for (path,res) in data {
         let ss = SquareSum::new(&path);
         println!("===================\nSum: {}\nPath: {:?}",ss.sum(),ss.path());
-        println!("(square:sum)\n{:?}",ss);
+        println!("(square/sum)\n{:?}",ss);
         assert_eq!(ss.sum(), res);
     }
 }

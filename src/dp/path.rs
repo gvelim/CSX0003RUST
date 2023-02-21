@@ -1,6 +1,25 @@
 use std::cmp::max;
 use std::fmt::{Debug, Formatter};
 
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_max_sum_of_squares() {
+        let data = vec![
+            (vec![vec![2,3,4],vec![1,5,4],vec![6,1,2]], 16),
+            (vec![vec![2,3,4,1],vec![1,4,5,4],vec![6,4,1,2],vec![3,1,3,2]], 22),
+            (vec![vec![3,7,9,2,7], vec![9,8,3,5,5], vec![1,7,9,8,5], vec![3,8,6,4,10], vec![6,3,9,7,8]], 67),
+        ];
+        for (path,res) in data {
+            let ss = SquareSum::new(&path);
+            println!("===================\nSum: {}\nPath: {:?}",ss.sum(),ss.path());
+            println!("(square:sum)\n{:?}",ss);
+            assert_eq!(ss.sum(), res);
+        }
+    }
+}
+
 struct SquareSum<'a> {
     path: &'a [Vec<usize>],
     dp: Vec<Vec<usize>>
@@ -59,17 +78,3 @@ impl Debug for SquareSum<'_> {
     }
 }
 
-#[test]
-fn test_max_sum_of_squares() {
-    let data = vec![
-        (vec![vec![2,3,4],vec![1,5,4],vec![6,1,2]], 16),
-        (vec![vec![2,3,4,1],vec![1,4,5,4],vec![6,4,1,2],vec![3,1,3,2]], 22),
-        (vec![vec![3,7,9,2,7], vec![9,8,3,5,5], vec![1,7,9,8,5], vec![3,8,6,4,10], vec![6,3,9,7,8]], 67)
-    ];
-    for (path,res) in data {
-        let ss = SquareSum::new(&path);
-        println!("===================\nSum: {}\nPath: {:?}",ss.sum(),ss.path());
-        println!("(square/sum)\n{:?}",ss);
-        assert_eq!(ss.sum(), res);
-    }
-}

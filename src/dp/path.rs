@@ -13,7 +13,7 @@ mod test {
         ];
         for (path,res) in data {
             let ss = SquareSum::new(&path);
-            println!("===================\nSum: {}\nPath: {:?}",ss.sum(),ss.path());
+            println!("===================\nSum: {}\nPath: {:?}",ss.sum(),ss.path().collect::<Vec<_>>());
             println!("(square:sum)\n{:?}",ss);
             assert_eq!(ss.sum(), res);
         }
@@ -37,27 +37,47 @@ impl SquareSum<'_> {
             );
         SquareSum { path, dp }
     }
-    fn path(&self) -> Vec<usize> {
-        let mut path = Vec::new();
-        let mut sum = self.sum();
-        let (mut x, mut y) = (self.dp[0].len()-1, self.dp.len()-1);
-
-        while sum > 0 {
-            sum = self.dp[y][x] - self.path[y-1][x-1];
-            path.push(self.path[y-1][x-1]);
-            if sum == self.dp[y-1][x] {
-                y -= 1;
-            } else {
-                x -= 1;
-            }
-        }
-        path.reverse();
-        path
+    fn path(&self) -> impl Iterator<Item=usize> + '_ {
+        SquareSumIter::new(self)
     }
     fn sum(&self) -> usize {
         *self.dp.last().unwrap().last().unwrap()
     }
 }
+
+struct SquareSumIter<'a> {
+    ss: &'a SquareSum<'a>,
+    sum: usize,
+    pos: (usize,usize)
+}
+
+impl<'a> SquareSumIter<'a> {
+    fn new(ss:&'a SquareSum<'a>) -> SquareSumIter<'a> {
+        SquareSumIter { ss, sum:ss.sum(), pos: (ss.dp[0].len()-1, ss.dp.len()-1) }
+    }
+}
+
+impl Iterator for SquareSumIter<'_> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.sum > 0 {
+            let ss = self.ss;
+            let (x,  y) = self.pos;        // get current x,y position
+            let square = ss.path[y-1][x-1];      // extract square value at (x,y)
+            self.sum = ss.dp[y][x] - square;           // previous position = sum(x,y) - square value
+            if self.sum == ss.dp[y-1][x] {             // does it match square above ?
+                self.pos.1 -= 1;                       // yes -> then go one up
+            } else {
+                self.pos.0 -= 1;                       // no -> then go one left
+            }
+            Some(square)
+        } else {
+            None
+        }
+    }
+}
+
 
 impl Debug for SquareSum<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

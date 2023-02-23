@@ -39,11 +39,11 @@ impl KnapSack<'_> {
     }
     fn positions(&self) -> impl Iterator<Item=bool> + '_ {
         let mut w = self.capacity;
-        (1..self.dp.len())
+        (0..self.list.len())
             .rev()
             .map(move |i|{
-                if self.dp[i][w] != self.dp[i-1][w] {
-                    w -= self.list[i-1].weight;
+                if self.dp[i+1][w] != self.dp[i][w] {
+                    w -= self.list[i].weight;
                     true
                 } else {
                     false
@@ -52,7 +52,7 @@ impl KnapSack<'_> {
     }
     fn elements(&self) -> impl Iterator<Item=&'_ Object> {
         self.positions()
-            .zip(self.list)
+            .zip(self.list.iter().rev())
             .filter_map(|(i,v)| if i {Some(v)} else {None})
     }
     fn max_value(&self) -> usize {

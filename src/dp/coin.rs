@@ -25,9 +25,9 @@ mod test {
             assert_eq!(n, res);
 
             start = SystemTime::now();
-            let coins = Coins::iterative(sum, &set);
+            coins = Coins::iterative(sum, &set);
             println!("Iterative: {sum} = {:?}, {:?}",
-                     (coins.get_coins_num(), coins.get_coins()),
+                     (coins.get_coins_num(), coins.coins().collect::<Vec<_>>()),
                      SystemTime::now().duration_since(start)
             );
             assert_eq!(coins.get_coins_num(), res);
@@ -109,16 +109,8 @@ impl Coins {
             *dp.last().unwrap()
         } else { 0 }
     }
-    fn get_coins(&self) -> Vec<usize> {
-        let mut output = vec![];
-        if let Some(coins) = &self.coins {
-            let mut pos = coins.len() - 1;
-            while pos > 0 {
-                output.push(coins[pos]);
-                pos -= coins[pos];
-            }
-        }
-        output
+    fn coins(&self) -> impl Iterator<Item=usize> + '_ {
+        CoinsIter::new(&self)
     }
     fn recursive(&mut self, sum: usize, coins:&[usize]) -> usize {
         if sum == 0 { return 0 }
@@ -141,5 +133,31 @@ impl Coins {
             .expect("recursive(): HashMap not initialised. Use with Coins::default()")
             .insert(sum,best);
         best
+    }
+}
+
+struct CoinsIter<'a > {
+    coins: &'a Coins,
+    pos: usize
+}
+
+impl CoinsIter<'_> {
+    fn new(coins:&Coins) -> CoinsIter {
+        CoinsIter { coins, pos: coins.coins.as_ref().expect("").len()-1 }
+    }
+}
+
+impl Iterator for CoinsIter<'_> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let Some(coins) = &self.coins.coins else { return None };
+        if self.pos > 0 {
+            let coin = coins[self.pos];
+            self.pos -= coins[self.pos];
+            Some(coin)
+        } else {
+            None
+        }
     }
 }

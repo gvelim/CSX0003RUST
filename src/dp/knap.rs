@@ -50,11 +50,10 @@ impl KnapSack<'_> {
                 }
             })
     }
-    fn get_items(&self) -> Vec<&Object> {
+    fn get_items(&self) -> impl Iterator<Item=&'_ Object> {
         self.positions()
             .zip(self.list)
             .filter_map(|(i,v)| if i {Some(v)} else {None})
-            .collect::<Vec<_>>()
     }
     fn max_value(&self) -> usize {
         *self.dp.last().unwrap().last().unwrap()
@@ -118,7 +117,7 @@ mod test {
             println!("Total value: {} given capacity {}\nSelected items: {:?}\n",
                    ks.max_value(),
                    capacity,
-                   ks.get_items()
+                   ks.get_items().collect::<Vec<_>>()
             );
             assert_eq!( ks.max_value(), res );
         }

@@ -37,24 +37,23 @@ impl KnapSack<'_> {
 
         KnapSack { list, capacity, dp }
     }
-    fn positions(&self) -> Vec<bool> {
-        let mut pos = vec![false; self.dp.len()-1];
+    fn positions(&self) -> impl Iterator<Item=bool> + '_ {
         let mut w = self.capacity;
         (1..self.dp.len())
             .rev()
-            .for_each(|i|{
+            .map(move |i|{
                 if self.dp[i][w] != self.dp[i-1][w] {
-                    pos[i-1] = true;
                     w -= self.list[i-1].weight;
+                    true
+                } else {
+                    false
                 }
-            });
-        pos
+            })
     }
-    fn get_items(&self) -> Vec<&Object> {
-        self.positions().iter()
+    fn elements(&self) -> impl Iterator<Item=&'_ Object> {
+        self.positions()
             .zip(self.list)
-            .filter_map(|(i,v)| if *i {Some(v)} else {None})
-            .collect::<Vec<_>>()
+            .filter_map(|(i,v)| if i {Some(v)} else {None})
     }
     fn max_value(&self) -> usize {
         *self.dp.last().unwrap().last().unwrap()
@@ -107,8 +106,8 @@ mod test {
         ];
 
         for (inp,res) in data {
-            let (capacity, mut list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}"));
-            list.sort_by_key(|obj| obj.weight );
+            let (capacity, list) = KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{}",e));
+            // list.sort_by_key(|obj| obj.weight );
             let ks = KnapSack::new( &list, capacity );
             println!("==========================");
             if list.len() < 20 {
@@ -118,7 +117,7 @@ mod test {
             println!("Total value: {} given capacity {}\nSelected items: {:?}\n",
                    ks.max_value(),
                    capacity,
-                   ks.get_items()
+                   ks.elements().collect::<Vec<_>>()
             );
             assert_eq!( ks.max_value(), res );
         }
@@ -127,7 +126,7 @@ mod test {
     #[test]
     fn test_parse() {
         let inp = std::fs::read_to_string("src/dp/txt/input_random_1_4_4.txt").unwrap_or_else(|e| panic!("{}",e));
-        println!("{:?}", KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{e}")) );
+        println!("{:?}", KnapSack::parse(inp.as_str()).unwrap_or_else(|e| panic!("{}",e)) );
         assert!(true)
     }
 }

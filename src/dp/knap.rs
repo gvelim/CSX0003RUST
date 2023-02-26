@@ -63,8 +63,8 @@ impl KnapSack<'_> {
         fn parse_line(line: &str) -> Result<(usize, usize),ParseIntError> {
             let mut parts = line.split(' ');
             Ok((
-                parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?,
-                parts.next().and_then(|n| Some(usize::from_str(n)) ).unwrap()?
+                parts.next().map(usize::from_str ).unwrap()?,
+                parts.next().map(usize::from_str ).unwrap()?
             ))
         }
 
@@ -72,7 +72,7 @@ impl KnapSack<'_> {
         let (knapsack, items) = parse_line( lines.next().unwrap() )?;
 
         let mut sack = Vec::with_capacity(items);
-        while let Some(line) = lines.next() {
+        for line in lines {
             let (value, weight) = parse_line( line )?;
             sack.push( Object{ value, weight } );
         }

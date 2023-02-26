@@ -9,7 +9,7 @@ struct WIS<'a> {
 impl WIS<'_> {
     fn recursive(set: &[usize]) -> usize {
         println!("->: {:?}",set);
-        if set.len() == 0 {
+        if set.is_empty() {
             println!("<-: -0 : {:?}",set);
             return 0
         }
@@ -59,23 +59,21 @@ impl WIS<'_> {
     }
     fn to_binary_string(&self) -> String {
         self.positions_in_set().iter()
-            .filter_map(|&d|
-                if d { Some('1') } else { Some('0') }
-            )
+            .map(|&d| if d { '1' } else { '0' })
             .collect::<String>()
     }
     fn parse_graph(filename: &str) -> Vec<usize> {
         let input = std::fs::read_to_string(filename).unwrap_or_else(|e| panic!("{e}"));
 
         let mut lines = input.lines();
-        let mut n = lines.next().and_then(|num| {
-            Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
-        }).unwrap();
+        let mut n = lines.next()
+            .map(|num| usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
+            .unwrap();
         let mut g = Vec::with_capacity(n);
         while n > 0 {
-            let val = lines.next().and_then(|num| {
-                Some(usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
-            }).unwrap();
+            let val = lines.next()
+                .map(|num| usize::from_str(num).unwrap_or_else(|e| panic!("{e}")))
+                .unwrap();
             g.push(val);
             n -= 1;
         }

@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
-use std::time::SystemTime;
 
 #[cfg(test)]
 mod test {
+    use std::time::SystemTime;
     use super::*;
 
     #[test]
@@ -108,17 +108,15 @@ impl Coins {
         } else { 0 }
     }
     fn coins(&self) -> impl Iterator<Item=usize> + '_ {
-        CoinsIter::new(&self)
+        CoinsIter::new(self)
     }
     fn recursive(&mut self, sum: usize, coins:&[usize]) -> usize {
         if sum == 0 { return 0 }
-        else {
-            if let Some(&best) =
-                self.map
-                    .as_ref()
-                    .expect("recursive(): HashMap not initialised. Use with Coins::default()")
-                    .get(&sum) { return best }
-        }
+        else if let Some(&best) = self.map
+            .as_ref()
+            .expect("recursive(): HashMap not initialised. Use with Coins::default()")
+            .get(&sum) { return best }
+
 
         let best = coins.iter()
             .filter(|&c| sum >= *c )

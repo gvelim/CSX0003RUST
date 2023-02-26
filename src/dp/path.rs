@@ -85,14 +85,15 @@ impl Debug for SquareSum<'_> {
         self.dp.iter()
             .skip(1)
             .zip(piter)
-            .for_each(|(dp,path)| {
+            .all(|(dp,path)| {
                 dp.iter()
                     .skip(1)
                     .zip(path)
-                    .for_each(|p|
-                        write!(f, "{:2}/{:2} ", p.1, p.0).expect("")
-                    );
-                writeln!(f).expect("");
+                    .all(|p|
+                        write!(f, "{:2}/{:2} ", p.1, p.0).is_ok()
+                    )
+                    .then_some( writeln!(f) )
+                    .is_some()
             });
         Ok(())
     }

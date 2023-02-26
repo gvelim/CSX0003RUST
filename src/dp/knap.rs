@@ -84,10 +84,12 @@ impl Debug for KnapSack<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let v = (0..self.capacity+1).collect::<Vec<usize>>();
         writeln!(f," Cap :: {:2?}", v)?;
-        for (i,item) in self.dp.iter().enumerate().rev() {
-            write!(f,"{:2}th :: {:2?}", i, item)?;
-            writeln!(f)?;
-        }
+        self.dp.iter()
+            .enumerate()
+            .rev()
+            .all(|(i,item)|
+                writeln!(f,"{:2}th :: {:2?}", i, item).is_ok()
+            );
         Ok(())
     }
 }

@@ -72,8 +72,7 @@ impl Coins {
             self.combos.as_mut().unwrap().insert(sol);
             return  1
         }
-        let calc = coins
-            .iter()
+        coins.iter()
             .filter(|&c| sum >= *c )
             .map(|&c| {
                 self.coins.as_mut().unwrap().push(c);
@@ -81,8 +80,7 @@ impl Coins {
                 self.coins.as_mut().unwrap().pop();
                 sum
             })
-            .sum();
-        calc
+            .sum()
     }
 
     fn iterative(sum: usize, coins:&[usize]) -> Coins {

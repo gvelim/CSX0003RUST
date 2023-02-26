@@ -42,15 +42,14 @@ impl WIS<'_> {
         let mut i = self.dp.len()-1;
         while i > 0 {
             match i {
-                0 => unreachable!(),
                 1 => {
                     println!("{:?}", (i, self.dp[i], self.dp[i-1], self.set[i-1]));
-                    positions[i - 1] = true;
+                    positions[i-1] = true;
                 },
                 2.. if self.dp[i] > self.dp[i-1] => {
-                        println!("{:?}", (i, self.dp[i], self.dp[i-1], self.set[i-1]));
-                        positions[i-1] = true;
-                        i -= 1;
+                    println!("{:?}", (i, self.dp[i], self.dp[i-1], self.set[i-1]));
+                    positions[i-1] = true;
+                    i -= 1;
                 }
                 _ => ()
             }
@@ -109,9 +108,9 @@ mod test {
             (vec![1,4,5,4],8)
             ,(vec![3,4,6,4],9)
             ,(vec![10, 280, 618, 762, 908, 409, 34, 59, 277, 246, 779],2626)
-            // ,(vec![10, 460, 250, 730, 63, 379, 638, 122, 435, 705, 84],2533)
-            // ,(WIS::parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
-            // ,(WIS::parse_graph("src/dp/txt/input_random_10_40.txt"), 19639)
+            ,(vec![10, 460, 250, 730, 63, 379, 638, 122, 435, 705, 84],2533)
+            ,(WIS::parse_graph("src/dp/txt/input_random_1_10.txt"), 281)
+            ,(WIS::parse_graph("src/dp/txt/input_random_10_40.txt"), 19639)
             // ,(parse_graph("src/dp/txt/input_random_30_1000.txt"), 288082919)
         ];
 

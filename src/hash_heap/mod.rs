@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
 /// Returns ONLY the first pair that sums up to the target value
-pub fn two_sum(nums: &Vec<i64>, target: i64) -> Option<Vec<i64>> {
+pub fn two_sum(nums: &[i64], target: i64) -> Option<Vec<i64>> {
     let mut map : HashMap<_,_> = HashMap::new();
-    match nums.iter()
+    nums.iter()
         .zip(0..)
         .filter_map(|(&b,n)|
             match map.get(&(target-b)) {
@@ -15,23 +15,17 @@ pub fn two_sum(nums: &Vec<i64>, target: i64) -> Option<Vec<i64>> {
             }
         )
         .next()
-    {
-        Some(s) => Some(vec![s.1, s.0]),
-        None => None
-    }
+        .map(|s| vec![s.1, s.0])
 }
 
 /// Finds ALL pairs that have their sum equal to the target value
-pub fn two_sum_all(nums: &Vec<i64>, target: i64) -> Vec<Vec<i64>> {
+pub fn two_sum_all(nums: &[i64], target: i64) -> Vec<Vec<i64>> {
     let mut map : HashMap<_,_> = HashMap::new();
     let mut val : HashSet<_> = HashSet::new();
     nums.iter()
         .zip(0..)
         .filter_map(|(b,n)| {
-            let res = match map.get(&(target - b)) {
-                Some(&i) => Some((b, i, n)),
-                None => None
-            };
+            let res = map.get(&(target - b)).map(|&i| (b, i, n));
             map.insert(b, n);
             res
         })
@@ -107,7 +101,7 @@ mod test {
             let out = (-10000..=10000)
                 .fold( vec![], |mut acc, e| {
                     two_sum(&inp,e)
-                    .and_then(|pair| Some(acc.push(pair)));
+                    .map(|pair| acc.push(pair));
                     acc
             });
             println!("Expected: {result} => Found: {}, {:?}",out.len(), out);

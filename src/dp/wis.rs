@@ -37,6 +37,9 @@ impl WIS<'_> {
     fn weight(&self) -> usize {
         *self.dp.last().unwrap()
     }
+    fn elements(&self) -> impl Iterator<Item=usize> + '_ {
+        WISElemIter { wis:self, idx:self.dp.len()-1 }
+    }
     fn positions_in_set(&self) -> Vec<bool> {
         let mut positions = vec![false; self.dp.len() - 1];
         let mut i = self.dp.len()-1;
@@ -81,6 +84,37 @@ impl WIS<'_> {
     }
 }
 
+struct WISElemIter<'a> {
+    wis: &'a WIS<'a>,
+    idx: usize
+}
+impl Iterator for WISElemIter<'_> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.idx {
+            0 => None,
+            1 => {
+                self.idx -= 1;
+                Some(self.wis.set[self.idx])
+            }
+            2.. => {
+                while self.wis.dp[self.idx] == self.wis.dp[self.idx - 1] { self.idx -=1 }
+                if self.idx > 1
+                {
+                    self.idx -= 2;
+                    Some(self.wis.set[self.idx+1])
+                } else {
+                    self.idx -= 1;
+                    Some(self.wis.set[self.idx])
+                }
+
+            }
+            _ => unreachable!()
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -116,6 +150,7 @@ mod test {
             let wis = WIS::new(&g);
             let n = wis.weight();
             println!("Weight Independent set: {:?},{:?}\n", n, wis.to_binary_string());
+            println!("Weight Independent set: {:?},{:?}\n", n, wis.elements().collect::<Vec<usize>>() );
             assert_eq!(n,res);
         }
     }

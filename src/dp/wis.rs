@@ -92,25 +92,18 @@ impl Iterator for WISElemIter<'_> {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.idx {
-            0 => None,
-            1 => {
+        if self.idx > 0 {
+            while self.wis.dp[self.idx] == self.wis.dp[self.idx - 1] { self.idx -= 1 }
+            if self.idx > 1
+            {
+                self.idx -= 2;
+                Some(self.wis.set[self.idx + 1])
+            } else {
                 self.idx -= 1;
                 Some(self.wis.set[self.idx])
             }
-            2.. => {
-                while self.wis.dp[self.idx] == self.wis.dp[self.idx - 1] { self.idx -=1 }
-                if self.idx > 1
-                {
-                    self.idx -= 2;
-                    Some(self.wis.set[self.idx+1])
-                } else {
-                    self.idx -= 1;
-                    Some(self.wis.set[self.idx])
-                }
-
-            }
-            _ => unreachable!()
+        } else {
+            None
         }
     }
 }

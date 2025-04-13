@@ -1,0 +1,3020 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rusting along</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Topics</li><li class="chapter-item expanded "><a href="merge.html"><strong aria-hidden="true">1.</strong> Merging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="merge_in_place.html"><strong aria-hidden="true">1.1.</strong> In-place merge with O(n+m) swaps</a></li><li class="chapter-item expanded "><a href="merge_sequencial_access.html"><strong aria-hidden="true">1.2.</strong> Sequential access across multiple slices</a></li><li class="chapter-item expanded "><a href="merge_lazy.html"><strong aria-hidden="true">1.3.</strong> Lazy merge and deferred slice mutability</a></li><li class="chapter-item expanded "><a href="merge_denormalise.html"><strong aria-hidden="true">1.4.</strong> Pattern matching: De-normalising control flow</a></li></ol></li><li class="chapter-item expanded "><a href="sort.html"><strong aria-hidden="true">2.</strong> Sorting</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sort_mergesort.html"><strong aria-hidden="true">2.1.</strong> Merge sort</a></li><li class="chapter-item expanded "><a href="sort_quicksort.html"><strong aria-hidden="true">2.2.</strong> Quick sort</a></li><li class="chapter-item expanded "><a href="sort_count.html"><strong aria-hidden="true">2.3.</strong> Count sort</a></li></ol></li><li class="chapter-item expanded "><a href="selection.html"><strong aria-hidden="true">3.</strong> Selecting</a></li><li class="chapter-item expanded "><a href="graph.html"><strong aria-hidden="true">4.</strong> Graphs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_min_cut.html"><strong aria-hidden="true">4.1.</strong> Krager's Minimum Cut</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_contraction.html"><strong aria-hidden="true">4.1.1.</strong> Contraction Algorithm</a></li></ol></li><li class="chapter-item expanded "><a href="graph_search.html"><strong aria-hidden="true">4.2.</strong> Graph Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_search_process_state.html"><strong aria-hidden="true">4.2.1.</strong> Node Processing State</a></li><li class="chapter-item expanded "><a href="graph_path_bfs_abstract.html"><strong aria-hidden="true">4.2.2.</strong> Abstracting Breadth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_shortest_distance.html"><strong aria-hidden="true">4.2.2.1.</strong> Shortest Distance</a></li><li class="chapter-item expanded "><a href="graph_path_minimum_cost.html"><strong aria-hidden="true">4.2.2.2.</strong> Dijktra's Min Path Cost</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.2.3.</strong> Bellman–Ford algorithm</div></li></ol></li><li class="chapter-item expanded "><a href="graph_path_dfs_abstract.html"><strong aria-hidden="true">4.2.3.</strong> Abstracting Depth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_topological_sort.html"><strong aria-hidden="true">4.2.3.1.</strong> Topological Sort</a></li><li class="chapter-item expanded "><a href="graph_connect.html"><strong aria-hidden="true">4.2.3.2.</strong> Strong Connectivity</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_connect_scc.html"><strong aria-hidden="true">4.2.3.2.1.</strong> Kosaraju’s algorithm</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><a href="graph_mst.html"><strong aria-hidden="true">4.3.</strong> Minimum Spanning Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_mst_kruskal.html"><strong aria-hidden="true">4.3.1.</strong> Kruskal's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_prim.html"><strong aria-hidden="true">4.3.2.</strong> Prim's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_cluster.html"><strong aria-hidden="true">4.3.3.</strong> Single-linkage clustering</a></li></ol></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rusting along</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Writing algorithms is a good way of learning the &quot;ways&quot;, or better, the expressiveness of the rust language.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="merge-algorithms"><a class="header" href="#merge-algorithms">Merge Algorithms</a></h1>
+<h2 id="merging-two-or-more-ordered-sets"><a class="header" href="#merging-two-or-more-ordered-sets">Merging two or more ordered sets</a></h2>
+<p>The basic use case for these algorithms is merging two ordered arrays into a single and ordered array.
+Although simple, it becomes far more complicated when you consider </p>
+<ul>
+<li>Very large datasets spanning many processing nodes (segmentation, map/reduce, etc)</li>
+<li>Memory and cpu constraints on embedded systems (in-place, out-of-place) </li>
+</ul>
+<h3 id="benchmarks"><a class="header" href="#benchmarks">Benchmarks</a></h3>
+<p>The following benchmarks provide an indicative performance comparison between the different merge implementations. The input size used is 5,000 (2 x 2,500) elements.</p>
+<pre><code>Out of place merge function
+===========================
+test bench_merge_iterator          ... bench:      61,250 ns/iter (+/- 5,708)
+
+In place merge functions
+========================
+test bench_merge_lazy              ... bench:      80,606 ns/iter (+/- 2,367)
+test bench_merge_mut               ... bench:      68,282 ns/iter (+/- 8,597)
+test bench_merge_mut_adjacent      ... bench:      43,533 ns/iter (+/- 655)
+</code></pre>
+<h3 id="implementation"><a class="header" href="#implementation">Implementation</a></h3>
+<p>The chapters that follow, provide a detailed explanation on how the below implementation works</p>
+<pre><code class="language-rust no_run noplayground">/// Applies memory efficient in-place merging when two slices are adjacent to each other.
+/// ```
+/// use csx3::merge::merge_mut_fast;
+///
+/// let mut input = vec![1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
+/// let (s1,s2) = input.split_at_mut(5);
+///
+/// merge_mut_fast(s1,s2);
+/// assert_eq!(input, vec![1,2,3,4,5,6,7,8,9,10]);
+/// ```
+/// Panics in case the two slices are found not to be adjacent. For safety, always use *ONLY* against slices that have been mutable split from an existing slice
+pub fn merge_mut_fast&lt;T&gt;(s1: &amp;mut [T], s2: &amp;mut [T]) -&gt; usize where T: Ord + Debug {
+    let ws: &amp;mut [T];
+
+    unsafe {
+        ws = from_raw_parts_mut(s1.as_mut_ptr(), s1.len() + s2.len());
+        assert!(s2[0] == ws[s1.len()]);
+    }
+
+    let (mut p, mut c, mut j, llen, mut inversion ) = (0usize, 0usize, s1.len(), s1.len(), 0usize);
+    let mut idx_rfl: Vec&lt;usize&gt; = Vec::from_iter(0..ws.len());
+    let len = idx_rfl.len();
+
+    //println!(&quot;{ws:?}::{idx_rfl:?}, ({i},{c},{j})&quot;);
+
+    unsafe {
+        let idxp = idx_rfl.as_mut_ptr();
+        let wsp = ws.as_mut_ptr();
+
+        let mut cc; // c' definition
+        let mut pp; // p' definition
+
+        loop {
+            cc = *idxp.add(c);
+            pp = *idxp.add(p);
+            match (j &lt; len &amp;&amp; j != p, p &lt; len-1 &amp;&amp; c &lt; llen -1) {
+                (true, _) if (*wsp.add(cc)).cmp(&amp;(*wsp.add(j))) == Ordering::Greater =&gt; {
+                    inversion += j - p;
+                    wsp.add(p).swap( wsp.add(j));
+                    //idx_rfl.swap(ii, j);
+                    idxp.add(pp).write(j);
+                    idxp.add(j).write(pp);
+                    j += 1;
+                },
+                (_, true) =&gt; {
+                    wsp.add(p).swap(wsp.add(cc));
+                    //idx_rfl.swap(pp, c);
+                    idxp.add(cc).write(pp);
+                    idxp.add(pp).write(cc);
+                    c += 1;
+                },
+                (_,_) =&gt; break,
+            };
+            p += 1;
+            //println!(&quot;{ws:?}::{idx_rfl:?}, ({i},{c},{j})&quot;);
+        }
+    }
+    //println!(&quot;Merge Done!&quot;);
+    inversion
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="in-place-merge-algorithm-with-onm-swaps"><a class="header" href="#in-place-merge-algorithm-with-onm-swaps">In-place Merge Algorithm with O(n+m) swaps</a></h1>
+<h2 id="general-approach"><a class="header" href="#general-approach">General Approach</a></h2>
+<p>In an &quot;In place&quot; merge of two ordered arrays it is always required to maintain a pivot between merged and unmerged sub-arrays as we go over the process of</p>
+<ol>
+<li>Use comparison indexes <code>(c,j)</code> to find the smallest element between (a) the left and (b) right ordered arrays</li>
+<li>Swap the next smallest element of the left and right sub-arrays against a pivot position <code>(p)</code></li>
+<li>Repeat until we've exhausted comparing and swapping of all elements</li>
+</ol>
+<pre><code>Start                               Finish
+==============================     ==========================
+Left array       Right array       Ordered elements across arrays
++---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
+| 1 | 3 | 5 | &lt;&gt; | 2 | 4 | 6 | =&gt;  | 1 | 2 | 3 |  | 4 | 5 | 6 |
++---+---+---+    +---+---+---+     +---+---+---+  +---+---+---+
+  c                j
+
+Generic Approach of using a pivot to separate 
+&quot;merged&quot; from &quot;yet to be merged&quot; regions
+=============================================
+
+         | left        Right  |
+         | [c]         [j]    |
++---+---+|+---+---+   +---+---+ 
+| 1 | 2 ||| 3 | 5 |   | 4 | 6 | 
++---+---+|+---+---+   +---+---+ 
+Merged   |     Unmerged region  
+region   p: Pivot
+</code></pre>
+<h2 id="challenge"><a class="header" href="#challenge">Challenge</a></h2>
+<h3 id="taking-a-naive-first-step"><a class="header" href="#taking-a-naive-first-step">Taking a naive first step</a></h3>
+<p>By trying to swap the smallest element of the two arrays with the pivot we quickly realise that things are getting out of control very soon. For example,</p>
+<pre><code>                              c  j  p   [c] &gt; [j]  Action
+ c/p             j            =======   =========  ========================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p) incr(c,p)
+     c/p         j                  
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p) incr(j,p)
+      c   p          j                   
+[ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  2  2  3    2!!   4   Fail: We lost control here! 2 isn't part of the left array
+</code></pre>
+<p>At this stage our partitioned region is left of <code>p</code> and equal to <code>[1,2]</code> while the unmerged region is <code>[(5!!,3),(4,6)]</code> which is clearly <strong><em>out-of-order</em></strong> and the result from then on is unpredictable. During the 2nd iteration, the left comparison index <code>[c]</code> points to a <code>2</code> rather <code>3</code> which is now at the 4th position in the right array, or the 2nd position in the unmerged partition.
+Therefore, we need to find a way to maintain a solid comparison index reference <code>[c]</code> for the left array while we iterate through</p>
+<h2 id="problem-solution"><a class="header" href="#problem-solution">Problem Solution</a></h2>
+<h3 id="canceling-the-rotation-during-right-swaps"><a class="header" href="#canceling-the-rotation-during-right-swaps">Canceling the Rotation during right swaps</a></h3>
+<p>It becomes obvious that during the right swap operation our left array is rotated left as seen below</p>
+<pre><code>                              c  j  p   [c] &gt; [j]  Action
+ c/p             j            =======   =========  ========================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1  1    1     2   left swap(c,p) incr(c,p)
+     c/p         j                   
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1  2    3     2   right swap(j,p) incr(j,p)
+      c   p          j                  
+[ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  &lt;-- Here instead of [3,5] we have [5,3]
+</code></pre>
+<p>Moreover, the partition point <code>[p]</code> more or less points to the where the left comparison index <code>[c]</code> should have been, that is, the unmerged partition. Let's try this time with</p>
+<ul>
+<li>reverting the rotation effect after each right swap hence bringing the left unmerged part back to order</li>
+<li>using <code>[c]</code> as both the partition and the left comparison index</li>
+</ul>
+<pre><code>                              c  j    [c] &gt; [j]  Action
+  c              j            ====    =========  ============================
+[(1 , 3 , 5)]  [(2 , 4 , 6)]  1  1     1     2   No swap, just incr(c)
+      c          j                   
+[ 1 ,(3 , 5)]  [(2 , 4 , 6)]  2  1     3     2   right swap(j,c), incr(c,j)
+          c          j 
+[ 1 , 2 ,(5 ]  [ 3),(4 , 6)]  3  2               rotate right by 1, from c to j excluded 
+          c          j                   
+[ 1 , 2 ,(3 ]  [ 5),(4 , 6)]  3  2     3     4   No swap, just incr(c)
+                 c   j                   
+[ 1 , 2 , 3 ]  [(5),(4 , 6)]  4  2     5     4   right swap(j,c), incr(c,j)
+                     c   j                   
+[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3               rotate right by 1, from c to j excluded 
+                     c   j                   
+[ 1 , 2 , 3 ]  [ 4 ,(5),(6)]  5  3     5     6   No swap, just incr(c) 
+                        c/j                   
+[ 1 , 2 , 3 ]  [ 4 , 5 ,(6)]  6  3               c == j (!) nothing more to compare... we've finished !!
+</code></pre>
+<p>Nice! It works, but only on paper. Although we overcame the conflict between pivot <code>[p]</code> and left comparison index <code>[c]</code> the obvious issues here is that our indexing across the two arrays is broken. Definitely <code>6 == 3</code> isn't correct, because <code>[c]</code> has to operate in both arrays while <code>[j]</code> operates solely in the right array.</p>
+<p>However, we do know that mergesort, performs merge on memory adjacent array segments hence this can be mitigated by reconstructing the parent array out of the two fragments so that, <code>working array = *left_array[0] .. *left_array[0] + (left_array.len() + right_array.len())</code></p>
+<pre><code>Left Array    Right Array
++---+---+---+ +---+---+---+     
+| 2 | 4 | 6 | | 1 | 3 | 5 |   Adjacent array segments
++---+---+---+ +---+---+---+     
+  |   |   |    |   |   |
++---+---+---+---+---+---+     
+|&amp;2 |&amp;4 |&amp;6 |&amp;1 |&amp;3 |&amp;5 |   Memory reconstructed and operated as a continuous array i.e.
++---+---+---+---+---+---+   we recast a slice with start pointer left_array[0] 
+  c           j             and length = left (len + right len)*sizeof()
+
+</code></pre>
+<p>Let's repeat the example but through the memory reconstructed array.</p>
+<pre><code>                           c  j    [c] &gt; [j]  Action
+  c           j            ====    =========  ============================
+[(1 , 3 , 5),(2 , 4 , 6)]  1  4     1     2   No swap, just incr(c)
+      c       j                   
+[ 1 ,(3 , 5),(2 , 4 , 6)]  2  4     3     2   right swap(j,c), incr(c,j)
+          c       j 
+[ 1 , 2 ,(5 , 3),(4 , 6)]  3  5               rotate right by 1, from c to j excluded
+          c       j                   
+[ 1 , 2 ,(3 , 5), 4 , 6)]  3  5     3     4   No swap, just incr(c)
+              c   j                   
+[ 1 , 2 , 3 ,(5),(4 , 6)]  4  6     5     4   right swap(j,c), incr(c,j)
+                  c   j                   
+[ 1 , 2 , 3 , 4 ,(5),(6)]  5  6               rotate right by 1, from c to j excluded 
+                  c   j                   
+[ 1 , 2 , 3 , 4 ,(5),(6)]  5  6     5     6   no swap, just incr(c) 
+                     c/j                   
+[ 1 , 2 , 3 , 4 , 5 , 6 ]  6  6               c == j (!) nothing more to compare... we've finished !!
+</code></pre>
+<p>So far so good. We have a working approach that however is dependent on adjacent-to-memory arrays for achieving the rotations</p>
+<p>However, there are some things we need to be aware of</p>
+<ol>
+<li>Rotations won't work between non-adjacent arrays without additional code complexity to deal with the gap</li>
+<li>Rotation will be computationally significant against large datasets</li>
+</ol>
+<p>So can we do better without need for rotations and non-adjacent to memory arrays ?</p>
+<p>It appears that we can. <code>Virtual Slice</code> &amp; <code>Index Reflector</code> come to the rescue.</p>
+<h2 id="virtual-slice---continuous-access-over-array-fragments"><a class="header" href="#virtual-slice---continuous-access-over-array-fragments">Virtual Slice - continuous access over array fragments</a></h2>
+<p>A <code>VirtualSlice</code> is composed out of one or more array fragments, adjacent to memory or not, and enables transparently operating over the <strong>attached</strong> array fragments.</p>
+<pre><code>Left Array       Right Array
++---+---+---+    +---+---+---+     
+| 2 | 4 | 6 | &lt;&gt; | 1 | 3 | 5 |   Non-adjacent array segments
++---+---+---+    +---+---+---+     
+  c       ^        j
+          |__
+       ...  | ...
++----+----+----+----+----+----+
+| &amp;2 | &amp;4 | &amp;6 | &amp;1 | &amp;3 | &amp;5 |  Array of mutable references : Virtual Slice
++----+----+----+----+----+----+  i.e. &amp;2 = pointer/reference to left array[0]
+ p/c             j
+</code></pre>
+<p>The VirtualSlice enables transparent operation over the array fragments, hence enable us to retain index consistency, we still need to tackle eliminating the costly rotations. For more detail go to the <a href="merge_sequencial_access.html">internals and sequential access section</a></p>
+<h2 id="index-reflector---from-absolute-to-derived-indexing"><a class="header" href="#index-reflector---from-absolute-to-derived-indexing">Index Reflector - from absolute to derived indexing</a></h2>
+<p>We know that <code>[c]</code> and <code>[p]</code> indexes are getting mixed up, as right swaps tend to move <code>[c]</code> non-sequentially causing left merge to go <strong><em>out-of-order</em></strong>.</p>
+<p>What if we could somehow, had a way such that when incrementing <code>c</code> by <code>1</code>, <code>c</code> points to the next in &quot;logical order&quot; element of the left array, 100% of the times and irrelevant of where <code>[c]</code> is positioned within the VirtualSlice ?</p>
+<p>This is where the <code>IndexReflector</code> comes handy. The <em>Index Reflector</em> becomes the <strong>absolute reference</strong> in terms of the <strong>ordered sequence</strong> that <code>c</code> &amp; <code>j</code> indexes have to follow and irrelevant of the non-sequential movement of <code>[c]</code> caused by every right swap.</p>
+<pre><code>Left Array       Right Array
++---+---+---+    +---+---+---+     
+| 2 | 4 | 6 | &lt;&gt; | 1 | 3 | 5 |   Non-adjacent array segments
++---+---+---+    +---+---+---+     
+          ^       
+          |_
+       ...  | ...
++----+----+----+----+----+----+
+| &amp;2 | &amp;4 | &amp;6 | &amp;1 | &amp;3 | &amp;5 |  Virtual Slice with derived indexes
++----+----+----+----+----+----+  c' = Index Reflector[c], j' = Index Reflector[j]
+ p/c'        |   j'    |    |
+         ... | ...     |    |
++----+----+----+----+----+----+
+| 1  | 2  | 3  | 4  | 5  | 6  |  Index Reflector captures VirtualSlice's elements latest positions against their starting position
++----+----+----+----+----+----+  i.e. if IndexReflector[3] == 4, it would imply that VirtualSlice[4] was in the 3rd position
+ p'/c            j               [p'] = x, such that Index Reflector[x] == p, where x E {c..j} 
+                                 i.e. if p == 3 given IndexReflector[x] == 3, then p' == 5 if IndexReflector[5] == 3
+
+</code></pre>
+<p>In the diagram above, the Index Reflector holds the <strong>starting position</strong> of the VirtualSlice elements. Order Comparison indexes <code>[c]</code> and <code>[j]</code> are operated against the index reflector and are <strong>projected</strong> over to VirtualSlice as <code>[c']</code> and <code>[j']</code> using the transformations described in the diagram.</p>
+<p>Reversely, Pivot index <code>[p]</code> is operated on the VirtualSlice and is projected over the Index Reflector as <code>[p']</code> using the transformation provided in the diagram.</p>
+<p>Let's see how this is going to work; pay attention to the non-sequencial movements of <code>c'</code> and <code>p'</code>.</p>
+<pre><code>Phase 1: Merge the two arrays until a comparison index goes out of bounds 
+
+Left Arr      Rght Arr       VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                             c'/p          j'                  c/p'         j                  [c'] &gt; [j']
+[ 5, 6, 7] &lt;&gt; [ 1, 2, 3, 4]  [(5 , 6 , 7),(1 , 2 , 3 , 4)]    [(1 , 2 , 3),(4 , 5 , 6 , 7)]      5      1     swap(j', p), swap(j, p'), incr(p,j)
+                                   p       c'  j'               c   p'          j                             
+[ 1, 6, 7] &lt;&gt; [ 5, 2, 3, 4]  [ 1 ,(6 , 7 , 5),(2 , 3 , 4)]    [(4 , 2 , 3),(1 , 5 , 6 , 7)]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+                                       p   c'      j'           c       p'          j                             
+[ 1, 2, 7] &lt;&gt; [ 5, 6, 3, 4]  [ 1 , 2 ,(7 , 5 , 6),(3 , 4)]    [(4 , 5 , 3),(1 , 2 , 6 , 7)]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+                                          c'/p         j'      c/p'                     j                             
+[ 1, 2, 3] &lt;&gt; [ 5, 6, 7, 4]  [ 1 , 2 , 3 ,(5 , 6 , 7),(4)]    [(4 , 5 , 6),(1 , 2 , 3 , 7)]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+                                               p       c'  j'   c   p'                       j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     &lt;-- j'/j got out of bounds ! Phase 1 completed
+</code></pre>
+<p>We ran-out of right array elements (<code>j</code>is over bound), which means anything below <code>[p]</code> is merged and anything including and above <code>[p]</code> just needs to be carried over. But we cannot complete as we have <strong><em>out-of-order</em></strong> elements in the unmerged partition.</p>
+<p>Index Reflector to the rescue!</p>
+<p>The index reflector tells us exactly what we need to do to complete the work. if you look at <code>[c .. left_array.len()]</code> / <code>[7,5,6]</code> in the index reflector, it tells us</p>
+<ol>
+<li>next comes the 7th element from virtual slice,</li>
+<li>then the 5th element from virtual slice, and</li>
+<li>finally, the 6th element from virtual slice</li>
+</ol>
+<p>So if we get the remainder from the VirtualSlice <code>[6,7,5]</code> and apply the above steps we'll get <code>[5,6,7]</code>. Nice !! Let's see it in action.</p>
+<pre><code>Phase 2: Finishing off the remainder unmerged partition
+
+Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                                               p       c'  j'   c   p'                       j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
+                                                   p   c'  j'       c   p'                   j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 4)]      x      x     swap(c', p), swap(c, p') incr(i,c)
+                                                     c'/p  j'          c/p'                  j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 4)]      x      x     &lt;-- We finished ! c' and p are both on the last position
+</code></pre>
+<p>Phase 2 is now complete. <strong>As if by magic</strong> everything is now in position and ordered after <code>O(n+m)</code> iterations</p>
+<h2 id="useful-index-reflector-properties"><a class="header" href="#useful-index-reflector-properties">Useful Index Reflector Properties</a></h2>
+<ol>
+<li>At completion the Index Reflector <strong>reflects</strong> the final position per element and given its starting order i.e the 4th element in VirtualSlice ends up in the 1st position, the 1st in the 5th, and so on</li>
+</ol>
+<pre><code>  Left Arr      Right Arr      VirtualSlice                     Index Reflector                  
+  =========     ===========    =============================    =============================    
+                               c'/p          j'                  c/p'         j                  
+  [ 5, 6, 7] &lt;&gt; [ 1, 2, 3, 4]  [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]    [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]      
+  ...
+  ...
+                                                        p/c' j'          c/p'                  j                             
+  [ 1, 2, 3] &lt;&gt; [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 , 7 ]    [ 5 , 6 , 7 , 1 , 2 , 3 , 4 ]      
+</code></pre>
+<ol start="2">
+<li><code>[c]</code> index is bound by <code>[0 .. left array.len]</code> range</li>
+<li><code>[p']</code> index is bound by <code>[c .. left array.len]</code> range</li>
+<li>Always <code>[j'] == [j]</code></li>
+</ol>
+<h2 id="scaling-up-performance"><a class="header" href="#scaling-up-performance">Scaling up performance</a></h2>
+<p>It is important that for each iteration, we translate <code>p</code> <strong>current position</strong> onto the <code>p'</code> position with its resulting non-sequential movement. Therefore, to find <code>p'</code> and for less than 500 elements, we can map <code>p -&gt; p'</code> by searching serially within the <code>[c .. left_array.len()]</code> range; use of 3rd property. However, this approach has an <code>O(n^2)</code> time complexity as the datasets grow larger, as it renders the serial search approach into a nested loop. Eliminating such loop will retain the linearity of the algorithm.</p>
+<p>Given that <code>p'</code> position is derived somehow always in relation to <code>c</code> and <code>p</code>, can we <strong>pre-calculate <code>p'</code> movement ahead of time</strong> rather calculating for current <code>p</code> ?</p>
+<p>Let's use out last example and add <code>p</code> also on the index reflector and see how this plays out</p>
+<pre><code>Phase 1: Merge the two arrays until a comparison index goes out of bounds 
+
+Left Arr      Rght Arr       VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                             c'/p          j'                c/p'/p         j                  [c'] &gt; [j']
+[ 5, 6, 7] &lt;&gt; [ 1, 2, 3, 4]  [(5 , 6 , 7),(1 , 2 , 3 , 4)]    [(1 , 2 , 3),(4 , 5 , 6 , 7)]      5      1     swap(j', p), swap(j, p'), incr(p,j)
+                                   p       c'  j'               c  p/p'         j                             
+[ 1, 6, 7] &lt;&gt; [ 5, 2, 3, 4]  [ 1 ,(6 , 7 , 5),(2 , 3 , 4)]    [(4 , 2 , 3),(1 , 5 , 6 , 7)]      5      2     swap(j', p), swap(j, p'), incr(p,j) 
+                                       p   c'      j'           c      p/p'         j                             
+[ 1, 2, 7] &lt;&gt; [ 5, 6, 3, 4]  [ 1 , 2 ,(7 , 5 , 6),(3 , 4)]    [(4 , 5 , 3),(1 , 2 , 6 , 7)]      5      3     swap(j', p), swap(j, p'), incr(p,j)
+                                          c'/p         j'      c/p'         p           j                             
+[ 1, 2, 3] &lt;&gt; [ 5, 6, 7, 4]  [ 1 , 2 , 3 ,(5 , 6 , 7),(4)]    [(4 , 5 , 6),(1 , 2 , 3 , 7)]      5      4     swap(j', p), swap(j, p'), incr(p,j)
+                                               p       c'  j'   c   p'          p           j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 4)]      x      x     &lt;-- j'/j got out of bounds ! Phase 1 completed
+</code></pre>
+<p>Very interesting! <code>index_reflector[p]</code> gives us the position of <code>p'</code> !</p>
+<p>For example in the last iteration, when <code>p = 5</code>, <code>index_reflector[5] = 2 = p'</code> therefore <code>p' == index_reflector[2]</code>. This also explains the workings of property No 3 where <code>p'</code> is constrained within the <code>[c..left_array.len()]</code> range.</p>
+<p>Let's carry on this example to the end and watch closely...</p>
+<pre><code>Phase 2: Finishing off the remainder unmerged partition
+
+Left Arr      Right Arr      VirtualSlice                     Index Reflector                  Compare        Action
+=========     ===========    =============================    =============================    ===========    ===================
+                                               p       c'  j'   c   p'          p           j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 6, 7, 5]  [ 1 , 2 , 3 , 4 ,(6 , 7 , 5)]    [(7 , 5 , 6),(1 , 2 , 3 , 2)]      x      x     swap(c', p), swap(c, p'), ** index_reflector[c]=[p] ** incr(i,c)
+                                                   p   c'  j'       c   p'          p       j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 5, 7, 6]  [ 1 , 2 , 3 , 4 , 5 ,(7 , 6)]    [(5 , 7 , 6),(1 , 2 , 3 , 3)]      x      x     swap(c', p), swap(c, p'), ** index_reflector[c]=[p] ** incr(i,c)
+                                                     c'/p  j'          c/p'             p   j                             
+[ 1, 2, 3] &lt;&gt; [ 4, 5, 6, 7]  [ 1 , 2 , 3 , 4 , 5 , 6 ,(7)]    [(5 , 6 , 7),(1 , 2 , 3 , 3)]      x      x     &lt;-- We finished ! c' and p are both on the last position
+</code></pre>
+<p>Hold on! Where did this <code>index_reflector[c]=[p]</code> come from?</p>
+<p>Et Voilà! This is the trick that predicts <code>p'</code> position at certain values of <code>p</code>. So here is what happens per above iteration:</p>
+<ol>
+<li>Complete left swap action &amp; store future index <code>p'</code>, that is, with <code>[c] = 7</code>,<code>p = 5</code> and <code>[p] = 2</code> we say that when <code>p == (7 = [c])</code> then <code>p'</code> should be found at position <code>2 == [p]</code></li>
+<li>Complete left swap action &amp; store future index <code>p'</code>, that is, with <code>[c] = 7</code>,<code>p = 6</code> and <code>[p] = 3</code> we say that when <code>p == (7 = [c])</code> then <code>p'</code> should be found at position <code>3 == [p]</code></li>
+<li>We finished!</li>
+</ol>
+<p>For completeness, when a right action occurs (<code>j</code> and <code>p</code> swap) similarly we need to ensure <code>index_reflector[j] = [p]</code> which is what the swap action does.</p>
+<p>With this pre-calculation trick we are now able to eliminate the hidden loop which results in up to 10x increase in performance and keeps the algorithm linear.</p>
+<p>Reusing the <code>index_reflector</code> for this optimisation has rendered property No 1 invalid. If we need to retain property No 1 a separate <code>index_reflector</code> for <code>p</code>/<code>p'</code> will be required.</p>
+<h2 id="further-optimisations--other-uses"><a class="header" href="#further-optimisations--other-uses">Further optimisations &amp; other uses</a></h2>
+<ol>
+<li>Given the 4th property we can reduce the Index Reflector to <code>left_array.len()</code> reducing the memory requirements from 2(n+m) to (2n+m) in case of mergesort</li>
+<li>In addition to 4th property and given the arrays are adjacent the VirtualSlice becomes a pointer to a reconstructed parent array hence the overall memory impact becomes O(n) * sizeof(usize)</li>
+<li>Given the 1st property and with a separate index reflector for <code>p'</code> optimisation, we can
+<ol>
+<li>Develop a &quot;sort mask array&quot; through which we can access the source array segments in order and without the need of permanently mutating them
+<ol>
+<li><a href="./merge_lazy.html">VirtualSlice::merge_shallow</a></li>
+</ol>
+</li>
+<li>Such &quot;sort mask&quot; can be imposed or &quot;played onto&quot; the source segments hence mutating them only when is needed
+<ol>
+<li><a href="./merge_lazy.html">VirtualSlice::impose_shallow_merge</a></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sequential-access-against-multiple-slice-segments"><a class="header" href="#sequential-access-against-multiple-slice-segments">Sequential access against multiple slice segments</a></h1>
+<p>A <code>VirtualSlice</code> is composed out of one or more slice segments, adjacent to memory or not, and enables transparently operating over them.</p>
+<p>The virtual slice operates in two modes. Adjacent and non-adjacent.</p>
+<p>It addresses the following needs:</p>
+<ul>
+<li>Need to access two or more slices as a single continuous one</li>
+<li>Need to use memory efficiently for cases where such slices are adjacent in memory</li>
+<li>Need to perform a merge of two or more ordered slices</li>
+</ul>
+<h2 id="memory-layout"><a class="header" href="#memory-layout">Memory layout</a></h2>
+<h3 id="non-adjacent-arrays-mode"><a class="header" href="#non-adjacent-arrays-mode">Non-Adjacent arrays Mode</a></h3>
+<pre><code>Left Array       Right Array
++---+---+---+    +---+---+---+     
+| 2 | 4 | 6 | &lt;&gt; | 1 | 3 | 5 |   Memory non-adjacent array segments
++---+---+---+    +---+---+---+     
+  c       ^        j
+          |__
+       ...  | ...
++----+----+----+----+----+----+
+| &amp;2 | &amp;4 | &amp;6 | &amp;1 | &amp;3 | &amp;5 |  Array of mutable references : Virtual Slice
++----+----+----+----+----+----+  i.e. &amp;2 = pointer/reference to left array[0]
+</code></pre>
+<h3 id="adjacent-arrays-mode"><a class="header" href="#adjacent-arrays-mode">Adjacent arrays Mode</a></h3>
+<pre><code>    Left Array   Right Array
++----+----+----+----+----+----+
+| +---+---+---++---+---+---+  |  VirtualSlice reconstructs the parent array   
+| | 2 | 4 | 6 || 1 | 3 | 5 |  |  out of the two adjacent array segments for 
+| +---+---+---++---+---+---+  |  sequencial access
++----+----+----+----+----+----+  
+    c            j
+</code></pre>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="merging-two-adjacent-slices-onm"><a class="header" href="#merging-two-adjacent-slices-onm">Merging two adjacent slices O(n+m)</a></h3>
+<ul>
+<li>No additional memory used for holding references</li>
+<li>Uses (n + m) * usize for dynamic indexing
+<ul>
+<li>can be further optimised to hold only (n) * size of additional memory</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-rust noplayground">use csx3::merge::vs::VirtualSlice;
+let v = &amp;mut [1, 3, 5, 7, 9, 2, 4, 6, 8, 10];
+let (s1, s2) = v.split_at_mut(5);
+
+let mut v = VirtualSlice::new_adjacent(s1)
+v.merge(s2);
+
+assert_eq!(s1, &amp;mut [1, 2, 3, 4, 5]);
+assert_eq!(s2, &amp;mut [6, 7, 8, 9, 10]);
+</code></pre>
+<h3 id="access--swap-contents-out-of-two-non-adjacent-slices"><a class="header" href="#access--swap-contents-out-of-two-non-adjacent-slices">Access &amp; swap contents out of two non-adjacent slices</a></h3>
+<ul>
+<li>Uses n + m memory for holding references</li>
+<li>Uses (n + m) * usize for dynamic indexing</li>
+</ul>
+<pre><code class="language-rust noplayground">use csx3::merge::vs::VirtualSlice;
+
+let s1 = &amp;mut [1, 3, 5, 7, 9];
+let _s3 = &amp;mut [0, 0, 0, 0, 0];   // Stack wedge 
+let s4 = &amp;mut [2, 4, 6, 8, 10];
+
+let mut v = VirtualSlice::new();
+
+v.attach(s1);
+v.attach(s4);
+
+v[0] = 11;
+v[5] = 9;
+v.swap(0, 5);
+
+assert_eq!(s1, &amp;mut [9, 3, 5, 7, 9]);
+assert_eq!(s4, &amp;mut [11, 4, 6, 8 , 10]);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="lazy-merge-with-deferred-slice-mutability"><a class="header" href="#lazy-merge-with-deferred-slice-mutability">Lazy merge with deferred slice mutability</a></h1>
+<p>Need to perform &quot;shallow&quot; or lazy merge, that is,</p>
+<ul>
+<li>provide ordered access to the underlying slices without mutating them (see shallow merge)</li>
+<li>while allow such order to be superimposed upon the slices if we later decide to (see superimpose)</li>
+</ul>
+<h2 id="lazy-merge-operation"><a class="header" href="#lazy-merge-operation">Lazy merge operation</a></h2>
+<ul>
+<li>Swapping of references instead of the actual data (light operation)</li>
+<li>Ordering logic per iteration</li>
+</ul>
+<pre><code class="language-rust noplayground">use csx3::merge::Merge;
+
+let (s1, s2) = (&amp;mut [5,6,7], &amp;mut[1,2,3,4]);
+
+let mut vs = s1.merge_lazy(s2);  // attach to s2 and do shallow merge with s1
+ 
+vs.iter()                           // ordered access of attached slices
+    .enumerate()                    // [&amp;1, &amp;2, &amp;3, &amp;4, &amp;5, &amp;6, &amp;7]
+    .for_each(|(i,x)| 
+        assert_eq(*x,i+1) 
+     );
+
+assert_eq!(s1, &amp;[5,6,7]);           // while s1 &amp; s2 are unaffected
+assert_eq!(s2, &amp;[1,2,3,4]);
+</code></pre>
+<h2 id="deferred-mutability-superimpose-lazy-state"><a class="header" href="#deferred-mutability-superimpose-lazy-state">Deferred Mutability; Superimpose lazy state</a></h2>
+<ul>
+<li>Straight swapping of data referenced (could end up a heavy heap operation)</li>
+<li>No ordering logic per iteration</li>
+</ul>
+<pre><code class="language-rust noplayground"> use csx3::merge::Merge;
+
+ let s1 = &amp;mut [5,6,7];
+ let s2 = &amp;mut [1,2,3,4];
+
+ let mut mask = s1.merge_lazy(s2);  // mask mutably borrows s1 &amp; s2
+
+ mask.iter()                        // iterate over merged contents
+     .enumerate()                   // while s1 and s2 are unaffected
+     .for_each(
+        |(i,x)| assert_eq!(*x,i+1) 
+     );
+
+ mask.superimpose_state();          // mutate the order back to s1 and s2
+                                    // and drop mutable references
+ assert_eq!(s1, &amp;[1,2,3]);
+ assert_eq!(s2, &amp;[4,5,6,7]);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pattern-matching-de-normalising-control-flow"><a class="header" href="#pattern-matching-de-normalising-control-flow">Pattern matching: De-normalising control flow</a></h1>
+<p>The merge logic behind the <a href="./merge_in_place.html">in-place</a> requires a control flow that needs to understand the following execution paths</p>
+<ol>
+<li><strong>Phase 1</strong>: compare and swap; both comparison indexes remain within bounds</li>
+<li><strong>Phase 2</strong>: swap remaining forward
+<ol>
+<li>left comparison index out of bounds</li>
+<li>right comparison index out of bounds</li>
+</ol>
+</li>
+</ol>
+<p>Remember that we make use of a <code>pivot</code> point where </p>
+<ul>
+<li>left of <code>pivot</code> everything is ordered</li>
+<li>right of <code>pivot</code>, are the items remaining to either be compared or carried over</li>
+</ul>
+<h2 id="the-challenge"><a class="header" href="#the-challenge">The challenge</a></h2>
+<p>A common approach will be ... </p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Phase 1 : Exit Conditions
+// right_index == total_length =&gt; right part has been exhausted
+// pivot == left_index =&gt; everything in array[...pivot] &lt;&lt; array[right index...], no more comparisons needed
+
+while right_index &lt; total_length &amp;&amp; pivot != right_index {
+
+    if ( array[left_index] &lt;= array[right_index] ) {
+
+            // A: swap left item with partition pivot position
+            // point to the next in order left position
+            left_index += 1;
+            
+        else {
+        
+            // B: swap right item with partition pivot position
+            // point to the next in order item (right slice)
+            right_index += 1;
+        }
+    }
+    // Move partition by one
+    pivot += 1;
+}
+
+// Phase 2 : Exit Conditions
+// left_index == left_array_length =&gt; copied/swapped over the left side
+// pivot == total_length =&gt; 
+
+while left_index &lt; left_array_length-1 &amp;&amp; pivot &lt; total_length-1 {
+
+    // C: swap left item with partition pivot position
+    // point to the next in order left position
+    // Move partition by one
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>From the above we observe that <code>Phase 1:B</code> and <code>Phase 2:C</code> are more or less the same logic. Code that is repeated across multiple execution paths is normally cause for human error especially when someone isn't sufficiently familiar with the logic behind.</p>
+<p>Hence, we need a way to eliminate such code for the benefit of <strong>maintainability</strong>.</p>
+<h2 id="rust-pattern-matching"><a class="header" href="#rust-pattern-matching">Rust pattern matching</a></h2>
+<p>We can unroll the execution flow in the following table</p>
+<pre><code>Conditions Definition
+=====================
+A: (right_index &lt; total_length &amp;&amp; pivot != right_index ) 
+   =&gt; Any more comparisons required ? have we run out of elements to compare ?
+
+B: (left_index &lt; left_array_length-1 &amp;&amp; pivot &lt; total_length-1 )
+   =&gt; Have all left slice elements been processed ? Have we reached the end where i == [c] ?
+   
+  +------+-------+----------+------------------------------------------------
+  |   A  |   B   | if Guard | Action
+  +------+-------+----------+------------------------------------------------
+1 | true |  true |   l &gt; r  | Phase 1: swap right with pivot
+2 | true | false |    N/A   | Exit: Merge completed; finished left part, right part remaining is ordered
+3 | true |  true |    N/A   | Phase 1: l&lt;=r implied; swap left with pivot
+4 |false |  true |    N/A   | Phase 2: move remaining items; swap with pivot
+5 |false | false |    N/A   | Exit: Merge completed; we have reached the end
+  +------+-------+----------+------------------------------------------------
+</code></pre>
+<p>This resembles a state-machine pattern which helps us understand</p>
+<ol>
+<li>condition priority/order, i.e. exit condition is last</li>
+<li>all execution paths and matching logic</li>
+<li>path compression, i.e. Phase 1 &amp; 2 for left copies/swaps</li>
+</ol>
+<p>As a result we make the following observations</p>
+<ul>
+<li>Paths (1) &amp; (3) only differ by the <code>Guard</code> condition</li>
+<li>Paths (3) &amp; (4) only differ by condition <code>A</code> while the <code>Guard</code> condition is not relevant</li>
+<li>Paths (2) &amp; (5) only differ by condition <code>A</code></li>
+</ul>
+<p>So we can re-prioritise the table's matching order and hence we can further simplify in the following way</p>
+<pre><code class="language-gitignore">  +------+-------+----------+------------------------------------------------
+  |   A  |   B   | if Guard | Action
+  +------+-------+----------+------------------------------------------------
+1 | true |   _   |   l &gt; r  | Phase 1: swap right with pivot
+  +------+-------+----------+------------------------------------------------
+3 |  _   |  true |    N/A   | Phase 1: l&lt;=r implied; swap left with pivot
+4 |  _   |  true |    N/A   | Phase 2: move remaining items; swap with pivot
+  +------+-------+----------+------------------------------------------------
+2 |  _   |   _   |    N/A   | Exit: Merge completed; finished all left part, right remaining is ordered
+5 |  _   |   _   |    N/A   | Exit: Merge completed; we have reached the end
+  +------+-------+----------+------------------------------------------------
+</code></pre>
+<p>With <code>match</code> offering a powerful matching expression mechanism we can use it to write the above table in the following way</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>loop {
+    let a = right_index &lt; total_length &amp;&amp; pivot != right_index;
+    let b = left_index &lt; left_array_length-1 &amp;&amp; pivot &lt; total_length-1
+
+    match (a, b) {
+        (true, _) if array[left_index] &gt; array[right_index] =&gt; {
+            
+            // Phase 1: swap right with pivot
+        }  
+        (_, true) =&gt; {
+        
+            // Phase 1: l&lt;=r implied; swap left with pivot
+            // Phase 2: move remaining items; swap with pivot
+     
+        }
+        (_, _) =&gt; break; // Exit: Merge completed
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>As a result of this analysis </p>
+<ul>
+<li>all execution paths have been understood</li>
+<li>we have eliminated duplication of logic across the paths</li>
+<li>we have been documented the logic in an easily to understand way</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sort-algorithms"><a class="header" href="#sort-algorithms">Sort Algorithms</a></h1>
+<p>Collection of algorithms with implementation attention to rust's expressiveness in terms of Iterators, generic types, matching expressions, ownership and borrowing rules, safe <code>unsafe</code> use, etc</p>
+<p>Below indicative benchmarks of the implemented sort functions compared to rust's standard implementation</p>
+<pre><code class="language-gitignore">Rust vector sort implementation
+===============================
+test bench_std_vector_sort        ... bench:     185,760 ns/iter (+/- 20,645)
+
+Package's slice sort implementations
+====================================
+test bench_countsort              ... bench:      92,429 ns/iter (+/- 11,676)
+test bench_quicksort              ... bench:     280,301 ns/iter (+/- 10,760)
+test bench_mergesort_mut_adjacent ... bench:     501,945 ns/iter (+/- 23,939)
+test bench_mergesort_mut          ... bench:     865,993 ns/iter (+/- 87,394)
+test bench_mergesort              ... bench:   1,047,933 ns/iter (+/- 129,582)
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="merge-sort"><a class="header" href="#merge-sort">Merge Sort</a></h1>
+<p>Generic implementation flavours covering</p>
+<ul>
+<li>in-place (mutable) or out-of-place (immutable) sorting of a given array</li>
+<li>calculation of number of inversion occurred</li>
+</ul>
+<h3 id="in-place-sorting-mutable"><a class="header" href="#in-place-sorting-mutable">In-place sorting (mutable)</a></h3>
+<p>The implementation re-orders/mutates the input array and returns the number if inversions occurred</p>
+<p>In relation to time and space complexity, the implementation offers </p>
+<ul>
+<li><a href="./merge_in_place.html">merging operations of O(n+m) swaps with no use of temp storage</a></li>
+<li>Takes up to <code>O(n+m) * usize</code> memory space per merge cycle which can be further reduced to <code>O(n) * usize</code> </li>
+</ul>
+<pre><code class="language-rust no_run noplayground">pub trait MergeSort&lt;T&gt;
+    where T : Ord {
+    fn mergesort_mut&lt;F&gt;(&amp;mut self, fn_merge: F ) -&gt; usize
+        where F: Copy + FnMut(&amp;mut[T], &amp;mut[T]) -&gt; usize;
+    fn mergesort(&amp;self) -&gt; (usize, Vec&lt;T&gt;);
+}
+
+impl&lt;T&gt;  MergeSort&lt;T&gt; for [T]
+    where T: Copy + Clone + Ord {
+    /// Sort function based on the merge sort algorithm
+    /// Sorts the mutable vector with in-place operations
+    /// while it returns the total count of inversions occurred
+    ///
+    /// The following functions are available to use as passing parameter
+    /// - merge_mut : safe to use with non-adjacent; time: O(n+m), space: O(2n+m)*usize
+    /// - merge_mut_adjacent : use only when slices are adjacent in memory: time: O(n+m), space: O(n)*usize
+    ///
+    /// ```
+    /// use csx3::{ merge::Merge, sort::merge::MergeSort };
+    ///
+    /// let input = &amp;mut [8, 4, 2, 1];
+    ///
+    /// assert_eq!( input.mergesort_mut(Merge::merge_mut_adjacent), 6 );
+    /// assert_eq!( input, &amp;[1,2,4,8] );
+    /// ```
+    fn mergesort_mut&lt;F&gt;(&amp;mut self, mut fn_merge: F ) -&gt; usize
+        where F: Copy + FnMut(&amp;mut[T], &amp;mut[T]) -&gt; usize  {
+
+        let len = self.len();
+
+        //println!(&quot;\tInput: ({}){:?} =&gt;&quot;, len, v);
+        match len {
+            // unity slice, just return it
+            0..=1 =&gt; 0,
+            // sort the binary slice and exit
+            // use a local variable to eliminate the need for &amp;mut as input
+            // and given we output a new vector
+            2 =&gt; {
+                if self[0] &gt; self[1] {
+                    self.swap(0, 1);
+                    return 1usize
+                }
+                0usize
+            },
+            // if slice length longer than 2 then split recursively
+            _ =&gt; {
+                let (left, right) = self.split_at_mut(len &gt;&gt; 1);
+                let left_inv = left.mergesort_mut(fn_merge);
+                let right_inv = right.mergesort_mut(fn_merge);
+
+                // merge the two slices taking an in-place merging approach - no additional memory
+                // plus return the total inversions occured
+                let merge_inv = fn_merge(left, right);
+
+                //println!(&quot;\tMerged: {:?}{:?} =&gt; {}&quot;, left, right, left_inv + right_inv + merge_inv);
+                left_inv + right_inv + merge_inv
+            }
+        }
+    }
+</code></pre>
+<h3 id="out-of-place-sorting-immutable"><a class="header" href="#out-of-place-sorting-immutable">Out-of-place sorting (immutable)</a></h3>
+<p>The implementation returns a sorted copy of the input array along with the total number of inversions occurred.</p>
+<p>The implementation </p>
+<ul>
+<li>Utilises <code>Iterator</code> traits of input slices to retrieve the next in order element through the <code>next()</code> function.</li>
+<li>Returns the inversion <code>count</code> per position and as part of calling <code>next()</code> function</li>
+<li>Takes <code>O(n+m) * typeof(array)</code> memory space per merge cycle</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">    /// Sort function based on the merge sort algorithm
+    /// Returns a new sorted vector given an input reference slice - heap allocations
+    /// along with the total count of inversions occurred
+    /// ```
+    /// use csx3::sort::merge::MergeSort;
+    ///
+    /// let input = &amp;[8, 4, 2, 1];
+    ///
+    /// assert_eq!( input.mergesort(), (6, vec![1,2,4,8]) );
+    /// ```
+    fn mergesort(&amp;self) -&gt; (usize, Vec&lt;T&gt;) {
+
+        let len = self.len();
+
+        //println!(&quot;\tInput: ({}){:?} =&gt;&quot;, len, v);
+        match len {
+            // unity slice, just return it
+            0..=1 =&gt; (0, self.to_vec()),
+            // sort the binary slice and exit
+            // use a local variable to eliminate the need for &amp;mut as input
+            // and given we output a new vector
+            2 =&gt; {
+                let mut inv_count = 0usize;
+                let mut output = self.to_vec();
+                if self[0] &gt; self[1] {
+                    output.swap(0, 1);
+                    inv_count += 1;
+                }
+                (inv_count, output)
+            },
+            // if slice length longer than 2 then split recursively
+            _ =&gt; {
+                let (left, right) = self.split_at(len &gt;&gt; 1);
+                let (left_inv, left) = left.mergesort();
+                let (right_inv, right) = right.mergesort();
+
+                // return a vector of the merged but ordered slices
+                // plus inversions vector; inversion count per position
+                let (merge_vec, output ):( Vec&lt;_&gt;, Vec&lt;T&gt;) = MergeIterator::new(left.iter(),right.iter()).unzip();
+                // println!(&quot;\tInversion Vector: {:?}&quot;, &amp;merge_vec);
+
+                // sum up the inversion count vector
+                let merge_inv : usize = merge_vec.into_iter().filter(|x| *x &gt; 0).sum();
+                //println!(&quot;\tInversion Vector: {:?}&quot;, &amp;merge_vec);
+
+                //println!(&quot;\tMerged: {:?}{:?} =&gt; {}&quot;, left, right, left_inv + right_inv + merge_inv);
+                (left_inv + right_inv + merge_inv, output)
+            }
+        }
+    }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quick-sort"><a class="header" href="#quick-sort">Quick Sort</a></h1>
+<p>A generic implementation that mutably sorts the input array by recursively pivoting around a specific point that is randomly selected</p>
+<pre><code class="language-rust no_run noplayground">pub trait QuickSort {
+    fn quick_sort(&amp;mut self);
+}
+
+impl&lt;T&gt; QuickSort for [T]
+    where T: Copy + Clone + Ord {
+
+    /// Sorts a given array using the Quick Sort algorithm.
+    /// The function rearranges the array contents rather than returning a new sorted copy of the input array
+    /// ```
+    /// use csx3::sort::quick::QuickSort;
+    ///
+    /// let v = &amp;mut [3,5,8,1,2,4,6,0];
+    ///
+    /// v.quick_sort();
+    /// assert_eq!(v, &amp;[0,1,2,3,4,5,6,8]);
+    /// ```
+    fn quick_sort(&amp;mut self) {
+
+        // have we reached the end of the recursion ?
+        if self.len() &lt; 2 {
+            return;
+        }
+        // pick an index at random based on a uniform distribution
+        let idx = self.len() &gt;&gt; 1;
+        // partition the array into to mutable slices for further sorting
+        let (left_partition,_ , right_partition) = self.partition_at_idx(idx);
+
+        // Recurse against left an right partitions
+        left_partition.quick_sort();
+        right_partition.quick_sort();
+    }
+}
+</code></pre>
+<h2 id="partitioning-around-a-pivot"><a class="header" href="#partitioning-around-a-pivot">Partitioning around a pivot</a></h2>
+<p>Splits an array into two mutable slices/partitions around a given pivot location such that</p>
+<p><code>[values in left partition] &lt; [pivot] &lt; [values in right partition]</code></p>
+<pre><code class="language-rust no_run noplayground">pub trait Partition&lt;T&gt; {
+    fn partition_at_idx(&amp;mut self, idx: usize) -&gt; (&amp;mut [T], &amp;mut T, &amp;mut [T]);
+}
+
+impl&lt;T&gt; Partition&lt;T&gt; for [T]
+    where T: Copy + Clone + Ord {
+
+    /// Splits an array into two mutable slices/partitions around a pivot location index
+    /// so that *[values in left partition] &lt; [pivot] &lt; [values in right partition]*
+    /// ```
+    /// use csx3::sort::*;
+    /// use csx3::sort::Partition;
+    /// let mut v = vec![6,12,5,9,7,8,11,3,1,4,2,10];
+    /// let (l, idx, r) = v.partition_at_idx(4);
+    ///
+    /// // [2, 5, 6, 3, 1, 4],7,[9, 12, 8, 11, 10]
+    /// // idx = &amp;7 (6th position using zero based index)
+    /// assert_eq!(l, &amp;[2,5,6,3,1,4]);
+    /// assert_eq!(idx, &amp;7);
+    /// assert_eq!(r, &amp;[9,12,8,11,10]);
+    /// ```
+    fn partition_at_idx(&amp;mut self, idx: usize) -&gt; (&amp;mut [T], &amp;mut T, &amp;mut [T]) {
+
+        let len = self.len();
+        assert!(idx &lt; len);
+
+        let mut i = 0usize;
+
+        // swap v[idx] to v[0] before entering the for loop
+        self.swap(0, idx);
+
+        // the for_each will own the &amp;mut v anything we need within the loop
+        // we'll have to get it before we get in
+        let pivot = self[0];
+        let ptr = self.as_mut_ptr();
+
+        // v[0] holds the pivot point hence we start comparing from 2nd item v[1]
+        // j : points to last element checked
+        // i : position in array so that v[1..i] &lt; v[i] &lt; r[i+1..j]
+        self.iter_mut()
+            .enumerate()
+            .skip(1)
+            .for_each( |(j, val)| {
+                if pivot &gt; *val {
+                    i+=1;
+                    // would be nice to make a call to v.swap(i, j) but &amp;mut v is now owned by for_each
+                    // so we cannot use it in the loop as this increases its borrow counter hence we need another way
+                    // We extract a ptr before entering the loop to use for swapping the item
+                    // and unless we find a better way that doesn't need unsafe neither use of while or for loops
+                    unsafe {
+                        std::ptr::swap::&lt;T&gt;(ptr.add(i), ptr.add(j) );
+                    }
+                }
+            });
+        // we found the correct order for pivot
+        // hence swap v[i] with v[0]
+        self.swap(0,i);
+        //println!(&quot;\tf:{:?}, ({})&quot;, v, i+1);
+
+        // split the array into [left part], [pivot + right partition]
+        let (l, r) = self.split_at_mut(i);
+        // split further into [pivot], [right partition]
+        let (p, r) = r.split_at_mut(1);
+
+        (l, &amp;mut p[0], r)
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="count-sort"><a class="header" href="#count-sort">Count Sort</a></h1>
+<p>A sorting algorithm with <strong>O(n) time complexity</strong> with the following key points</p>
+<ul>
+<li>Sorts the array in 2 passes</li>
+<li>Does not make use of comparisons</li>
+<li>Keeps a Bookkeeping array for counting number of occurrences per array item.</li>
+</ul>
+<p>The algorithm's limitation is that in its worst case it could consume <code>2 ^ bits</code> of memory especially when </p>
+<ul>
+<li>32 &amp; 64 bit types are used,</li>
+<li>with arrays where the distance between the array's MIN and MAX values is significantly large</li>
+</ul>
+<h2 id="challenges-working-with-integer-arrays"><a class="header" href="#challenges-working-with-integer-arrays">Challenges working with integer arrays</a></h2>
+<p>The algorithm requires the ability to <strong>translate</strong> </p>
+<ul>
+<li>Array values (positive or negative) to BookKeeping indexes (positive)</li>
+<li>BookKeeping Index positions (positive) to negative or positive values</li>
+</ul>
+<pre><code>+---+---+---+---+---+---+---+---+     Type: Integer or Unsigned
+| 2 | 2 | 5 | 5 | 8 | 1 | 5 | 3 |     (Min, Max) = (1,8)
++---+---+---+---+---+---+---+---+     (distance) = Min - Max + 1 = 8
+  |   |   |   |    \______|__
+   \__|    \___\_________/   \
+      |           |           |
++---+---+---+---+---+---+---+---+    Type: Unsigned
+| 1 | 2 | 1 | 0 | 3 | 0 | 0 | 1 |    BookKeeping (BK) capacity(8)
++---+---+---+---+---+---+---+---+    holding counts from BK[min..max]   
+min(1)  BK['5'] = ^         max(8)       
+</code></pre>
+<h3 id="distance-calculation"><a class="header" href="#distance-calculation">Distance calculation</a></h3>
+<p>Therefore, knowing the <code>distance</code> between <code>min</code> &amp; <code>max</code> values is fundamental to the algorithm's logic.</p>
+<p>However, integer values can easily cause an overflow when the <code>distance</code> between <code>min</code> and <code>max</code> exceeds the <code>[-127..0]</code> or <code>[0..127]</code> ranges</p>
+<pre><code>-127            0            +127
+  |-------------|-------------|        Both Min and Max are negative
+   &lt;-- dist ---&gt;                        Safe: Dist = (max - min)
+
+-127            0            +127
+  |-------------|-------------|        Min is negative, Max is positive
+                                       Unsafe: (max - min) overflows
+    &lt;-------- dist ---------&gt;                
+
+-127            0            +127
+  |-------------|-------------|        Both Min &amp; Max are positive
+                  &lt;-- dist --&gt;         Safe: Dist = (max - min)
+</code></pre>
+<p>Therefore, when <code>min</code> and <code>max</code> have opposite signs we have to convert both to <code>usize</code> before we calculate the <code>distance</code>. Therefore the below implementation will calculate the distance correctly for both <code>signed</code> and <code>unsigned</code> types.</p>
+<pre><code class="language-rust noplayground">fn dist_from(&amp;self, min: i8) -&gt; usize {
+    if *self &gt; min {
+        (*self as usize).wrapping_sub(min as usize)
+    } else {
+        (min as usize).wrapping_sub(*self as usize)
+    }
+}
+
+let len: usize = max.dist_from(min);
+</code></pre>
+<p>Now that we know how to calculate the <code>distance</code> we can proceed with <strong>value-to-index</strong> and <strong>index-to-value</strong> translations.</p>
+<h3 id="value-to-index-translation"><a class="header" href="#value-to-index-translation">Value-to-index translation</a></h3>
+<p>We know that </p>
+<ul>
+<li><code>Min</code> maps to <code>Bookkeeping[0]</code> position and</li>
+<li><code>Max</code> maps to <code>BookKeeping[distance]</code> position</li>
+<li>where <code>Min &lt;= array[..] &lt;= Max</code></li>
+</ul>
+<p>Therefore, the index is found as <code>index = value - Min</code> which more or less is the <code>distance</code> from <code>min</code>, which we already know how to calculate.
+As a result the translation is given by the following implementation ...</p>
+<pre><code class="language-rust noplayground">let idx = value.dist_from(min);     // Map array value -&gt; BK index 
+BookKeeping[idx] += 1;              // increment count by 1
+</code></pre>
+<h3 id="index-to-value-translation"><a class="header" href="#index-to-value-translation">Index-to-value translation</a></h3>
+<p>This is the reverse effect, where we need to translate the <code>index</code> from the BookKeeping onto the corresponding array <code>value</code>, since we know that BookKeeping position <code>[0]</code> is the <code>min</code> value wihtin the input array.</p>
+<p>For example, if <code>min == 6</code> then the array's <code>value</code> at position <code>index</code> will be given as</p>
+<ul>
+<li>for <code>index = 0</code>, <code>array[0] = MIN + 0</code></li>
+<li>for <code>index = 1</code>, <code>array[1] = MIN + 1</code></li>
+<li>for <code>index = 2</code>, <code>array[2] = MIN + 2</code></li>
+<li>etc</li>
+</ul>
+<p>Recall that the <code>max(index) == distance</code> and <code>distance</code> </p>
+<ul>
+<li>always <strong><em>fits</em></strong> the unsigned numbers value range</li>
+<li><strong><em>overflows</em></strong> the signed numbers value range as shown below</li>
+</ul>
+<pre><code>-127            0            +127
+  |-------------|-------------|        (Min,Max) = (-123,122)
+    -123 &lt;----- dist -----&gt; 122        distance = 245
+     min                    max        value = (Min: -123 + index: 245)
+                                       ^^^^^ ** OVERFLOW **
+</code></pre>
+<p>For example, <code>i8</code> has <code>i8::MIN</code> value of <code>-128</code>, and by adding <code>index</code> with value <code>245</code> will cause an overflow of <code>-11</code>; this is equivalent to <code>245 % i8::MIN</code>.
+However, the trick here is that by adding <code>-11</code> to <code>min</code> and wrapping around, will yield the desired <code>value</code>.</p>
+<p>Therefore, the steps  to translate <code>index/unsigned</code> to <code>value/signed</code> are</p>
+<ol>
+<li>Convert <code>index</code> to <code>i8</code> given by <code>index % i8:MIN</code></li>
+<li>and do a <strong>modular add</strong> with <code>min</code></li>
+</ol>
+<pre><code>Value = (Min  + (   index as i8  )) % 128                
+=====   =====   ===================   ===
+82    = (-123 + (-51 = 205 % -128)) % 128
+113   = (-123 + (-20 = 236 % -128)) % 128
+122   = (-123 + (-11 = 245 % -128)) % 128
+</code></pre>
+<p>Rust performs then above operation with the following statement and implemented as<code>Distance::add_index()</code></p>
+<pre><code class="language-rust noplayground">array[index] = min.wrapping_add( index as i8 );
+</code></pre>
+<h2 id="final-implementation"><a class="header" href="#final-implementation">Final implementation</a></h2>
+<p>Hence, by putting all the above together, we have the following implementation for the <code>CountSort</code> trait</p>
+<pre><code class="language-rust no_run noplayground">/// Sorts a given array using the Count Sort algorithm.
+/// Input array NuType shouldn't exceed u16 to avoid memory issues
+/// ```
+/// use csx3::sort::count::CountSort;
+///
+/// let v = &amp;mut [3i8,5,8,1,2,4,6,0];
+///
+/// v.count_sort();
+/// assert_eq!(v, &amp;[0,1,2,3,4,5,6,8]);
+/// ```
+pub trait CountSort {
+
+    fn count_sort(&amp;mut self);
+}
+
+// CountSort macro implementation for singed and unsigned types
+impl&lt;T&gt; CountSort for [T]
+    where T: Distance&lt;T&gt; + Copy + Ord + Debug{
+
+    fn count_sort(&amp;mut self) {
+
+        if self.len() &lt; 2 {
+            return;
+        }
+        // find min and max elements
+        // so we can construct the boundaries of the counting array
+        // i.e. if (min,max) = (13232, 13233) then we need only an array with capacity(2)
+        let (min, max) = min_max(self);
+
+        // construct a counting array with length = Max - Min + 1
+        let len: usize = max.dist_from(min);
+        // initialise it with zero counts
+        let mut count = vec![0usize; len + 1];
+        // and finally measure counts per item
+        self.iter()
+            .for_each(|x| {
+                // construct index offset based on Min value, such as, Min is at [0] position
+                let idx: usize = x.dist_from(min);
+                count[idx] += 1;
+            });
+
+        // play back onto the input slice the counts collected with Sum of all counts == slice.len()
+        let iter = &amp;mut self.iter_mut();
+        count.into_iter()
+            .enumerate()
+            .filter(|(_, x)| *x &gt; 0)
+            .for_each(|(i, x)| {
+                // place value at `x` positions
+                iter.take(x)
+                    // translate index -&gt; value
+                    // given value = Min + index
+                    .for_each(|n| { *n = min.add_index(i ) });
+            });
+    }
+}
+/// Distance calculation between two types that are either both signed or unsigned
+/// Returns the distance as unsigned type
+pub trait Distance&lt;T&gt; {
+    fn dist_from(&amp;self, min: T) -&gt; usize;
+    fn add_index(&amp;self, idx: usize) -&gt; T;
+}
+
+/// Macro implementation of Distance trait for all signed types
+macro_rules! impl_dist_signed {
+    ( $($x:ty),*) =&gt; {
+        $( impl Distance&lt;$x&gt; for $x {
+            #[inline]
+            fn dist_from(&amp;self, min: $x) -&gt; usize {
+                if *self &gt; min {
+                    (*self as usize).wrapping_sub(min as usize)
+                } else {
+                    (min as usize).wrapping_sub(*self as usize)
+                }
+            }
+            #[inline]
+            fn add_index(&amp;self, idx: usize) -&gt; $x { self.wrapping_add(idx as $x) }
+        } )*
+    }
+}
+impl_dist_signed!(i8,i16,i32,isize,u8,u16,u32,usize);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="selection-algorithm"><a class="header" href="#selection-algorithm">Selection Algorithm</a></h1>
+<p>if you had an array entry of 4 elements, containing the numbers 10, 8, 2 and 4, and you were looking for the 3rd statistic that would be 8.</p>
+<p>The first order statistic is just the minimum element of the array. That's easier to find with a linear scan. The nth order statistic is just the maximum, again easier, easy to find with a linear scan. The middle element is the median.</p>
+<p>For all other cases, the selection algorithm returns the answers in O(n) time</p>
+<h2 id="implementation-flavours"><a class="header" href="#implementation-flavours">Implementation flavours</a></h2>
+<h3 id="randomised-approach"><a class="header" href="#randomised-approach">Randomised approach</a></h3>
+<p>Where pivot selected is chosen randomly based on the 75/25 rule</p>
+<pre><code class="language-rust no_run noplayground">pub trait Select&lt;T&gt; {
+    fn r_selection(&amp;mut self, nth_min: usize) -&gt; &amp;T;
+}
+
+impl&lt;T&gt; Select&lt;T&gt; for [T]
+    where T: Copy + Ord {
+    /// Find the nth order statistic within an unordered set with O(n) performance
+    /// using nth_min as 1 will return the smallest item; 2 the second smallest, etc
+    /// When function returns, the input array has been rearranged so that ```item == array[ nth order ]```
+    /// ```
+    /// use csx3::select::Select;
+    ///
+    /// let (arr, nth_order) = (&amp;mut [23,43,8,22,15,11], 1usize);
+    ///
+    /// let ret_val = arr.r_selection(nth_order);
+    /// assert_eq!(ret_val, &amp;8);
+    /// assert_eq!(&amp;arr[nth_order-1], &amp;8);
+    /// ```
+    fn r_selection(&amp;mut self, nth_min: usize) -&gt; &amp;T
+    {
+
+        // println!(&quot;Input: {:?}::{}th&quot;, v, order_nth);
+        if self.len() == 1 {
+            return &amp;self[0];
+        }
+
+        // pick an index at random based on a uniform distribution
+        let idx = rand::thread_rng().gen_range(0..(self.len() - 1));
+        // find out the nth order of this sample
+        let (left_partition, nth, right_partition) = self.partition_at_idx(idx);
+
+        let order = left_partition.len() + 1;
+        // println!(&quot;\tAsked:{}ord Picked:{}th, {:?} {:?}ord {:?}&quot;, nth_min, idx, left_partition, order, right_partition);
+
+        // is nth order sampled over, equal or above the desired nth_min ?
+        match nth_min.cmp(&amp;order) {
+            // we've found the item in nth_min order
+            Ordering::Equal =&gt; nth,
+            // the nth_min is below the nth found so recurse on the left partition
+            Ordering::Less =&gt;
+                left_partition.r_selection(nth_min),
+            // the nth_min is above the nth found so recurse on the right partition with adjusted order
+            Ordering::Greater =&gt;
+                right_partition.r_selection(nth_min - order),
+        }
+    }
+}
+</code></pre>
+<h3 id="deterministic-approach"><a class="header" href="#deterministic-approach">Deterministic approach</a></h3>
+<p>Where the pivot selected is always the median of the recursive set provided by the below implementation</p>
+<p>The idea is to</p>
+<ul>
+<li>break the array into chunks of 5 elements</li>
+<li>sort them and pick <code>chunk[3]</code> as the median</li>
+<li>Collect all medians into a new <code>array</code></li>
+<li>recurse until you converge to the median</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">/// Returns a vector of N/5 medians where N = input array length
+/// It breaks array into N/5 sub-arrays of length 5 for cheap sorting and picking the median value
+///
+pub fn medians_of_medians&lt;T&gt;(v:&amp;mut [T]) -&gt; Vec&lt;T&gt;
+    where T : Copy + Ord + Debug {
+
+    // extract median of medians array
+    // split input slice into n/5 groups of 5
+    v.chunks_mut(5)
+        .map(|chunk| {
+            // sort each group
+            chunk.mergesort_mut(Merge::merge_mut_adjacent);
+            // pull the median out
+            chunk[ chunk.len() &gt;&gt; 1]
+        })
+        // return as vector
+        .collect()
+}
+
+/// Finds the median value within an array of N elements
+pub fn find_median&lt;T&gt;(v:&amp;mut [T]) -&gt; T
+    where T : Copy + Ord + Debug {
+
+    if v.len() == 1 {
+        return v[0]
+    }
+    let mut medians: Vec&lt;T&gt; = medians_of_medians(v);
+    find_median(&amp;mut medians)
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="graph-algorithms"><a class="header" href="#graph-algorithms">Graph Algorithms</a></h1>
+<p>Collection of graph algorithms that address problems like shortest path, network bottlenecks or weaknesses, strongly connected components etc </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kargers-minimum-cut-algorithm"><a class="header" href="#kargers-minimum-cut-algorithm">Karger's Minimum Cut Algorithm</a></h1>
+<p>Karger's algorithm is a randomized algorithm to compute a minimum cut of a connected graph. The algorithm will <em><strong>randomly contract</strong></em> the graph a number of times in order to identify the minimum number of edges that when removed will cause the graph to split into two disjoint subsets that is minimal in some metric.</p>
+<p>The key concept behind this algorithm is that the minimum cut relates to a <strong>very small</strong> subset of edges, hence statistically through random sampling and following a <strong>number of trials</strong> will always arrive to the graph's optimum cut; the probability to contract such edges is statistically small.</p>
+<h2 id="how-to-find-the-minimum-cut-of-a-graph"><a class="header" href="#how-to-find-the-minimum-cut-of-a-graph">How to find the minimum cut of a graph</a></h2>
+<p>The algorithm performs the following steps </p>
+<ul>
+<li>Perform <code>N * ln(N)</code> contractions of the graph, where <code>N</code> is the total number of graph nodes
+<ul>
+<li>Record the resulting minimum-cut per contraction</li>
+<li>Compare result to current min-cut and if smaller make new min-cut the current</li>
+</ul>
+</li>
+<li>Return the smallest minimum-cut recorded</li>
+</ul>
+<p>The below image shows 10 repetitions of the contraction procedure. The 5th repetition finds the minimum cut of size 3
+<img src="img/10_repetitions_of_Karger%E2%80%99s_contraction_procedure.svg.png" alt="image" /></p>
+<h2 id="implementation-approach"><a class="header" href="#implementation-approach">Implementation approach</a></h2>
+<p>Given that we have a way to contract a graph down to two node subsets, all we have to do is to perform <code>N*log(N)</code> trials in order to find the minimum cut. </p>
+<pre><code class="language-rust no_run noplayground">    fn minimum_cut(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        // calculate the number of iterations as N*log(N)
+        let nodes = self.nodes.len();
+        let mut iterations = nodes as u32 * nodes.ilog2();
+        println!(&quot;Run Iterations: {iterations}&quot;);
+
+        // initialise min-cut min value and output as Option
+        let mut min_cut = usize::MAX;
+        let mut result = None;
+        let repetitions = iterations as f32;
+
+        // iterate N*log(N) time or exit if min-cut found has only 2 edges
+        let mut f = f32::MAX;
+        while iterations != 0 &amp;&amp; f &gt; 0.088 {
+
+            // contract the graph
+            if let Some(graph) = self.contract_graph() {
+
+                // extract the number of edges
+                let edges = graph.export_edges();
+                // count the edges
+                let edges = edges.len();
+
+                // if number of edges returned is smaller than current
+                // then store the min-cut returned from this iteration
+                if edges &lt; min_cut {
+                    min_cut = edges;
+                    result = Some(graph);
+                    f = (min_cut as f32).div(repetitions);
+                    println!(&quot;({iterations})({f:.3}) Min Cut !! =&gt; {:?}&quot;, edges);
+                }
+        }
+            iterations -= 1;
+        }
+        result
+    }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="graph-contraction-algorithm"><a class="header" href="#graph-contraction-algorithm">Graph Contraction Algorithm</a></h1>
+<p>Graph contraction is a technique for computing properties of graph in parallel. As its name implies, it is a contraction technique, where we solve a problem by reducing to a smaller instance
+of the same problem. Graph contraction is especially important because divide-and-conquer is difficult to apply to
+graphs efficiently. The difficulty is that divide-and-conquer would require reliably partitioning
+the graph into smaller graphs. Due to their irregular structure, graphs are difficult to partition.
+In fact, graph partitioning problems are typically NP-hard.<sup class="footnote-reference"><a href="#note">1</a></sup></p>
+<h2 id="how-to-contract-a-graph"><a class="header" href="#how-to-contract-a-graph">How to contract a graph</a></h2>
+<p>The algorithm performs the following steps</p>
+<ul>
+<li><strong>STEP 1</strong>: Initialise temporary super node and super edge structures</li>
+<li><strong>STEP 2</strong>: Contract the graph, until 2 super nodes are left
+<ul>
+<li><strong>STEP A</strong>: select a random edge</li>
+<li><strong>STEP B</strong> : Contract the edge by merging the edge's nodes</li>
+<li><strong>STEP C</strong> : Collapse/Remove newly formed edge loops since src &amp; dst is the new super node</li>
+<li><strong>STEP D</strong> : Identify all edges affected due to the collapsing of nodes</li>
+<li><strong>STEP E</strong> : Repoint affected edges to the new super node</li>
+</ul>
+</li>
+<li><strong>STEP 3</strong> : find the edges between the two super node sets</li>
+</ul>
+<p>A visual example is the below image which shows the successful run of the contraction algorithm on a 10-vertex graph. The minimum cut has size 3.
+<img src="img/Single_run_of_Karger%E2%80%99s_Mincut_algorithm.svg.png" alt="image" /></p>
+<h2 id="implementation-approach-1"><a class="header" href="#implementation-approach-1">Implementation approach</a></h2>
+<p>The key to the implementation is to</p>
+<ul>
+<li>process all nodes and their edges, so you end up with two <strong>super-sets</strong> of nodes</li>
+<li>finally calculate the graph edges crossing the two node <strong>super-sets</strong></li>
+</ul>
+<h3 id="helper-data-structures"><a class="header" href="#helper-data-structures">Helper Data Structures</a></h3>
+<p>Therefore, the following temporary data structures are necessary </p>
+<ul>
+<li><strong>Super-nodes</strong> : <code>HashMap</code> holding <code>[KEY:super-node, VALUE:set of merged nodes]</code></li>
+<li><strong>Super-edges</strong> : list of edges in the form of <code>HashBag</code> that holds hash pairs of <code>[VALUE:(source:super-node, destination:super-node)]</code></li>
+</ul>
+<p>Worth noting here that </p>
+<ul>
+<li>We <strong>must</strong> be in a position to deal with repeating <code>(2..*)</code> <code>super-edges</code> resulting from the contraction of two <code>super-nodes</code>, hence the use <code>HashBag</code> which is an unordered multiset implementation. Use of <code>HashSet</code> results to elimination of <code>super-edge</code> multiples hence <strong><em>diminishing</em></strong> algorithm's statistical ability to produce the optimal graph contraction</li>
+<li>We <strong>must</strong> account for <code>SuperEdges</code> multiples while we (a) remove loops and (b) re-aligning <code>super-edges</code> following two <code>super-node</code> contraction</li>
+</ul>
+<p>The following implementation of <code>Super-Edges</code> structure, provides and abstracts, the key operations of edge collapsing that is</p>
+<ul>
+<li>extract a random edge for the total set</li>
+<li>removal of an explicit edge</li>
+<li>repositioning of edges from one node onto another</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug)]
+pub struct SuperEdges {
+    list: HashMap&lt;Node, HashBag&lt;NodeType&gt;&gt;,
+    length: usize
+}
+
+impl SuperEdges {
+
+    pub fn get_random_edge(&amp;self) -&gt; Edge {
+        let mut idx = thread_rng().gen_range(0..self.length);
+
+        let mut iter = self.list.iter();
+        if let Some((idx, &amp;node, edges)) = loop {
+            if let Some((node,edges)) = iter.next() {
+                if idx &lt; edges.len() {
+                    break Some((idx, node, edges))
+                }
+                idx -= edges.len();
+            } else {
+                break None
+            }
+        } {
+            Edge(
+                node,
+                edges.iter()
+                    .nth(idx)
+                    .copied()
+                    .unwrap_or_else(|| panic!(&quot;get_random_edge(): cannot get dst node at position({idx} from src({node})&quot;))
+            )
+        } else {
+            panic!(&quot;get_random_edge(): Couldn't pick a random edge with index({idx}) from src&quot;)
+        }
+    }
+
+    pub fn remove_edge(&amp;mut self, src: Node, dst: Node) {
+        // print!(&quot;remove_edge(): {:?} IN:{:?} -&gt; Out:&quot;, edge, self);
+        let edges = self.list.get_mut(&amp;src).unwrap_or_else(|| panic!(&quot;remove_edge(): Node({src}) cannot be found within SuperEdges&quot;));
+        self.length -= edges.contains(&amp;dst.into());
+        while edges.remove(&amp;dst.into()) != 0 { };
+        // println!(&quot;{:?}&quot;,self);
+    }
+    
+    pub fn move_edges(&amp;mut self, old: Node, new: Node) {
+        // Fix direction OLD -&gt; *
+        let old_edges = self.list
+            .remove(&amp;old)
+            .unwrap_or_else(|| panic!(&quot;move_edges(): cannot remove old node({old})&quot;));
+        // print!(&quot;move_edges(): {old}:{:?}, {new}:{:?}&quot;, old_edges,self.list[&amp;new]);
+        self.list.get_mut(&amp;new)
+            .unwrap_or_else(|| panic!(&quot;move_edges(): failed to extend({new}) with {:?} from({new})&quot;, old_edges))
+            .extend( old_edges.into_iter());
+
+        // Fix Direction * -&gt; OLD
+        self.list.values_mut()
+            .filter_map( |e| {
+                let count = e.contains(&amp;old.into());
+                if  count &gt; 0  { Some((count, e)) } else { None }
+            })
+            .for_each(|(mut count, edges)| {
+                while edges.remove(&amp;old.into()) != 0 {};
+                while count != 0 { edges.insert(new.into()); count -= 1; }
+            });
+        // println!(&quot; -&gt; {:?}&quot;,self.list[&amp;new]);
+    }
+}
+</code></pre>
+<p>Similarly, the <code>SuperNodes</code> structure, provides and abstracts</p>
+<ul>
+<li>the merging of two nodes into a super node</li>
+<li>indexed access to super nodes</li>
+<li>iterator</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug)]
+/// Helper Structure that holds the `set` of merged nodes under a super node `key`
+/// The HashMap therefore is used as [Key:Super Node, Value: Set of Merged Nodes]
+/// A super node's set is a `Graph Component` in itself, that is, you can visit a Node from any other Node within the set
+pub struct SuperNodes {
+    super_nodes:HashMap&lt;Node,HashSet&lt;Node&gt;&gt;
+}
+impl Clone for SuperNodes {
+    fn clone(&amp;self) -&gt; Self {
+        SuperNodes { super_nodes: self.super_nodes.clone() }
+    }
+}
+impl SuperNodes {
+    /// Total size of `Graph Components`, that is, super nodes
+    pub fn len(&amp;self) -&gt; usize { self.super_nodes.len() }
+    /// Given an Graph node, the function returns the Super Node that it belongs
+    /// for example given the super node [Key:1, Set:{1,2,3,4,5}]
+    /// querying for node `3` will return `1` as its super node
+    pub fn find_supernode(&amp;self, node: &amp;Node) -&gt; Node {
+        // is this a super node ?
+        if self.contains_supernode(node) {
+            // if yes, just return it
+            *node
+        } else {
+            // otherwise find its super node and return it
+            // get an Iterator for searching each super node
+            let mut sets = self.super_nodes.iter();
+            loop {
+                // If next returns [Super Node, Node Set] proceed otherwise exist with None
+                let Some((&amp;src, set)) = sets.next() else { break None };
+                // Is the queried Node in the set ?
+                if set.contains(node) {
+                    // yes, return the super node
+                    break Some(src)
+                }
+            }.unwrap_or_else(|| panic!(&quot;find_supernode(): Unexpected error, cannot find super node for {node}&quot;))
+        }
+    }
+    /// Returns the graph component, aka `set` of nodes, for a given super node `key`,
+    /// otherwise `None` if it doesn't exist
+    pub fn contains_supernode(&amp;self, node: &amp;Node) -&gt; bool {
+        self.super_nodes.contains_key(node)
+    }
+    /// The function takes two super nodes and merges them into one
+    /// The `dst` super node is merged onto the `src` super node
+    pub fn merge_nodes(&amp;mut self, src:Node, dst:Node) -&gt; &amp;mut HashSet&lt;Node&gt; {
+        // remove both nodes that form the random edge and
+        // hold onto the incoming/outgoing edges
+        let super_src = self.super_nodes.remove(&amp;src).unwrap();
+        let super_dst = self.super_nodes.remove(&amp;dst).unwrap();
+
+        // combine the incoming/outgoing edges for attaching onto the new super-node
+        let super_node = super_src.union(&amp;super_dst).copied().collect::&lt;HashSet&lt;Node&gt;&gt;();
+        // re-insert the src node as the new super-node and attach the resulting union
+        self.super_nodes.entry(src).or_insert(super_node)
+    }
+    /// Provides an iterator that yields the Node Set of each super node
+    pub fn iter(&amp;self) -&gt; SuperNodeIter {
+        SuperNodeIter { iter: self.super_nodes.iter() }
+    }
+}
+/// Ability for SuperNode struct to use indexing for search
+/// e.g super_node[3] will return the HashSet corresponding to key `3`
+impl Index&lt;Node&gt; for SuperNodes {
+    type Output = HashSet&lt;Node&gt;;
+    fn index(&amp;self, index: Node) -&gt; &amp;Self::Output {
+        &amp;self.super_nodes[&amp;index]
+    }
+}
+
+/// HashNode Iterator structure
+pub struct SuperNodeIter&lt;'a&gt; {
+    iter: hash_map::Iter&lt;'a, Node, HashSet&lt;Node&gt;&gt;
+}
+
+/// HashNode Iterator implementation yields a HashSet at a time
+impl&lt;'a&gt; Iterator for SuperNodeIter&lt;'a&gt; {
+    type Item = &amp;'a HashSet&lt;Node&gt;;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if let Some(super_node) = self.iter.next() {
+            Some(super_node.1)
+        } else { None }
+    }
+}
+</code></pre>
+<p>The <code>SuperEdges</code> and <code>SuperNodes</code> structures are initiated from the <code>Graph</code> structure</p>
+<pre><code class="language-rust no_run noplayground">/// Helper Graph functions
+impl Graph {
+    /// SuperEdges Constructor
+    pub fn get_super_edges(&amp;self) -&gt; SuperEdges {
+        let mut length = 0;
+        let list = self.edges.iter()
+            .map(|(&amp;n,e)| (n, e.iter().copied().collect::&lt;HashBag&lt;NodeType&gt;&gt;())
+            )
+            .inspect(|(_,c)| length += c.len() )
+            .collect();
+        // println!(&quot;get_super_edges(): [{length}]{:?}&quot;,list);
+        SuperEdges { list, length }
+    }
+    /// SuperNodes Constructor
+    pub fn get_super_nodes(&amp;self) -&gt; SuperNodes {
+        SuperNodes {
+            super_nodes: self.nodes.iter()
+                .map(|&amp;node| (node, HashSet::&lt;Node&gt;::new()))
+                .map(|(node, mut map)| {
+                    map.insert(node);
+                    (node, map)
+                })
+                .collect::&lt;HashMap&lt;Node, HashSet&lt;Node&gt;&gt;&gt;()
+        }
+    }
+}
+</code></pre>
+<h3 id="putting-all-together"><a class="header" href="#putting-all-together">Putting all together</a></h3>
+<p>With the supporting data structures in place we are able to write the following implementation for the contraction algorithm</p>
+<pre><code class="language-rust no_run noplayground">    fn contract_graph(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        if self.edges.is_empty() {
+            return None;
+        }
+
+        // STEP 1: INITIALISE temporary super node and super edge structures
+        let mut super_edges = self.get_super_edges();
+        let mut super_nodes= self.get_super_nodes();
+
+        // STEP 2: CONTRACT the graph, until 2 super nodes are left
+        while super_nodes.len() &gt; 2 {
+
+            // STEP A: select a random edge
+                // get a copy rather a reference so we don't upset the borrow checker
+                // while we deconstruct the edge into src and dst nodes
+            let Edge(src,dst) = super_edges.get_random_edge();
+            // println!(&quot;While: E({src},{dst}):{:?}&quot;,super_edges.list);
+
+            // STEP B : Contract the edge by merging the edge's nodes
+                // remove both nodes that form the random edge and
+                // hold onto the incoming/outgoing edges
+                // combine the incoming/outgoing edges for attaching onto the new super-node
+                // re-insert the src node as the new super-node and attach the resulting union
+            super_nodes.merge_nodes(src, dst.into());
+
+            // STEP C : Collapse/Remove newly formed edge loops since src &amp; dst is the new super node
+            super_edges.remove_edge( src, dst.into());
+            super_edges.remove_edge( dst.into(), src);
+
+            // STEP D : Identify all edges that still point to the dst removed as part of collapsing src and dst nodes
+            // STEP E : Repoint all affected edges to the new super node src
+            super_edges.move_edges(dst.into(), src);
+        }
+
+        // STEP 3 : find the edges between the two super node sets
+        let mut snode_iter = super_nodes.iter();
+        Some(
+            self.get_crossing_edges(
+                snode_iter.next().expect(&quot;There is no src super node&quot;),
+                snode_iter.next().expect(&quot;There is no dst super node&quot;)
+            )
+        )
+    }
+</code></pre>
+<h2 id="finding-graph-edges-between-two-sets-of-nodes"><a class="header" href="#finding-graph-edges-between-two-sets-of-nodes">Finding Graph Edges between two sets of Nodes</a></h2>
+<p>Given subsets of nodes, in order to find the crossing edges we have to</p>
+<ul>
+<li>For each <code>src:node</code> in the <code>node subset A</code>
+<ul>
+<li>Extract the graph's <code>edges</code> originating from the <code>src:node</code></li>
+<li>Test for the <code>intersection</code> of graph's <code>edges</code> (aka destination nodes) against the <code>node subset B</code></li>
+<li>if the <code>intersection</code> is empty proceed, otherwise store the edges in a new <code>graph</code> </li>
+</ul>
+</li>
+</ul>
+<p>Worth noting here that for every edge found we need to account for its opposite self, for example, for <code>Edge(2,3)</code> we need to also add <code>Edge(3,2)</code></p>
+<p>The below function returns the edges of a graph crossing two node subsets.</p>
+<pre><code class="language-rust no_run noplayground">    /// Given two Super Node sets the function returns the crossing edges as a new Graph structure
+    fn get_crossing_edges(&amp;self, src_set: &amp;HashSet&lt;Node&gt;, dst_set: &amp;HashSet&lt;Node&gt;) -&gt; Graph {
+         src_set.iter()
+            .map(|src|
+                ( src,
+                  // get src_node's edges from the original graph
+                  self.edges.get(src)
+                      .unwrap_or_else(|| panic!(&quot;get_crossing_edges(): cannot extract edges for node({src}&quot;))
+                      .iter()
+                      .map(|&amp;ntype| ntype.into() )
+                      .collect::&lt;HashSet&lt;Node&gt;&gt;()
+                )
+            )
+            .map(|(src, set)|
+                // Keep only the edges nodes found in the dst_set (intersection)
+                // we need to clone the reference before we push them
+                // into the output graph structure
+                (src, set.intersection(dst_set).copied().collect::&lt;HashSet&lt;Node&gt;&gt;())
+            )
+            .filter(|(_, edges)| !edges.is_empty() )
+            .fold(Graph::new(), |mut out, (&amp;src, edges)| {
+                // println!(&quot;Node: {node} -&gt; {:?}&quot;,edges);
+                // add edges: direction dst -&gt; src
+                edges.iter()
+                    .for_each(|&amp;dst| {
+                        out.nodes.insert(dst);
+                        out.edges.entry(dst)
+                            .or_default()
+                            .insert(src.into() );
+                    });
+                // add edges: direction src -&gt; dst
+                out.nodes.insert(src);
+                out.edges.insert(
+                    src,
+                    edges.into_iter().map(|edge| edge.into()).collect()
+                );
+                out
+            })
+        // println!(&quot;Crossing graph: {:?}&quot;, output);
+    }
+</code></pre>
+<h3 id="references"><a class="header" href="#references">References:</a></h3>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15210-s15/www/lectures/graph-contract.pdf">Graph Contraction and Connectivity</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="graph-search-algorithms"><a class="header" href="#graph-search-algorithms">Graph Search Algorithms</a></h1>
+<p>The term graph search or graph traversal refers to a class of algorithms based on systematically
+visiting the vertices of a graph that can be used to compute various properties of graphs</p>
+<p>To motivate graph search, let’s first consider the kinds of properties of a graph that we
+might be interested in computing. We might want to determine </p>
+<ul>
+<li>if one vertex is reachable from another. Recall that a vertex <code>u</code> is reachable from <code>v</code> if there is a (directed) path from <code>v</code> to <code>u</code></li>
+<li>if an undirected graph is connected, </li>
+<li>if a directed graph is strongly connected—i.e. there is a path from every vertex to every other vertex</li>
+<li>the shortest path from a vertex to another vertex. </li>
+</ul>
+<p>These properties all involve paths, so it makes sense to think about algorithms that follow paths. This is effectively the goal of graph-search</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="processing-state-of-graph-nodes"><a class="header" href="#processing-state-of-graph-nodes">Processing state of graph nodes</a></h1>
+<p>In most case, we have to maintain some form of processing state while we perform a graph search. The most common processing data that we need to calculate and store is</p>
+<ul>
+<li>A node's visiting <code>state</code></li>
+<li>The <code>parent</code> node, that is, the node we are visiting from</li>
+<li>A unit in terms of <code>cost</code> or <code>distance</code></li>
+</ul>
+<p>The <code>Tracker</code> structure holds the processed graph information while provides the means to</p>
+<ul>
+<li>access a node as an index in the form of <code>tracker[node]</code></li>
+<li>set and update the path cost to a specific node</li>
+<li>set and update the parent node for the path cost calculation</li>
+<li>extract the minimum cost path given a target node
+The below code implements the above functionality</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug,Copy,Clone,PartialEq)]
+pub enum NodeState {
+    Undiscovered,
+    Discovered,
+    Processed
+}
+#[derive(Debug,Clone)]
+pub struct NodeTrack {
+    visited:NodeState,
+    dist:Cost,
+    parent:Option&lt;Node&gt;
+}
+impl NodeTrack {
+    pub fn visited(&amp;mut self, s:NodeState) -&gt; &amp;mut Self {
+        self.visited = s; self
+    }
+    pub fn distance(&amp;mut self, d:Cost) -&gt; &amp;mut Self {
+        self.dist = d; self
+    }
+    pub fn parent(&amp;mut self, n:Node) -&gt; &amp;mut Self {
+        self.parent =Some(n); self
+    }
+    pub fn is_discovered(&amp;self) -&gt; bool {
+        self.visited != NodeState::Undiscovered
+    }
+}
+#[derive(Debug)]
+pub struct Tracker {
+    list: HashMap&lt;Node, NodeTrack&gt;
+}
+pub trait Tracking {
+    fn extract(&amp;self, start:Node) -&gt; (Vec&lt;Node&gt;, Cost) {
+        (self.extract_path(start), self.extract_cost(start))
+    }
+    fn extract_path(&amp;self, start: Node) -&gt; Vec&lt;Node&gt;;
+    fn extract_cost(&amp;self, start: Node) -&gt; Cost;
+}
+impl Tracking for Tracker {
+    fn extract_path(&amp;self, start:Node) -&gt; Vec&lt;Node&gt; {
+        let mut path = VecDeque::new();
+        // reconstruct the shortest path starting from the target node
+        path.push_front(start);
+        // set target as current node
+        let mut cur_node= start;
+        // backtrace all parents until you reach None, that is, the start node
+        while let Some(parent) = self[cur_node].parent {
+            path.push_front(parent);
+            cur_node = parent;
+        }
+        path.into()
+    }
+    fn extract_cost(&amp;self, start:Node) -&gt; Cost {
+        self[start].dist
+    }
+}
+impl Index&lt;Node&gt; for Tracker {
+    type Output = NodeTrack;
+
+    fn index(&amp;self, index: Node) -&gt; &amp;Self::Output {
+        self.list.get(&amp;index).unwrap_or_else(|| panic!(&quot;Error: cannot find {index} in tracker {:?}&quot;, &amp;self))
+    }
+}
+impl IndexMut&lt;Node&gt; for Tracker {
+    fn index_mut(&amp;mut self, index: Node) -&gt; &amp;mut Self::Output {
+        self.list.get_mut(&amp;index).unwrap_or_else(|| panic!(&quot;Error: cannot find {index} in tracker&quot;))
+    }
+}
+</code></pre>
+<p>To initialise the <code>Tracker</code> we use the <code>Graph</code> structure</p>
+<pre><code class="language-rust no_run noplayground">impl Graph {
+
+    pub fn get_tracker(&amp;self, visited: NodeState, dist: Cost, parent: Option&lt;Node&gt;) -&gt; Tracker {
+        Tracker {
+            list: self.nodes.iter()
+                .fold(HashMap::new(), |mut out, &amp;node| {
+                    out.entry(node)
+                        .or_insert(NodeTrack { visited, dist, parent });
+                    out
+                })
+        }
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="abstracting-breadth-first-search"><a class="header" href="#abstracting-breadth-first-search">Abstracting Breadth First Search</a></h1>
+<p>Breadth First Search is applied on a number of algorithms with the same pattern, that is:</p>
+<ol>
+<li>Initiate processing <code>state</code> with starting node</li>
+<li>Do some work on the node <code>before</code> exploring any paths</li>
+<li>For each edge off this node
+<ol>
+<li>Process the edge <code>before</code> performing search on it</li>
+<li>Push edge node on the queue for further processing</li>
+</ol>
+</li>
+<li>Do some work on the node <code>after</code> all edges has been discovered</li>
+</ol>
+<p>Different path search algorithms have different demands in terms of </p>
+<ul>
+<li>Queue type, that is, FIFO, LIFO, etc </li>
+<li>Initiation states for starting node</li>
+<li>Pre-processing &amp; post-processing logic required for nodes and edges</li>
+</ul>
+<p>The above can be observed on how the <code>Graph State</code> realises the <code>BFSearch</code> trait for <a href="./graph_path_minimum_cost.html">Minimum Path Cost</a> and <a href="./graph_path_shortest_distance.html">Shortest Distance</a> implementation</p>
+<h2 id="implementation-1"><a class="header" href="#implementation-1">Implementation</a></h2>
+<p>As a result, we can define a <code>trait</code> for any <code>Graph State</code> structure, that provides the means of how the <code>queue</code> processing, <code>node</code> &amp; <code>edge</code> pre-processing / post-processing steps should be performed and in relation to the required state and behaviour.</p>
+<pre><code class="language-rust no_run noplayground">/// Breadth First Search abstraction, that can be used to find shortest distance, lowest cost paths, etc
+/// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
+/// - initiate step fn()
+/// - Queue push &amp; pop step fn()
+/// - Queue-to-Node and vice versa step fn()
+/// - Node pre/post-processing step fn()
+/// - Edge pre-processing step fn()
+/// - Path return fn()
+/// - node state fn()
+trait BFSearch {
+    type Output;
+    type QueueItem;
+
+    /// Initialise the Path search given the starting node
+    fn initiate(&amp;mut self, start:Node) -&gt; &amp;mut Self;
+
+    /// Pull an Item from the queue
+    fn pop(&amp;mut self) -&gt; Option&lt;Self::QueueItem&gt;;
+
+    /// Extract Node value from a Queued Item
+    fn node_from_queued(&amp;self, qt: &amp;Self::QueueItem) -&gt; Node;
+
+    /// Pre-process item retrieved from the queue and before proceeding with queries the Edges
+    /// return true to proceed or false to abandon node processing
+    fn pre_process_node(&amp;mut self, _node: Node) -&gt; bool { true }
+
+    /// Process node after all edges have been processes and pushed in the queue
+    fn post_process_node(&amp;mut self, _node: Node) { }
+
+    /// Has the node been Discovered ?
+    fn is_discovered(&amp;self, _node: NodeType) -&gt; bool;
+
+    /// Process the Edge node and
+    /// return 'true' to proceed with push or 'false' to skip the edge node
+    fn pre_process_edge(&amp;mut self, src: Node, dst: NodeType) -&gt; bool;
+
+    /// Construct a Queued Item from the Node
+    fn node_to_queued(&amp;self, node: Node) -&gt; Self::QueueItem;
+
+    /// Push to the queue
+    fn push(&amp;mut self, item: Self::QueueItem);
+
+    /// Retrieve path
+    fn extract_path(&amp;self, start: Node) -&gt; Self::Output;
+
+    /// Path Search Implementation
+    fn path_search(&amp;mut self, g: &amp;Graph, start: Node, goal:Node) -&gt; Option&lt;Self::Output&gt; {
+        // initiate BFSearch given a start node
+        self.initiate(start);
+        // until no items left for processing
+        while let Some(qt) = self.pop() {
+            //Extract the src node
+            let src = self.node_from_queued(&amp;qt);
+            // pre-process and if false abandon and proceed to next item
+            if !self.pre_process_node(src) { continue };
+            // if we have reached our goal return the path
+            if src == goal {
+                return Some(self.extract_path(goal))
+            }
+            // given graph's edges
+            // get src node's edges and per their NodeType
+            if let Some(edges) = g.edges.get(&amp;src) {
+                edges.iter()
+                    .for_each(|&amp;dst| {
+                        // if dst hasn't been visited AND pre-processing results to true,
+                        // then push to explore further
+                        if !self.is_discovered(dst)
+                            &amp;&amp; self.pre_process_edge(src, dst) {
+                            // push dst node for further processing
+                            self.push(self.node_to_queued(dst.into()))
+                        }
+                    });
+                // Process node after edges have been discovered and pushed for further processing
+                self.post_process_node(src);
+            }
+        }
+        None
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="shortest-distance-path"><a class="header" href="#shortest-distance-path">Shortest Distance Path</a></h1>
+<p>In this case, we want to determine if one vertex is reachable from another. Recall that a vertex <code>u</code> is reachable from <code>v</code> if there is a (directed) path from <code>v</code> to <code>u</code>.<sup class="footnote-reference"><a href="#note">1</a></sup></p>
+<h2 id="search-strategy-breadth-first-search-bfs-algorithm"><a class="header" href="#search-strategy-breadth-first-search-bfs-algorithm">Search Strategy: Breadth First Search (BFS) Algorithm</a></h2>
+<p>The breadth-first algorithm is a particular graph-search algorithm that can be applied to solve a variety of problems such as </p>
+<ul>
+<li>finding all the vertices reachable from a given vertex, </li>
+<li>finding if an undirected graph is connected, </li>
+<li>finding (in an unweighted graph) the shortest path from a given vertex to all other vertices, </li>
+<li>determining if a graph is bipartite, </li>
+<li>bounding the diameter of an undirected graph, </li>
+<li>partitioning graphs, </li>
+<li>and as a subroutine for finding the maximum flow in a  flow network (using Ford-Fulkerson’s algorithm).</li>
+</ul>
+<p>As with the other graph searches, BFS can be applied to both directed and undirected graphs.</p>
+<h2 id="bfs-approach"><a class="header" href="#bfs-approach">BFS Approach</a></h2>
+<p>The idea of breadth first search is to start at a source vertex <code>s</code> and explore the graph outward
+in all directions level by level, first visiting all vertices that are the (out-)neighbors of <code>s</code> (i.e. have
+distance 1 from s), then vertices that have distance two from <code>s</code>, then distance three, etc. More
+precisely, suppose that we are given a graph <code>G</code> and a source <code>s</code>. We define the level of a vertex <code>v</code>
+as the shortest distance from <code>s</code> to <code>v</code>, that is the number of edges on the shortest path connecting <code>s</code>
+to <code>v</code>.</p>
+<p><img src="img/Animated_BFS.gif" alt="Animated BFS" /></p>
+<p>The above animated image provides an insight into the processing steps</p>
+<ul>
+<li>Starting node <code>a</code> is pushed to the queue with <code>level</code> set to <code>0</code></li>
+<li>Pop the <code>(node,level)</code> from the queue; at first this is <code>(a,0)</code>
+<ul>
+<li>Mark node as <code>visited</code> (black)</li>
+<li>For each edge coming off the node
+<ul>
+<li>If edge is not visited 
+<ul>
+<li>calculate <code>edge-level</code> as one edge away from <code>node</code>, that is, <code>level + 1</code> </li>
+<li>push <code>(edge, edge-level)</code> at the end of the queue for <code>processing</code> (gray)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>As a result and as depicted below, at the end of the graph processing, all nodes have been allocated into depth levels </p>
+<p><img src="img/bfs_search_graph.png" alt="BFS" /></p>
+<h2 id="implementation-2"><a class="header" href="#implementation-2">Implementation</a></h2>
+<p>We still need to have the means to maintain the following information while we are searching the graph</p>
+<ul>
+<li><code>node</code> state, in terms of processed / not processed</li>
+<li><code>parent</code> node, that is, the node we visited from</li>
+<li><code>unit</code> in terms of distance / level</li>
+</ul>
+<p>The <code>Tracker</code> structure simplifies managing the <a href="graph_search_process_state.html">node processing state</a> of the graph, and we will use as part of our implementation.</p>
+<p>Both <code>Tracker</code> and <code>VecDeque</code> structures are part the Graph processing State structure <code>PDState</code> which in turn, implements the <a href="graph_path_bfs_abstract.html">BFSearch abstraction</a></p>
+<p>As a result, the following implementation realises the BFS algorithm </p>
+<pre><code class="language-rust no_run noplayground">    fn path_distance(&amp;self, start:Node, goal:Node) -&gt; Option&lt;(Vec&lt;Node&gt;, Cost)&gt; {
+        /// Structure for maintaining processing state while processing the graph
+        struct PDState {
+            tracker: Tracker,
+            queue: VecDeque&lt;Node&gt;
+        }
+        /// State Constructor from a given Graph and related the initiation requirements for the algo
+        impl PDState {
+            fn new(g: &amp;Graph) -&gt; PDState {
+                PDState {
+                    tracker: g.get_tracker(Undiscovered, 0, None),
+                    queue: VecDeque::&lt;Node&gt;::new()
+                }
+            }
+        }
+        /// Implementation of Path Search abstraction
+        impl BFSearch for PDState {
+            type Output = (Vec&lt;Node&gt;, Cost);
+            type QueueItem = Node;
+
+            /// Initiate search by pushing starting node and mark it as Discovered
+            fn initiate(&amp;mut self, node:Node) -&gt; &amp;mut Self {
+                self.queue.push_back(node);
+                self.tracker[node].visited(Discovered);
+                self
+            }
+
+            /// Get the first item from the start of the queue
+            fn pop(&amp;mut self) -&gt; Option&lt;Self::QueueItem&gt; { self.queue.pop_front() }
+
+            /// extract Node from the queued Item
+            fn node_from_queued(&amp;self, node: &amp;Self::QueueItem) -&gt; Node { *node }
+
+            /// Has it seen before ?
+            fn is_discovered(&amp;self, node: NodeType) -&gt; bool { self.tracker[node.into()].is_discovered() }
+
+            /// Process Edge before pushing it at the end of the queue
+            fn pre_process_edge(&amp;mut self, src: Node, dst: NodeType) -&gt; bool {
+                let level = self.tracker[src].dist + 1;
+                // mark visited, calculate distance &amp; store parent for distance
+                self.tracker[dst.into()].visited(Discovered)
+                    .distance(level)
+                    .parent(src);
+                true
+            }
+
+            /// Construct queued item from Node
+            fn node_to_queued(&amp;self, node: Node) -&gt; Self::QueueItem { node }
+
+            /// Push item at the end of the queue
+            fn push(&amp;mut self, item: Self::QueueItem) { self.queue.push_back(item) }
+
+            /// Extract path discovered so far
+            fn extract_path(&amp;self, start: Node) -&gt; Self::Output { self.tracker.extract(start) }
+        }
+
+        // Construct the state structure and search for a path that exists between start -&gt; goal
+        PDState::new(self).path_search(self, start, goal )
+    }
+</code></pre>
+<h3 id="references-1"><a class="header" href="#references-1">References:</a></h3>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15210-s15/www/lectures/graph-searches.pdf">Graph Searches</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dijkstras-minimum-path-cost"><a class="header" href="#dijkstras-minimum-path-cost">Dijkstra's Minimum Path Cost</a></h1>
+<p>Here we cover problems involving finding the shortest path between vertices in a
+graph with weights (lengths) on the edges. One obvious application is in finding the shortest
+route from one address to another, however shortest paths have many other application<sup class="footnote-reference"><a href="#note">1</a></sup> </p>
+<h2 id="dijkstras-algorithm"><a class="header" href="#dijkstras-algorithm">Dijkstra's Algorithm</a></h2>
+<p>Dijkstra’s is an important algorithm both because it is an efficient algorithm for an important problem, but
+also because it is a very elegant example of an efficient greedy algorithm that generates optimal
+solutions on a nontrivial task.</p>
+<p>The below animated image demonstrated how the algorithm works</p>
+<p><img src="img/Dijkstra_Animation.gif" alt="image" title="Dijkstra_Animation" /></p>
+<p>The above depiction performs the below steps </p>
+<ul>
+<li>push the starting node <code>a</code> in the priority queue with cost <code>0</code></li>
+<li>Pop the node with the lowest cost in the queue; at fist this is <code>a</code>
+<ul>
+<li>if the 'node' matches our target node <code>b</code> 
+<ul>
+<li>extract path with minimum cost </li>
+<li>terminate</li>
+</ul>
+</li>
+<li>For each <code>edge node</code> attached to the <code>node</code>
+<ul>
+<li>calculate <code>cost distance</code></li>
+<li>if <code>edge node</code> has <code>cost</code> larger to the calculated <code>cost distance</code> then assign cost to <code>edge node</code>, otherwise do not update cost</li>
+<li>push <code>(edge node, cost)</code> to the priority queue and repeat</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="prioritised-queue"><a class="header" href="#prioritised-queue">Prioritised Queue</a></h3>
+<p>Dijkstra's differentiating approach is that we must always process next the node with the lowest cost in the queue. To achieve this we have to make use of the <code>BinaryHeap</code> collection structure. The use of such structure help us to maintain on ordered-queue by node-cost, hence keeping the node with lowest-cost at the top of the heap/queue.</p>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug,Clone,Copy,Hash,Eq,PartialEq)]
+pub enum NodeType {
+    N(Node),
+    NC(Node, Cost)
+}
+impl From&lt;NodeType&gt; for Node {
+    fn from(nt: NodeType) -&gt; Self {
+        match nt { NodeType::N(node)|NC(node, _) =&gt; node }
+    }
+}
+impl From&lt;Node&gt; for NodeType {
+    fn from(value: Node) -&gt; Self {
+        NodeType::N(value)
+    }
+}
+impl Ord for NodeType {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        other.partial_cmp(self).unwrap_or_else(|| panic!(&quot;Edge::cmp() - cannot compare nodes with type NodeType::N&quot;))
+    }
+}
+impl PartialOrd for NodeType {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other {
+            NodeType::N(_) =&gt; None,
+            NC(_, cost) =&gt; {
+                let NC(_,sc) = self else { panic!(&quot;Edge::partial_cmp() - cannot compare NodeType::NC against NodeType::N&quot;) };
+                Some(cost.cmp(sc))
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="implementation-3"><a class="header" href="#implementation-3">Implementation</a></h3>
+<p>With the ordered-queue logic in place, we still need to have the means to maintain the following information per node and while we are searching the graph </p>
+<ul>
+<li><code>node</code> state, in terms of processed / not processed</li>
+<li><code>parent</code> node, that is, the node we visited from</li>
+<li><code>unit</code> in terms of cost or distance</li>
+</ul>
+<p>The <code>Tracker</code> structure simplifies managing the <a href="graph_search_process_state.html">node processing state</a> of the graph, and we will use as part of our implementation.</p>
+<p>Both <code>Tracker</code> and <code>BinaryHeap</code> structures are part the Graph processing State structure <code>PSState</code> which in turn, implements the <a href="graph_path_bfs_abstract.html">BFSearch abstraction</a></p>
+<p>As a result, the algorithm can now be realised by the following implementation </p>
+<pre><code class="language-rust no_run noplayground">    fn path_shortest(&amp;self, start: Node, goal: Node) -&gt; Option&lt;(Vec&lt;Node&gt;, Cost)&gt; {
+        /// Structure for maintaining processing state while processing the graph
+        struct PSState {
+            tracker: Tracker,
+            queue: BinaryHeap&lt;NodeType&gt;
+        }
+
+        /// State Constructor from a given Graph and related shortest path initiation requirements
+        impl PSState {
+            fn new(g:&amp;Graph) -&gt; PSState {
+                PSState {
+                    // reset all node costs to MAX value with no path-parent nodes
+                    tracker: g.get_tracker(Undiscovered, Cost::MAX, None),
+                    // We are using a BinaryHeap queue in order to always have first in the queue
+                    // the node with lowest cost to explore next
+                    queue: BinaryHeap::new()
+                }
+            }
+        }
+
+        /// Implementation of Path Search abstraction
+        impl BFSearch for PSState {
+            type Output = (Vec&lt;Node&gt;,Cost);
+            type QueueItem = NodeType;
+
+            /// Processing of starting node
+            fn initiate(&amp;mut self, start: Node) -&gt; &amp;mut Self {
+                // set cost at start node to zero with no parent node
+                self.tracker[start].distance(0);
+                // push start node in the BinaryHeap queue
+                self.queue.push(NC(start,0));
+                self
+            }
+
+            /// get the element with the lowest cost from the queue
+            fn pop(&amp;mut self) -&gt; Option&lt;Self::QueueItem&gt; { self.queue.pop() }
+
+            /// extract node from the queued item retrieved
+            fn node_from_queued(&amp;self, qt: &amp;Self::QueueItem) -&gt; Node {
+                (*qt).into()
+            }
+
+            /// Process current node after all edges have been discovered and marked for processing
+            fn post_process_node(&amp;mut self, node: Node) {
+                self.tracker[node].visited(Discovered);
+            }
+
+            /// has the given node been seen before ?
+            fn is_discovered(&amp;self, node: NodeType) -&gt; bool { self.tracker[node.into()].is_discovered() }
+
+            /// Process given edge and return `true` to proceed or `false` to abandon further edge processing
+            fn pre_process_edge(&amp;mut self, src:Node, dst: NodeType) -&gt; bool {
+                if let NC(dst, cost) = dst {
+                    // calc the new path cost to edge
+                    let edge_cost = self.tracker[src].dist + cost;
+                    // if new cost is better than previously found
+                    if edge_cost &gt; self.tracker[dst].dist  {
+                        // Do no process this edge any further
+                        false
+                    }
+                    else {
+                        // set the new lower cost @node along with related parent Node
+                        self.tracker[dst].distance(edge_cost).parent(src);
+                        // and ensure the edge is processed further
+                        true
+                    }
+                }
+                else {
+                    // somehow we got the wrong NodeType here
+                    panic!(&quot;pre_process_edge(): Must use NodeType::NC&quot;)
+                }
+            }
+
+            /// Construct the item to be queued, that is, (Node,Cost)
+            fn node_to_queued(&amp;self, node: Node) -&gt; Self::QueueItem {
+                NC(node, self.tracker[node].dist )
+            }
+
+            /// Push into (Node,Cost) into the queue
+            fn push(&amp;mut self, item: Self::QueueItem) { self.queue.push(item) }
+
+            /// Get search path discovered so far
+            fn extract_path(&amp;self, start: Node) -&gt; Self::Output { self.tracker.extract(start) }
+        }
+
+        // Construct the state structure and search for a path that exists between start -&gt; goal
+        PSState::new(self).path_search(self,start,goal)
+
+    }
+</code></pre>
+<h3 id="references-2"><a class="header" href="#references-2">References:</a></h3>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15210-s15/www/lectures/shortest-path.pdf">Shortest Path</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="abstracting-depth-first-search"><a class="header" href="#abstracting-depth-first-search">Abstracting Depth First Search</a></h1>
+<p>Depth First Search is applied on a number of algorithms with the same pattern</p>
+<ol>
+<li>Do some work on the node <code>before</code> exploring any paths</li>
+<li>For edge of the node
+<ol>
+<li>Process the edge <code>before</code> performing search on it</li>
+<li>Perform search on the edge</li>
+<li>Process the edge <code>after</code> all paths from this edge, got explored </li>
+</ol>
+</li>
+<li>Do some work on the node <code>after</code> all paths from this node, got explored</li>
+</ol>
+<p>Different algorithms have different demands on how what the graph state should be and which of those steps are required and in what way</p>
+<p>The above can be observed on how the <code>Graph State</code> realises the <code>DFSearch</code> trait for <a href="graph_path_topological_sort.html">Topological sort</a> and <a href="graph_connect_scc.html">Strongly Connected Components</a> implementation</p>
+<h2 id="implementation-4"><a class="header" href="#implementation-4">Implementation</a></h2>
+<p>As a result, we can define a <code>trait</code> for any <code>Graph State</code> structure, that provide the means of how the pre-processing / post-processing steps should be performed and in relation to the required state and behaviour.</p>
+<p>It is important to note here the recursive nature of the search and hence the need for <code>self</code> to maintain the internal state while recursively searching the graph</p>
+<pre><code class="language-rust no_run noplayground">/// Depth First Search abstraction, enabling a variety of implementations such as, strongly connected components, topological sort, etc
+/// The `Path_Search()` default implementation uses the below functions while it leaves their behaviour to the trait implementer
+/// - Node pre-processing step fn()
+/// - Node post-processing step fn()
+/// - Node pre-processing edge fn()
+/// - abort recursion fn()
+/// - Path return fn()
+/// - node state fn()
+trait DFSearch {
+    type Output;
+
+    /// work to be done before edges are explored, that is, discovered but not processed
+    /// uses incl. measuring entry time, set node state, etc
+    fn pre_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self;
+
+    /// work to be done after the edges have been explored; hence the node is now processed
+    /// uses incl. measuring exit time, set node parent, save node in path, etc
+    fn post_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self;
+
+    /// work to be done after the node pre-processed and before the edges is explored
+    /// uses incl. check for loops, categorize edge into types, etc
+    /// default implementation does nothing otherwise you have to override
+    fn pre_process_edge(&amp;mut self, _edge: Edge) -&gt; &amp;mut Self { self }
+
+    /// Abort the recursion
+    /// uses incl. detecting the graph is not Direct acyclic, etc
+    fn abort(&amp;self) -&gt; bool { false }
+
+    /// return the path at position and given the pre/post processing steps
+    fn path(&amp;self) -&gt; &amp;Self::Output;
+
+    /// return whether the node has been seen before
+    fn is_discovered(&amp;self, node: Node) -&gt; bool;
+
+    /// Default implementation of depth first search
+    fn path_search(&amp;mut self, g: &amp;Graph, start: Node) -&gt; Option&lt;&amp;Self::Output&gt; {
+        // Entering the node at time tick()
+        if self.pre_process_node(start).abort() { return None }
+
+        // processing the edges
+        // println!(&quot;Enter: {start}:{:?}&quot;, self.tracker[start]);
+        if let Some(edges) = g.edges.get(&amp;start) {
+            for &amp;dst in edges {
+                let d = dst;
+
+                if self.pre_process_edge(Edge(start,d)).abort() { return None };
+
+                if !self.is_discovered(d.into()) {
+                    self.path_search(g, d.into());
+                }
+            }
+        }
+        // Exiting the node at time tick()
+        if self.post_process_node(start).abort() { return None };
+        // println!(&quot;Exit: {start}:{:?}&quot;, self.tracker[start]);
+        Some(self.path())
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="topological-sort-algorithm"><a class="header" href="#topological-sort-algorithm">Topological Sort Algorithm</a></h1>
+<p>A topological sort is an ordering of the nodes of a directed graph such that if
+there is a path from node a to node b, then node a appears before node b in the
+ordering.</p>
+<h1 id="graph-recursion-and-processing-state"><a class="header" href="#graph-recursion-and-processing-state">Graph Recursion and Processing state</a></h1>
+<p>The idea is to go through the nodes of the graph and always begin a depth-first search at the current node if it has not been processed yet. During the searches,
+the nodes have three possible states:</p>
+<ul>
+<li>state 0: the node has not been processed (white)</li>
+<li>state 1: the node is under processing (light gray)</li>
+<li>state 2: the node has been processed (dark gray)</li>
+</ul>
+<p>Initially, the state of each node is 0. When a search reaches a node for the first time, its state becomes 1. This is our <code>pre-processing</code> step for the node</p>
+<p>If the graph contains a cycle, we will find this out during the search, because sooner or later we will arrive at a node whose state is 1. In this case, it is not
+possible to construct a topological sort. This is the <code>pre-processing</code> step for the edge.</p>
+<p>If the graph does not contain a cycle, we can construct a topological sort by adding each node to a list when the state of the node becomes 2. This is our <code>post-processing</code> step for the node.
+This list in reverse order is a topological sort</p>
+<p>As a result we can implement the <code>DFSearch</code> trait in the following way in relation to the above pre-processing &amp; post-processing steps</p>
+<pre><code class="language-rust no_run noplayground">/// Graph state that we need to maintain
+/// for the topological sort algorithm
+struct TState {
+    tracker: Tracker,
+    path: Vec&lt;Node&gt;,
+    abort: bool
+}
+
+impl TState {
+    /// Construct a new `GraphState` given a `Graph`
+    fn new(g: &amp;Graph) -&gt; TState {
+        TState {
+            tracker: g.get_tracker(Undiscovered, 0, None),
+            path: Vec::new(),
+            abort: false
+        }
+    }
+}
+
+/// Topological sort implementation of the TState
+/// There is no need for exit/entry time or tracking parent node.
+/// Here we only need to save the `node` in the `tracker.path` following its full processing
+impl DFSearch for TState {
+    type Output = Vec&lt;Node&gt;;
+
+    /// mark node as visited but not processed
+    fn pre_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self {
+        self.tracker[node].visited(Discovered);
+        self
+    }
+
+    /// Important we store the node in the path following node processing complete
+    fn post_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self {
+        self.tracker[node].visited(Processed);
+        self.path.push(node);
+        self
+    }
+
+    /// before we jump into the edge for further exploration
+    /// we check if the edge is actually a node already `Discovered` but not `Processed`
+    /// if that is the case, we set the abort flag to `True`
+    fn pre_process_edge(&amp;mut self, edge: Edge) -&gt; &amp;mut Self {
+        let Edge(_,dst) = edge;
+        if self.tracker[dst.into()].visited == Discovered {
+            self.abort = true;
+        }
+        self
+    }
+
+    /// Implement the abort fn() so we can stop the path search recursion
+    fn abort(&amp;self) -&gt; bool {
+        self.abort
+    }
+
+    /// extract the aggregate path stored
+    fn path(&amp;self) -&gt; &amp;Self::Output {
+        &amp;self.path
+    }
+
+    /// return true if node is either `Discovered` or `Processed`
+    fn is_discovered(&amp;self, node: Node) -&gt; bool {
+        self.tracker[node].is_discovered()
+    }
+}
+</code></pre>
+<h1 id="implementation-5"><a class="header" href="#implementation-5">Implementation</a></h1>
+<p>When the search has completed and has exhausted all paths the <code>path</code> member of the <code>Tracker</code> structure will now contain the order by which the nodes have been visited. As a result we only have to <code>reverse</code> such order and return it.</p>
+<pre><code class="language-rust no_run noplayground">/// Topological Sort trait
+pub trait TopologicalSort {
+    fn topological_sort(&amp;self) -&gt; Option&lt;Vec&lt;Node&gt;&gt;;
+}
+/// Graph implementation of Topological Sort
+impl TopologicalSort for Graph {
+    /// Implementation of topological sort for Graph
+    fn topological_sort(&amp;self) -&gt; Option&lt;Vec&lt;Node&gt;&gt; {
+        // initiate the run state structure for calculating the topological sort of the graph
+        let mut ts = TState::new(self);
+
+        // Construct a path aggregate, that is, each path found is joined up together
+        // achieved by appending the path of each iteration onto tracker.path
+        // see post_processing() of TState implementation of DFSearch
+        for &amp;node in &amp;self.nodes {
+            // if node is not yet visited &amp;&amp; search hasn't thrown a NONE, that is, we've found a circle
+            if !ts.is_discovered(node)
+                &amp;&amp; ts.path_search(self, node).is_none() {
+                return None
+            }
+        }
+
+        // Extract &amp; reverse path from tracker so we extract the topological sort
+        ts.path.reverse();
+        Some(ts.path)
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="strong-connectivity"><a class="header" href="#strong-connectivity">Strong Connectivity</a></h1>
+<p>In a directed graph, the edges can be traversed in one direction only, so even if the graph is connected, this does not guarantee that there would be a path from
+a node to another node. For this reason, it is meaningful to define a new concept that requires more than connectivity.</p>
+<p>A graph is <strong>strongly connected</strong> if there is a path from any node to all other nodes in the graph. The <strong>strongly connected components</strong> of a graph divide the graph into strongly connected parts that are as large as possible. The strongly connected components form an acyclic component graph that represents the deep structure of the original graph.</p>
+<p>The yellow directed acyclic graph is the condensation of the blue directed graph. It is formed by contracting each strongly connected component of the blue graph into a single yellow vertex</p>
+<p><img src="img/2560px-Graph_Condensation.svg.png" alt="" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kosarajus-algorithm"><a class="header" href="#kosarajus-algorithm">Kosaraju’s algorithm</a></h1>
+<p>Kosaraju’s algorithm is an efficient method for finding the strongly connected components of a directed graph.</p>
+<h2 id="approach"><a class="header" href="#approach">Approach</a></h2>
+<p>The algorithm performs two depth-first searches</p>
+<ol>
+<li>the first search constructs an <strong>ordered node list</strong> of nodes according to the structure of the graph.</li>
+<li>the second search applies the <strong>ordered node list</strong> against the <strong>reversed edges</strong> of the graph in order to find the strongly connected components.</li>
+</ol>
+<h2 id="graph-recursion-and-processing-state-1"><a class="header" href="#graph-recursion-and-processing-state-1">Graph Recursion and Processing State</a></h2>
+<p>In the <strong>first</strong> Depth First Search we need to calculate per node</p>
+<ul>
+<li>the exit <code>time</code>, that is, the time in which the node has been <code>Processed</code>, that is, there is nothing left to be found.</li>
+<li>the node state in relation to any of the states, <code>Undiscovered</code>, <code>Discovered</code> or <code>Processed</code></li>
+</ul>
+<p>Recursion is a key implementation approach that will enable us to perform</p>
+<ol>
+<li>Node pre-processing, e.g. capture/log the <code>entry</code> time and before search any deeper</li>
+<li>Node post-processing, e.g. capture/log the <code>exit</code> time after there is no path remaining to be found from this node</li>
+</ol>
+<p>As a result to measure time across recursions and without the use of a <code>global</code> variable, we resort to the <code>GraphState</code> struct that</p>
+<ul>
+<li>implements the <a href="graph_path_dfs_abstract.html"><code>DFSearch</code> trait</a> that provides the recursive function</li>
+<li>holds the recursion state for <code>time</code>, <code>path</code> at node, node <code>state</code> &amp; <code>ordered list</code></li>
+</ul>
+<p>In addition, <code>GraphState</code> provide us with the <code>Tracker</code> structure that simplifies handling of the <a href="graph_search_process_state.html">node processing state</a> while we are search the graph.</p>
+<pre><code class="language-rust no_run noplayground">/// GraphState struct enable us to maintain the processing state of the graph
+/// and while we apply a recursive approach in searching the graph
+struct GraphState {
+    tracker: Tracker,
+    queue: BinaryHeap&lt;NodeType&gt;,
+    time: Cost,
+    path: Vec&lt;Node&gt;
+}
+
+impl GraphState {
+    /// Construct a new `GraphState` given a `Graph`
+    fn new(g: &amp;Graph) -&gt; GraphState {
+        GraphState {
+            tracker: g.get_tracker(Undiscovered, 0, None),
+            queue: BinaryHeap::new(),
+            time: 0,
+            path: Vec::new()
+        }
+    }
+
+    /// Extract from `BinaryHeap` the exit times per ordered from max -&gt; min
+    fn get_timings(&amp;self) -&gt; Vec&lt;(Node, Cost)&gt; {
+        self.queue.iter().rev().map(|&amp;s| {
+            let NC(n, c) = s else { panic!(&quot;get_timings(): node type is not NodeType::NC&quot;) };
+            (n,c)
+        }  ).collect::&lt;Vec&lt;_&gt;&gt;()
+    }
+}
+
+/// Graph State implements DFSearch trait and particularly provides specific implementation for
+/// the calculation of the strongly connected components, in terms of node post/pre processing fn(),
+/// path return fn() and node state fn()
+impl DFSearch for GraphState {
+    type Output = Vec&lt;Node&gt;;
+
+    /// capture time of entry and set node state to visited,
+    /// given the node's edges have yet be visited
+    fn pre_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self {
+        // Entering the node at time tick()
+        self.time += 1;
+        self.tracker[node].visited(Discovered).distance(self.time);
+        self
+    }
+
+    /// capture time of exit and set node state to processed,
+    /// given all edges have also been processed
+    fn post_process_node(&amp;mut self, node: Node) -&gt; &amp;mut Self {
+        // Exiting the node at time tick()
+        self.time += 1;
+        self.tracker[node].visited(Processed).distance(self.time);
+        self.queue.push(NC(node, self.time));
+        self.path.push(node);
+        self
+    }
+
+    /// Return the path as it was calculated by the post processing step
+    fn path(&amp;self) -&gt; &amp;Self::Output {
+        &amp;self.path
+    }
+
+    /// return the state of the node
+    fn is_discovered(&amp;self, node: Node) -&gt; bool {
+        self.tracker[node].is_discovered()
+    }
+}
+</code></pre>
+<h2 id="transpose-the-graph"><a class="header" href="#transpose-the-graph">Transpose the graph</a></h2>
+<p>The <code>GraphState</code> will help us capture the node order by which we will run search on the second pass. However, the second pass must run against the <strong>transposed graph</strong>, that is, the graph with all edges reversed.</p>
+<pre><code class="language-rust no_run noplayground">impl Graph {
+    pub fn transpose(&amp;self) -&gt; Graph {
+        self.nodes.iter()
+            .fold(Graph::new(), |mut g, &amp;node| {
+                g.nodes.insert(node);
+                // reverse the edges for this node, if any
+                if let Some(edges) = self.edges.get(&amp;node) {
+                    edges.iter()
+                        .for_each(|&amp;e|{
+                            g.nodes.insert(e.into());
+                            g.edges.entry(e.into()).or_default().insert(node.into());
+                        });
+                }
+                g
+            })
+    }
+}
+</code></pre>
+<h2 id="final-implementation-1"><a class="header" href="#final-implementation-1">Final implementation</a></h2>
+<p>With all of the above elements in place, The below function provides an implementation approach to the algorithm </p>
+<pre><code class="language-rust no_run noplayground">pub trait ConnectedComponents {
+    fn strongly_connected(&amp;self) -&gt; Vec&lt;Vec&lt;Node&gt;&gt;;
+}
+
+impl ConnectedComponents for Graph {
+    fn strongly_connected(&amp;self) -&gt; Vec&lt;Vec&lt;Node&gt;&gt; {
+
+        // initiate the run state structure for calculating the scc of the graph
+        // and in order to enable recursive searching in rust
+        let mut gs = GraphState::new(self);
+
+        // Pass 1: Find all paths and calculate entry and exit times per node
+        self.nodes.iter()
+            .for_each(|&amp;start| {
+                // println!(&quot;Start &gt;&gt; {start}&quot;);
+                if !gs.tracker[start].is_discovered() {
+                    let path = gs.path_search(self, start);
+                    println!(&quot;Pass 1: Path {:?}&quot;,path);
+                    gs.path.clear();
+                }
+            });
+
+        // Extract node sequence ordered by highest exit times
+        let v = gs.get_timings();
+        println!(&quot;Timings: {:?}&quot;,v);
+        // reverse the graph edges
+        let tg = self.transpose();
+        // reset run state
+        gs = GraphState::new( &amp;tg);
+
+        // Pass 2: Identify and store each strongly connected component identified
+        v.into_iter()
+            .fold(Vec::new(),|mut components, (node, _)| {
+                if !gs.is_discovered(node) {
+                    // extract new component
+                    let component = gs.path_search(&amp;tg, node ).unwrap();
+                    println!(&quot;Pass 2: Component [{}]{:?}&quot;, component.len(), component);
+                    // store component found
+                    components.push(component.clone() );
+                    // reset path so to remove last found component
+                    gs.path.clear();
+                }
+                components
+            })
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="minimum-spanning-tree"><a class="header" href="#minimum-spanning-tree">Minimum Spanning Tree</a></h1>
+<p>A minimum spanning tree (MST) or minimum weight spanning tree is a subset of the edges of a connected, edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight.<sup class="footnote-reference"><a href="#note">1</a></sup></p>
+<p>That is, it is a spanning tree whose sum of edge weights is as small as possible.</p>
+<p><img src="img/Minimum_spanning_tree.svg.png" alt="Minimum Spanning Tree" />
+More generally, any edge-weighted undirected graph (not necessarily connected) has a minimum spanning forest, which is a union of the minimum spanning trees for its connected components.</p>
+<p>There are many use cases for minimum spanning trees. One example is a telecommunications company trying to lay cable in a new neighborhood. If it is constrained to bury the cable only along certain paths (e.g. roads), then there would be a graph containing the points (e.g. houses) connected by those paths. Some paths might be more expensive, because they are longer, or require the cable to be buried deeper; these paths would be represented by edges with larger weights</p>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://en.wikipedia.org/wiki/Minimum_spanning_tree#Algorithms">Wikipedia - Minimum spanning tree</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kruskals-mst-algorithm"><a class="header" href="#kruskals-mst-algorithm">Kruskal's MST Algorithm</a></h1>
+<p>In Kruskal’s algorithm, we start with the spanning tree containing <strong>only</strong> the nodes of the graph and with no any edges connecting the nodes. </p>
+<p>Then the algorithm goes through, adding the edges one at a time, ordered by their weights, and as long as the edge is not creating a cycle.</p>
+<h2 id="approach-1"><a class="header" href="#approach-1">Approach</a></h2>
+<p>Let's look at the following input <code>graph</code> as an example.</p>
+<p><img src="img/mst_graph.png" alt="" /></p>
+<p>The algorithm maintains the components of the tree. Initially, each node of the graph belongs to a separate component. As shown below there are six components since none of the nodes are connected.</p>
+<p><img src="img/mst_step1.png" alt="Step 1 - Number of components equal to number of nodes" /></p>
+<p>We always start with the lowest weighted edge by adding it to the tree, in this case <code>(5,6)</code>. As result, two components are now merged into one as in the below example where nodes <code>5</code> and <code>6</code> form a new component</p>
+<p><img src="img/mst_step2.png" alt="Step 2 - merging up components one edge at a time" /></p>
+<p>Next in order are edges <code>(6,3),(1,2),...</code> and so on, until finally we have added all edges in the graph, one by one and with all nodes now merged into a single component, hence the minimum spanning tree has been found</p>
+<p><img src="img/mst_step3.png" alt="Step 3 - MST as a single component" /></p>
+<p>Overall the approach can be summarised as following</p>
+<ol>
+<li><strong>Phase 1</strong>: Sort Edges by minimum cost first</li>
+<li><strong>Phase 2</strong>: Build Minimum Spanning Tree
+<ol>
+<li>Create an empty graph <code>G</code></li>
+<li>Initiate the graph components, that is, one per node</li>
+<li>While there are <code>&gt; 1</code> graph components remaining
+<ol>
+<li>Retrieve edge with the lowest weight <code>(src,dst)</code></li>
+<li>Find component for <code>src</code>, let's say it is <code>src'</code></li>
+<li>Find component for <code>dst</code>, let's say it is <code>dst'</code></li>
+<li>if <code>src'</code> is different to <code>dst'</code> then
+<ol>
+<li>Merge <code>dst'</code> into the <code>src'</code> component </li>
+<li>Add edge <code>(src,dst)</code> into the graph <code>G</code></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="super-nodes-as-components"><a class="header" href="#super-nodes-as-components">Super Nodes as Components</a></h3>
+<p>The <code>SuperNodes</code> struct used to solve the <strong>minimum cut</strong> algorithm is more or less the right tool in this instance given that the definition of a <code>super node</code> is synonymous to a graph component.</p>
+<p>The <code>SuperNodes</code> structure, provides us with the</p>
+<ul>
+<li>merging of two super node components into a super node
+<ul>
+<li>finding of the super node component that a given node belongs to</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug)]
+/// Helper Structure that holds the `set` of merged nodes under a super node `key`
+/// The HashMap therefore is used as [Key:Super Node, Value: Set of Merged Nodes]
+/// A super node's set is a `Graph Component` in itself, that is, you can visit a Node from any other Node within the set
+pub struct SuperNodes {
+    super_nodes:HashMap&lt;Node,HashSet&lt;Node&gt;&gt;
+}
+impl Clone for SuperNodes {
+    fn clone(&amp;self) -&gt; Self {
+        SuperNodes { super_nodes: self.super_nodes.clone() }
+    }
+}
+impl SuperNodes {
+    /// Total size of `Graph Components`, that is, super nodes
+    pub fn len(&amp;self) -&gt; usize { self.super_nodes.len() }
+    /// Given an Graph node, the function returns the Super Node that it belongs
+    /// for example given the super node [Key:1, Set:{1,2,3,4,5}]
+    /// querying for node `3` will return `1` as its super node
+    pub fn find_supernode(&amp;self, node: &amp;Node) -&gt; Node {
+        // is this a super node ?
+        if self.contains_supernode(node) {
+            // if yes, just return it
+            *node
+        } else {
+            // otherwise find its super node and return it
+            // get an Iterator for searching each super node
+            let mut sets = self.super_nodes.iter();
+            loop {
+                // If next returns [Super Node, Node Set] proceed otherwise exist with None
+                let Some((&amp;src, set)) = sets.next() else { break None };
+                // Is the queried Node in the set ?
+                if set.contains(node) {
+                    // yes, return the super node
+                    break Some(src)
+                }
+            }.unwrap_or_else(|| panic!(&quot;find_supernode(): Unexpected error, cannot find super node for {node}&quot;))
+        }
+    }
+    /// Returns the graph component, aka `set` of nodes, for a given super node `key`,
+    /// otherwise `None` if it doesn't exist
+    pub fn contains_supernode(&amp;self, node: &amp;Node) -&gt; bool {
+        self.super_nodes.contains_key(node)
+    }
+    /// The function takes two super nodes and merges them into one
+    /// The `dst` super node is merged onto the `src` super node
+    pub fn merge_nodes(&amp;mut self, src:Node, dst:Node) -&gt; &amp;mut HashSet&lt;Node&gt; {
+        // remove both nodes that form the random edge and
+        // hold onto the incoming/outgoing edges
+        let super_src = self.super_nodes.remove(&amp;src).unwrap();
+        let super_dst = self.super_nodes.remove(&amp;dst).unwrap();
+
+        // combine the incoming/outgoing edges for attaching onto the new super-node
+        let super_node = super_src.union(&amp;super_dst).copied().collect::&lt;HashSet&lt;Node&gt;&gt;();
+        // re-insert the src node as the new super-node and attach the resulting union
+        self.super_nodes.entry(src).or_insert(super_node)
+    }
+    /// Provides an iterator that yields the Node Set of each super node
+    pub fn iter(&amp;self) -&gt; SuperNodeIter {
+        SuperNodeIter { iter: self.super_nodes.iter() }
+    }
+}
+/// Ability for SuperNode struct to use indexing for search
+/// e.g super_node[3] will return the HashSet corresponding to key `3`
+impl Index&lt;Node&gt; for SuperNodes {
+    type Output = HashSet&lt;Node&gt;;
+    fn index(&amp;self, index: Node) -&gt; &amp;Self::Output {
+        &amp;self.super_nodes[&amp;index]
+    }
+}
+
+/// HashNode Iterator structure
+pub struct SuperNodeIter&lt;'a&gt; {
+    iter: hash_map::Iter&lt;'a, Node, HashSet&lt;Node&gt;&gt;
+}
+
+/// HashNode Iterator implementation yields a HashSet at a time
+impl&lt;'a&gt; Iterator for SuperNodeIter&lt;'a&gt; {
+    type Item = &amp;'a HashSet&lt;Node&gt;;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if let Some(super_node) = self.iter.next() {
+            Some(super_node.1)
+        } else { None }
+    }
+}
+</code></pre>
+<h3 id="binaryheap-for-edge-ordering"><a class="header" href="#binaryheap-for-edge-ordering">BinaryHeap for edge Ordering</a></h3>
+<p>To provide an ordered edge list we use the <code>BinaryHeap</code> collection that uses the edge's <code>weight</code> as the prioritisation key. The following <code>Step</code> implementation provide us with the desirable result.</p>
+<pre><code class="language-rust no_run noplayground">/// BinaryHeap Step structure containing `Edge(src,(dst,cost))` tuple
+/// The `cost` is only used as the prioritisation key for the `Heap`
+/// Implementing MinHeap through reverse comparison of Other against Self
+impl PartialOrd for Edge {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other.1 {
+            N(_) =&gt; other.partial_cmp(self),
+            NC(_, cost) =&gt; {
+                let Edge(_,NC(_,sc)) = self else { panic!(&quot;&quot;) };
+                cost.partial_cmp(sc)
+            }
+        }
+    }
+}
+impl Ord for Edge {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+</code></pre>
+<p>Additionally, we have the following helper <code>Graph</code> functions that provide us with </p>
+<ul>
+<li>the ordered edge list</li>
+<li>the sum of weights for all edges in the graph</li>
+<li>adding an edge into the graph</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">    /// Sums up the cost of all weighted edges
+    pub fn sum_edges(&amp;self) -&gt; Cost {
+        self.edges
+            .values()
+            .fold(0, |cost, edges| {
+                cost + edges.iter()
+                    .map(|&amp;dst| {
+                        let NC(_,c) = dst else { panic!(&quot;get_mst_cost(): Edge destination node is not of type NodeType::NC&quot;) };
+                        c
+                    })
+                    .reduce(|acc,c| acc + c )
+                    .unwrap()
+            }) &gt;&gt; 1 // in an undirected graph we count twice the edge hence dividing by 2
+    }
+    /// Adds a new Edge to the graph
+    pub fn push_edge(&amp;mut self, edge: Edge) {
+        let Edge(src, dst) = edge;
+        self.nodes.insert(src);
+        self.edges.entry(src)
+            .or_default()
+            .insert(dst);
+        let NC(dst,cost) = dst else { panic!(&quot;&quot;) };
+        self.nodes.insert(dst);
+        self.edges.entry(dst)
+            .or_default()
+            .insert(NC(src,cost));
+    }
+    /// Returns Graph's edges in the form of a MinHeap, that is,
+    /// the lowest cost edge at the top of the heap
+    pub fn get_edges_by_cost(&amp;self) -&gt; BinaryHeap&lt;Edge&gt; {
+        self.edges.iter()
+            .fold(BinaryHeap::new(), |mut heap, (&amp;src, edges)| {
+                    heap.extend(
+                        edges.iter().map(|&amp;dst| Edge(src,dst))
+                    );
+                    heap
+                })
+
+    }
+</code></pre>
+<h2 id="implementation-6"><a class="header" href="#implementation-6">Implementation</a></h2>
+<p>As a result, the following implementation consolidates all of the above into the Kruskal's algorithm implementation.</p>
+<pre><code class="language-rust no_run noplayground">    /// MST using Kruskal's algorithm implementation
+    pub fn mst_kruska(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        // Get the ordered heap by lowest cost Edge on top
+        let mut heap = self.get_edges_by_cost();
+        // Keeps the graph's components, that is, a super node is a graph component's lead node
+        // The initial state is for each node to be a lead component node with a component of its own
+        let mut snodes = self.get_super_nodes();
+        // the output graph that will hold *only* the edges
+        // that form the minimum spanning tree
+        let mut graph = Graph::new();
+
+        // As long as more than 2 components
+        while snodes.len() &gt; 1 {
+            // get the edge with the lowest cost
+            // otherwise if we've run out of edges while there are 2 or more components
+            // then the graph IS NOT CONNECTED
+            let Some(edge) = heap.pop() else { return None };
+            let Edge(src, NC(dst, _)) = edge else { panic!(&quot;mst_kruska() - Cannot find NodeType::NC&quot;) };
+            // print!(&quot;({src:2}-&gt;{dst:2}):{cost:6} - &quot;);
+
+            // if src is not a super node then get its super node
+            let src = snodes.find_supernode(&amp;src);
+            // if dst is not a super node then get its super node
+            let dst = snodes.find_supernode(&amp;dst);
+
+            // if src component differs from dst component then merge the two and save the edge connecting them
+            if src != dst {
+                snodes.merge_nodes(src, dst);
+                graph.push_edge(edge);
+                // println!(&quot;Store&quot;);
+            } else {
+                // println!(&quot;Skip&quot;);
+            }
+        }
+        Some(graph)
+    }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="prims-mst-algorithm"><a class="header" href="#prims-mst-algorithm">Prim's MST Algorithm</a></h1>
+<p>Prim’s algorithm resembles Dijkstra’s algorithm. The difference is that Dijkstra’s algorithm always selects an edge whose distance from the starting node is minimum, but Prim’s algorithm simply selects the minimum weight edge that adds a new node to the tree</p>
+<h2 id="approach-2"><a class="header" href="#approach-2">Approach</a></h2>
+<p>The algorithm first adds an arbitrary node to the tree. After this, the algorithm always chooses a minimum-weight edge that adds a new node to the tree. Finally, all nodes have been added to the tree and a minimum spanning tree has been found</p>
+<p>To illustrate how the algorithm works let's consider the following <code>input</code> graph</p>
+<p><img src="img/mst_graph.png" alt="" /></p>
+<p>When we start, the minimum spanning tree has no edges</p>
+<p><img src="img/mst_prim_s1.png" alt="" /></p>
+<p>We then select an arbitrary node, in this case <code>1</code>, and from edges <code>(1,2),(1,5)</code> we choose the edge <code>(1,2)</code> that has the lowest weight, and we then add it into the output tree. At this point in time, nodes <code>[1,2]</code> are spawned into the evolving tree.</p>
+<p><img src="img/mst_prim_s2.png" alt="" /></p>
+<p>With edge <code>(1,2)</code> added to the tree, we're looking to all edges that cross between the tree and the non-tree nodes. In this case we have edges <code>[(1,5),(2,5),(2,3)]</code> with <code>(2,3)</code> being the one that has the lowest weight from all known crossing edges.</p>
+<p>At this point the tree contains nodes <code>[1,2,3]</code> with nodes remaining outside the tree as <code>[5,6,4]</code></p>
+<p><img src="img/mst_prim_s3.png" alt="" /></p>
+<p>We repeat the process, always expanding one node at a time and adding to the tree the lowest weight edge each time and until there are no more nodes remaining outside the tree.</p>
+<p><img src="img/mst_prim_s4.png" alt="" /></p>
+<h2 id="min-ordered-edge-binaryheap"><a class="header" href="#min-ordered-edge-binaryheap">Min-Ordered edge BinaryHeap</a></h2>
+<p>To provide a minimum-ordered edge list, we make use of the BinaryHeap collection with the edge's weight as the prioritisation key. The following Step implementation provide us with the desirable result</p>
+<pre><code class="language-rust no_run noplayground">/// BinaryHeap Step structure containing `Edge(src,(dst,cost))` tuple
+/// The `cost` is only used as the prioritisation key for the `Heap`
+/// Implementing MinHeap through reverse comparison of Other against Self
+impl PartialOrd for Edge {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other.1 {
+            N(_) =&gt; other.partial_cmp(self),
+            NC(_, cost) =&gt; {
+                let Edge(_,NC(_,sc)) = self else { panic!(&quot;&quot;) };
+                cost.partial_cmp(sc)
+            }
+        }
+    }
+}
+impl Ord for Edge {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+</code></pre>
+<h2 id="implementation-7"><a class="header" href="#implementation-7">Implementation</a></h2>
+<p>Few key points related to the below implementation</p>
+<ol>
+<li>We hold the evolving tree in a <code>Graph</code> structure with its <code>nodes</code> <code>HashSet</code> representing the tree's Component for queries</li>
+<li>When we spawn a new node, we don't search for the minimum weight edge, rather we store all crossing edges in the <code>heap</code>;</li>
+<li>Edges added in the <code>heap</code> might go <strong>stale</strong>, that is, future iterations cause edges nodes to be pulled inside the <code>tree</code> component, hence when extracting the min-weight edge from the <code>heap</code> we need to ensure the edge isn't stale.</li>
+</ol>
+<p>As a result, the following implementation consolidates all of the above into the Prim's algorithm implementation.</p>
+<pre><code class="language-rust no_run noplayground">    /// MST using Prim's algorithm implementation
+    pub fn mst_prim(&amp;self) -&gt; Option&lt;Graph&gt; {
+
+        // Create an empty Graph/Tree to add one edge at a time
+        // we'll be using g.node as the Tree's Component invariant,
+        // that is, the Component that contains all vertices absorbed by the Tree
+        let mut tree = Graph::new();
+
+        // Min-Ordered heap with all edges found crossing the evolving tree
+        let mut heap = BinaryHeap::&lt;Edge&gt;::new();
+
+        // seed with first vertex
+        let &amp;start = self.nodes.iter().next().unwrap();
+        heap.push(Edge(start, NC(start, 0)));
+
+        // spawn a node at a time until we have spawned all graph nodes
+        // while tree component isn't equal input component
+        while tree.nodes != self.nodes {
+            // spawn a new edge node from the queue with the smallest edge weight
+            let src = match heap.pop() {
+                // if the queue is empty, but still have nodes to spawn
+                // then either (a) the graph is not connected or (b) is a directed graph
+                None =&gt; return None,
+                // spawn the destination node from edge
+                Some(Edge(_, NC(dst, _))) =&gt; dst,
+                Some(Edge(_, N(_))) =&gt; panic!(&quot;mst_prim(): Extracted edge using wrong NodeType::N&quot;),
+            };
+
+            // Add all edges that are crossing the tree Component given the spawned node
+            // and have not yet been spawned, that is, they are NOT already part of tree component
+            heap.extend(self.edges.get(&amp;src)
+                .unwrap_or_else(|| panic!(&quot;mst_prim(): Node ({src}) has not edges; Graph is not undirected or connected&quot;))
+                .iter()
+                // remove any edge node already in the mst, part of Component X
+                .filter(|&amp;&amp;dst| !tree.nodes.contains(&amp;dst.into()))
+                // push edges crossing Component X, that is,
+                // src IN Component X, dst NOT IN Component X
+                .map(|&amp;dst| Edge(src, dst))
+            );
+
+            // find the min-weigh edge that is crossing the current tree component
+            // don't remove from heap as we need to spawn dst node for the next iteration
+            while let Some(&amp;edge) = heap.peek() {
+                let Edge(src, dst) = edge;
+                // Is this edge a stale or a valid one, that is, crosses the tree component
+                if HashSet::from([src, dst.into()]).is_subset(&amp;tree.nodes) {
+                    // Some times heap holds older edges that, after few iterations they get stale,
+                    // that is, both edges nodes have been moved into the tree component
+                    heap.pop();
+                } else {
+                    // either src or dst edge nodes are outside the tree component
+                    // hence add the edge into the tree
+                    tree.push_edge(edge);
+                    // exit the while loop since we've found the edge with the min weight
+                    break
+                }
+            }
+        }
+        Some(tree)
+    }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="single-linkage-clustering"><a class="header" href="#single-linkage-clustering">Single-linkage clustering</a></h1>
+<p>Single-linkage clustering is one of several methods of hierarchical clustering. It is based on grouping clusters in bottom-up fashion (agglomerative clustering), at each step combining two clusters that contain the closest pair of elements not yet belonging to the same cluster as each other. A drawback of this method is that it tends to produce long thin clusters in which nearby elements of the same cluster have small distances, but elements at opposite ends of a cluster may be much farther from each other than two elements of other clusters. This may lead to difficulties in defining classes that could usefully subdivide the data<sup class="footnote-reference"><a href="#note">1</a></sup></p>
+<p><img src="img/definitive-guide-to-hierarchical-clustering-with-python-and-scikit-learn-11.webp" alt="" /></p>
+<h2 id="approach-3"><a class="header" href="#approach-3">Approach</a></h2>
+<p>At the start all points form their own component. Then at each iteration, we fuse together those components that are connected by the shortest distance edge. We repeat until the number of components left is equal to the number of clusters required.</p>
+<p>This is exactly how the <a href="graph_mst_kruskal.html">Kruska's algorithm</a> works, with the only difference, the produced Minimum Spanning Tree can be seen as a single component / cluster, therefore we have to stop the process until <code>k</code> components/clusters are left.</p>
+<p>However, if we stop the at <code>k</code> components our min spanning tree won't have the remaining edges connecting the clusters, hence we won't know the clusters' <code>spacing</code>, that is, the distance between the closest together pair of separated nodes.</p>
+<h2 id="clusterset-structure"><a class="header" href="#clusterset-structure">ClusterSet Structure</a></h2>
+<p>Therefore, we need to capture both (a) the min spanning tree and (b) the nodes forming the <code>k</code> clusters requested</p>
+<p>The <code>ClusterSet</code> structure captures such information and further provides the means to query the <strong>spacing of a clustering</strong>, through the use of the following functions, </p>
+<ul>
+<li><code>crossing_edges()</code> returns those <code>mst</code> edges crossing the node <code>clusters</code></li>
+<li><code>spacing()</code> returns the smallest <code>mst</code> edge</li>
+</ul>
+<pre><code class="language-rust no_run noplayground">struct ClusterSet {
+    mst: Graph,
+    clusters : SuperNodes
+}
+
+impl ClusterSet {
+    /// spacing of a clustering. It's the distance between the closest together pair of separated points
+    /// We want all of the separated points to be as far apart as possible.
+    /// That is, we want the spacing to be big. The bigger the better
+    fn spacing(&amp;self) -&gt; Edge {
+        self.crossing_edges().pop().unwrap_or_else(|| panic!(&quot;spacing(): no edges found spanning the clusters&quot;))
+    }
+    fn crossing_edges(&amp;self) -&gt; BinaryHeap&lt;Edge&gt;{
+
+        let mut input = self.mst.get_edges_by_cost();
+        let mut output = BinaryHeap::&lt;Edge&gt;::new();
+
+        while let Some(edge) = input.pop() {
+            let Edge(src, dst) = edge;
+            if self.clusters.find_supernode(&amp;src) != self.clusters.find_supernode(&amp;dst.into()) {
+                output.push(edge);
+            }
+        }
+        output
+    }
+}
+
+</code></pre>
+<h2 id="implementation-8"><a class="header" href="#implementation-8">Implementation</a></h2>
+<p>With the <code>ClusterSet</code> data structure in place we implemented the <code>Graph</code> implementation of the Clustering trait looks as follows</p>
+<pre><code class="language-rust no_run noplayground">trait Clustering {
+    fn find_clusters(&amp;self, k: usize) -&gt; Option&lt;ClusterSet&gt;;
+}
+
+impl Clustering for Graph {
+
+    fn find_clusters(&amp;self, k: usize) -&gt; Option&lt;ClusterSet&gt; {
+
+        // Get the ordered heap by lowest cost Edge on top
+        let mut heap = self.get_edges_by_cost();
+        // Keeps the graph's components, that is, a super node is a graph component's lead node
+        // The initial state is for each node to be a lead component node with a component of its own
+        let mut snodes = self.get_super_nodes();
+        // the output graph that will hold *only* the edges
+        // that form the minimum spanning tree
+        let mut graph = Graph::new();
+        let mut clusters = None;
+
+        // As long as more than 2 components
+        while snodes.len() &gt; 1 {
+            // get the edge with the lowest cost
+            // otherwise if we've run out of edges while there are 2 or more components
+            // then the graph IS NOT CONNECTED
+            let Some(edge) = heap.pop() else { return None };
+            let Edge(src, NC(dst, _)) = edge else { panic!(&quot;find_clusters() - Cannot find NodeType::NC&quot;) };
+            // print!(&quot;({src:2}-&gt;{dst:2}):{cost:6} - &quot;);
+
+            // if src is not a super node then get its super node
+            let src = snodes.find_supernode(&amp;src);
+            // if dst is not a super node then get its super node
+            let dst = snodes.find_supernode(&amp;dst);
+
+            // if src component differs from dst component then merge the two and save the edge connecting them
+            if src != dst {
+                snodes.merge_nodes(src, dst);
+                graph.push_edge(edge);
+                // println!(&quot;Store&quot;);
+            } else {
+                // println!(&quot;Skip&quot;);
+            }
+            if snodes.len() == k {
+                clusters = Some(snodes.clone())
+            }
+        }
+        Some(ClusterSet{
+            mst: graph,
+            clusters: clusters.unwrap()
+        })
+    }
+}
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://en.wikipedia.org/wiki/Single-linkage_clustering">Wikipedia: Single-linkage clustering</a></p>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+    </body>
+</html>

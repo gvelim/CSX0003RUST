@@ -1,0 +1,345 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Dijktra&#x27;s Min Path Cost - Rusting along</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="intro.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Topics</li><li class="chapter-item expanded "><a href="merge.html"><strong aria-hidden="true">1.</strong> Merging</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="merge_in_place.html"><strong aria-hidden="true">1.1.</strong> In-place merge with O(n+m) swaps</a></li><li class="chapter-item expanded "><a href="merge_sequencial_access.html"><strong aria-hidden="true">1.2.</strong> Sequential access across multiple slices</a></li><li class="chapter-item expanded "><a href="merge_lazy.html"><strong aria-hidden="true">1.3.</strong> Lazy merge and deferred slice mutability</a></li><li class="chapter-item expanded "><a href="merge_denormalise.html"><strong aria-hidden="true">1.4.</strong> Pattern matching: De-normalising control flow</a></li></ol></li><li class="chapter-item expanded "><a href="sort.html"><strong aria-hidden="true">2.</strong> Sorting</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="sort_mergesort.html"><strong aria-hidden="true">2.1.</strong> Merge sort</a></li><li class="chapter-item expanded "><a href="sort_quicksort.html"><strong aria-hidden="true">2.2.</strong> Quick sort</a></li><li class="chapter-item expanded "><a href="sort_count.html"><strong aria-hidden="true">2.3.</strong> Count sort</a></li></ol></li><li class="chapter-item expanded "><a href="selection.html"><strong aria-hidden="true">3.</strong> Selecting</a></li><li class="chapter-item expanded "><a href="graph.html"><strong aria-hidden="true">4.</strong> Graphs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_min_cut.html"><strong aria-hidden="true">4.1.</strong> Krager's Minimum Cut</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_contraction.html"><strong aria-hidden="true">4.1.1.</strong> Contraction Algorithm</a></li></ol></li><li class="chapter-item expanded "><a href="graph_search.html"><strong aria-hidden="true">4.2.</strong> Graph Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_search_process_state.html"><strong aria-hidden="true">4.2.1.</strong> Node Processing State</a></li><li class="chapter-item expanded "><a href="graph_path_bfs_abstract.html"><strong aria-hidden="true">4.2.2.</strong> Abstracting Breadth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_shortest_distance.html"><strong aria-hidden="true">4.2.2.1.</strong> Shortest Distance</a></li><li class="chapter-item expanded "><a href="graph_path_minimum_cost.html" class="active"><strong aria-hidden="true">4.2.2.2.</strong> Dijktra's Min Path Cost</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.2.2.3.</strong> Bellman–Ford algorithm</div></li></ol></li><li class="chapter-item expanded "><a href="graph_path_dfs_abstract.html"><strong aria-hidden="true">4.2.3.</strong> Abstracting Depth First Search</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_path_topological_sort.html"><strong aria-hidden="true">4.2.3.1.</strong> Topological Sort</a></li><li class="chapter-item expanded "><a href="graph_connect.html"><strong aria-hidden="true">4.2.3.2.</strong> Strong Connectivity</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_connect_scc.html"><strong aria-hidden="true">4.2.3.2.1.</strong> Kosaraju’s algorithm</a></li></ol></li></ol></li></ol></li><li class="chapter-item expanded "><a href="graph_mst.html"><strong aria-hidden="true">4.3.</strong> Minimum Spanning Trees</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="graph_mst_kruskal.html"><strong aria-hidden="true">4.3.1.</strong> Kruskal's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_prim.html"><strong aria-hidden="true">4.3.2.</strong> Prim's Algorithm</a></li><li class="chapter-item expanded "><a href="graph_mst_cluster.html"><strong aria-hidden="true">4.3.3.</strong> Single-linkage clustering</a></li></ol></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rusting along</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="dijkstras-minimum-path-cost"><a class="header" href="#dijkstras-minimum-path-cost">Dijkstra's Minimum Path Cost</a></h1>
+<p>Here we cover problems involving finding the shortest path between vertices in a
+graph with weights (lengths) on the edges. One obvious application is in finding the shortest
+route from one address to another, however shortest paths have many other application<sup class="footnote-reference"><a href="#note">1</a></sup> </p>
+<h2 id="dijkstras-algorithm"><a class="header" href="#dijkstras-algorithm">Dijkstra's Algorithm</a></h2>
+<p>Dijkstra’s is an important algorithm both because it is an efficient algorithm for an important problem, but
+also because it is a very elegant example of an efficient greedy algorithm that generates optimal
+solutions on a nontrivial task.</p>
+<p>The below animated image demonstrated how the algorithm works</p>
+<p><img src="img/Dijkstra_Animation.gif" alt="image" title="Dijkstra_Animation" /></p>
+<p>The above depiction performs the below steps </p>
+<ul>
+<li>push the starting node <code>a</code> in the priority queue with cost <code>0</code></li>
+<li>Pop the node with the lowest cost in the queue; at fist this is <code>a</code>
+<ul>
+<li>if the 'node' matches our target node <code>b</code> 
+<ul>
+<li>extract path with minimum cost </li>
+<li>terminate</li>
+</ul>
+</li>
+<li>For each <code>edge node</code> attached to the <code>node</code>
+<ul>
+<li>calculate <code>cost distance</code></li>
+<li>if <code>edge node</code> has <code>cost</code> larger to the calculated <code>cost distance</code> then assign cost to <code>edge node</code>, otherwise do not update cost</li>
+<li>push <code>(edge node, cost)</code> to the priority queue and repeat</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="prioritised-queue"><a class="header" href="#prioritised-queue">Prioritised Queue</a></h3>
+<p>Dijkstra's differentiating approach is that we must always process next the node with the lowest cost in the queue. To achieve this we have to make use of the <code>BinaryHeap</code> collection structure. The use of such structure help us to maintain on ordered-queue by node-cost, hence keeping the node with lowest-cost at the top of the heap/queue.</p>
+<pre><code class="language-rust no_run noplayground">#[derive(Debug,Clone,Copy,Hash,Eq,PartialEq)]
+pub enum NodeType {
+    N(Node),
+    NC(Node, Cost)
+}
+impl From&lt;NodeType&gt; for Node {
+    fn from(nt: NodeType) -&gt; Self {
+        match nt { NodeType::N(node)|NC(node, _) =&gt; node }
+    }
+}
+impl From&lt;Node&gt; for NodeType {
+    fn from(value: Node) -&gt; Self {
+        NodeType::N(value)
+    }
+}
+impl Ord for NodeType {
+    fn cmp(&amp;self, other: &amp;Self) -&gt; Ordering {
+        other.partial_cmp(self).unwrap_or_else(|| panic!(&quot;Edge::cmp() - cannot compare nodes with type NodeType::N&quot;))
+    }
+}
+impl PartialOrd for NodeType {
+    fn partial_cmp(&amp;self, other: &amp;Self) -&gt; Option&lt;Ordering&gt; {
+        match other {
+            NodeType::N(_) =&gt; None,
+            NC(_, cost) =&gt; {
+                let NC(_,sc) = self else { panic!(&quot;Edge::partial_cmp() - cannot compare NodeType::NC against NodeType::N&quot;) };
+                Some(cost.cmp(sc))
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="implementation"><a class="header" href="#implementation">Implementation</a></h3>
+<p>With the ordered-queue logic in place, we still need to have the means to maintain the following information per node and while we are searching the graph </p>
+<ul>
+<li><code>node</code> state, in terms of processed / not processed</li>
+<li><code>parent</code> node, that is, the node we visited from</li>
+<li><code>unit</code> in terms of cost or distance</li>
+</ul>
+<p>The <code>Tracker</code> structure simplifies managing the <a href="graph_search_process_state.html">node processing state</a> of the graph, and we will use as part of our implementation.</p>
+<p>Both <code>Tracker</code> and <code>BinaryHeap</code> structures are part the Graph processing State structure <code>PSState</code> which in turn, implements the <a href="graph_path_bfs_abstract.html">BFSearch abstraction</a></p>
+<p>As a result, the algorithm can now be realised by the following implementation </p>
+<pre><code class="language-rust no_run noplayground">    fn path_shortest(&amp;self, start: Node, goal: Node) -&gt; Option&lt;(Vec&lt;Node&gt;, Cost)&gt; {
+        /// Structure for maintaining processing state while processing the graph
+        struct PSState {
+            tracker: Tracker,
+            queue: BinaryHeap&lt;NodeType&gt;
+        }
+
+        /// State Constructor from a given Graph and related shortest path initiation requirements
+        impl PSState {
+            fn new(g:&amp;Graph) -&gt; PSState {
+                PSState {
+                    // reset all node costs to MAX value with no path-parent nodes
+                    tracker: g.get_tracker(Undiscovered, Cost::MAX, None),
+                    // We are using a BinaryHeap queue in order to always have first in the queue
+                    // the node with lowest cost to explore next
+                    queue: BinaryHeap::new()
+                }
+            }
+        }
+
+        /// Implementation of Path Search abstraction
+        impl BFSearch for PSState {
+            type Output = (Vec&lt;Node&gt;,Cost);
+            type QueueItem = NodeType;
+
+            /// Processing of starting node
+            fn initiate(&amp;mut self, start: Node) -&gt; &amp;mut Self {
+                // set cost at start node to zero with no parent node
+                self.tracker[start].distance(0);
+                // push start node in the BinaryHeap queue
+                self.queue.push(NC(start,0));
+                self
+            }
+
+            /// get the element with the lowest cost from the queue
+            fn pop(&amp;mut self) -&gt; Option&lt;Self::QueueItem&gt; { self.queue.pop() }
+
+            /// extract node from the queued item retrieved
+            fn node_from_queued(&amp;self, qt: &amp;Self::QueueItem) -&gt; Node {
+                (*qt).into()
+            }
+
+            /// Process current node after all edges have been discovered and marked for processing
+            fn post_process_node(&amp;mut self, node: Node) {
+                self.tracker[node].visited(Discovered);
+            }
+
+            /// has the given node been seen before ?
+            fn is_discovered(&amp;self, node: NodeType) -&gt; bool { self.tracker[node.into()].is_discovered() }
+
+            /// Process given edge and return `true` to proceed or `false` to abandon further edge processing
+            fn pre_process_edge(&amp;mut self, src:Node, dst: NodeType) -&gt; bool {
+                if let NC(dst, cost) = dst {
+                    // calc the new path cost to edge
+                    let edge_cost = self.tracker[src].dist + cost;
+                    // if new cost is better than previously found
+                    if edge_cost &gt; self.tracker[dst].dist  {
+                        // Do no process this edge any further
+                        false
+                    }
+                    else {
+                        // set the new lower cost @node along with related parent Node
+                        self.tracker[dst].distance(edge_cost).parent(src);
+                        // and ensure the edge is processed further
+                        true
+                    }
+                }
+                else {
+                    // somehow we got the wrong NodeType here
+                    panic!(&quot;pre_process_edge(): Must use NodeType::NC&quot;)
+                }
+            }
+
+            /// Construct the item to be queued, that is, (Node,Cost)
+            fn node_to_queued(&amp;self, node: Node) -&gt; Self::QueueItem {
+                NC(node, self.tracker[node].dist )
+            }
+
+            /// Push into (Node,Cost) into the queue
+            fn push(&amp;mut self, item: Self::QueueItem) { self.queue.push(item) }
+
+            /// Get search path discovered so far
+            fn extract_path(&amp;self, start: Node) -&gt; Self::Output { self.tracker.extract(start) }
+        }
+
+        // Construct the state structure and search for a path that exists between start -&gt; goal
+        PSState::new(self).path_search(self,start,goal)
+
+    }
+</code></pre>
+<h3 id="references"><a class="header" href="#references">References:</a></h3>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://www.cs.cmu.edu/afs/cs/academic/class/15210-s15/www/lectures/shortest-path.pdf">Shortest Path</a></p>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="graph_path_shortest_distance.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="graph_path_dfs_abstract.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="graph_path_shortest_distance.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="graph_path_dfs_abstract.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
